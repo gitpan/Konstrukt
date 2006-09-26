@@ -1,0 +1,20 @@
+=head1 NAME
+
+Konstrukt::Doc::CoreDevelopment - Hacking on the Konstrukt core
+
+=head1 DESCRIPTION
+
+nothing yet
+
+=head1 AUTHOR 
+
+Copyright 2006 Thomas Wittek (mail at gedankenkonstrukt dot de). All rights reserved. 
+
+This document is free software.
+It is distributed under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Konstrukt::Doc>
+
+=cut

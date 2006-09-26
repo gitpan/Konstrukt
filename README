@@ -1,0 +1,68 @@
+NAME
+    Konstrukt - Web application/design framework
+
+SYNOPSIS
+    use Konstrukt;
+
+DESCRIPTION
+    The basic idea (which is not new) is to compose each page with the aid
+    of special tags that offer functionalities beyond the plain markup of
+    HTML.
+
+    The tags are used to structure the pages and the content, add dynamics
+    to your website and encapsulate complex applications and common
+    functionalities in plugins, which can very easily be integrated in your
+    website. Additionally strict separation of code, content and layout is
+    maintained.
+
+    Covered functionalitys include:
+
+    * A powerful templating system
+    * Blog
+    * Wiki
+    * Calendar
+    * Guestbook
+    * Embedded Perl
+    * and much more...
+
+    You may build powerful web sites in an instant and have full control
+    over the look and feel through the template system.
+
+    You may also nest (and thus combine) the tags/plugins into each other,
+    which makes it a very powerful but still easy to use system.
+
+  Further information
+    For more in-depth information you may want to take a look at
+    Konstrukt::Doc and the docs/ directory in this package.
+
+    There you will find information on the usage of this framework and on
+    plugin development as well as on the framework internals.
+
+BUGS
+    Many... Currently tracked for each module at its beginning:
+
+            #FIXME: ...
+            #TODO: ...
+            #FEATURE: ...
+
+    You may get an overview of these by using the supplied "todo_list.pl"
+    script.
+
+AUTHOR
+    Thomas Wittek
+
+    mail at gedankenkonstrukt dot de
+
+    http://gedankenkonstrukt.de
+
+AUTHOR
+    Copyright 2006 Thomas Wittek (mail at gedankenkonstrukt dot de). All
+    rights reserved.
+
+LICENSE
+    This document is free software. It is distributed under the same terms
+    as Perl itself.
+
+SEE ALSO
+    Konstrukt::Doc, HTML::Mason, Embperl, perl
+

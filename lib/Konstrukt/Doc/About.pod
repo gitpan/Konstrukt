@@ -1,0 +1,146 @@
+=head1 NAME
+
+Konstrukt::Doc::About - About the Konstrukt framework
+
+=head1 DESCRIPTION
+
+The basic idea (which is not new) is to compose each page with the aid of
+special tags that offer functionalities beyond the plain markup of HTML.
+
+The tags are used to structure the pages and the content, add dynamics to your
+website and encapsulate complex applications and common functionalities in
+plugins, which can very easily be integrated in your website.
+Additionally strict separation of code, content and layout is maintained.
+
+Covered functionalitys include:
+
+=over
+
+=item * A powerful templating system
+
+=item * Blog
+
+=item * Wiki
+
+=item * Calendar
+
+=item * Guestbook
+
+=item * Embedded Perl
+
+=item * and much more...
+
+=back 
+
+You may build powerful web sites in an instant and have full control over the
+look and feel through the template system.
+
+You may also nest (and thus combine) the tags/plugins into each other, which makes it a very
+powerful but still easy to use system.
+
+This framework has these main goals:
+
+=over
+
+=item 1. Rapid development
+
+=item 2. Separation of code, content and layout
+
+=item 3. Reuse of code/markup
+
+=item 4. Clean code
+
+=item 5. Speed
+
+=back 
+
+These goals are accomplished by the following techniques:
+
+=head2 1. Rapid development
+
+As this framework supposes heavy use of templating, you'll usually never write
+markup twice. The templates can be easily nested into each other which allows
+for high modularity and reuse even at the markup level.
+
+Additionally there already exists a wide range of tags/plugins, which offer
+commonly used functionality like blogs or wikis.
+
+If you want to develop an application that's not yet covered by the supplied
+plugins, you can develop your own ones "easily" (ok, you cannot just hack away
+on it, you have to read a bit before). The framework supports your plugin
+development with an existing infrastructure of session and user management,
+debug facilities, settings handling and request/response-objects. So you don't
+have to do this nasty work.
+
+=head2 2. Separation of code, content and layout
+
+The logic is usually implemented in the plugins (which will be used as tags from
+the markup). You won't write any markup in your plugins, instead your plugins
+pass all data to templates, which will display your data and allow the user
+to interact with your plugin.
+
+Thus all markup will be inside the templates, which only consist of markup (html,
+xhtml, xml, ...) and the special Konstrukt tags, which put data from the plugins
+into your template.
+
+The data/content is usually stored in a database, which will be accessed by the
+plugins. Static content will be placed in template files.
+
+This principle allows for better maintainance and division of work. A programmer
+can focus on the code (plugins) and a web designer can focus on the markup
+(templates).
+	
+Of course it's also possible to embed perl code into the templates (via the
+perl plugin) or print out markup from your plugin. But this not recommended
+and avoided through the frameworks own plugins.
+
+=head2 3. Reuse of code/markup
+
+The logic is encapsulated in plugins, the markup in templates. These can be
+reused within the web site or over several different web sites. So generally
+you write once and use often. This avoids redundancy and duplicate work.
+
+=head2 4. Clean code
+
+At first, the separation of code and markup will greatly improve the overall
+code quality.
+
+But also internally there was a big focus on clean code.
+All code is written in object oriented perl with strong modularization. The
+code is heavily documented and commented (i'd guess a code:documentation ratio
+of about 1:1) and "obfuscated" code is avoided where possible. Very spare use
+of global variables, constant use of "strict" and "warnings" pragmas.
+Further development and enhancement should be easy.
+
+=head2 5. Speed
+
+There is a very smart chache mechanism used in this framework. The cache system
+will identify static parts of your web pages (static markup and plugins that
+don't generate dynamic content) and cache the document so that only
+the dynamic parts of a document will be executed on a request and not the whole
+document. All static documents of course will be served directly without any
+further processing. Additionally the atomic template components will be cached
+to speed up the use in all documents using them.
+
+Caching is a basic concept within this framework with the goal not to calculate
+anything twice when it didn't change. The downside of this is, that a plugin 
+developer hat to understand the caching system, when she/he wants to develop
+high-performance plugins. If speed is not important, there are also simple
+interfaced where one doesn't have to care about caching.
+
+The framework is designed to work in a mod_perl (version 1 and 2) environment
+which allows for further speed gains. But there are also interfaces for CGI and
+for the execution from the command line.
+
+=head1 AUTHOR 
+
+Copyright 2006 Thomas Wittek (mail at gedankenkonstrukt dot de). All rights reserved. 
+
+This document is free software.
+It is distributed under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Konstrukt::Doc>
+
+=cut
