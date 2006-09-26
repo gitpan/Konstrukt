@@ -253,7 +253,6 @@ lib/Konstrukt/Settings.pm
 lib/Konstrukt/SimplePlugin.pm
 lib/Konstrukt/TagHandler.pm
 lib/Konstrukt/TagHandler/Plugin.pm
-lib/TestHandler.pm
 LICENSE
 MANIFEST			This list of files
 scripts/_sessiontest.pl

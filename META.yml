@@ -224,6 +224,4 @@ provides:
     file: lib/Konstrukt/TagHandler.pm
   Konstrukt::TagHandler::Plugin:
     file: lib/Konstrukt/TagHandler/Plugin.pm
-  TestHandler:
-    file: lib/TestHandler.pm
 generated_by: Module::Build version 0.2612
