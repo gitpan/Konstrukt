@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Konstrukt::DBI- Database handle pool
+Konstrukt::DBI - Database handle pool
 
 =head1 SYNOPSIS
 

@@ -18,26 +18,29 @@ my $build = Module::Build->new(
 		#'Other::Module'  => '>= 1.2, != 1.5, < 2.0',
 		
 		'perl'                => '5.6.1',
+
+		'Module::Build'       => '0.27',
 		
 		'CGI'                 => '3.10',
+		'DBI'                 => '1.48',
 		'Date::Calc'          => '5.4',
 		'Devel::UseAnyFunc'   => '1.00',
+		'Digest::SHA'         => '5.32',
+		'MIME::Base64'        => '3.00',
+		'POSIX'               => '1.00',
 		'Storable'            => '2.1',
 		'Time::HiRes'         => '1.5',
+		'Time::Local'         => '1.11',
 		'Time::Zone'          => '2.00',
 	},
 	recommends => {
 		'Clone'               => '0.20',
-		'Clone::PP'           => '1.00',
 		'Data::Dump'          => '1.00',
-		'DBI'                 => '1.48',
-		'Digest::SHA'         => '5.32',
 		'Digest::HMAC_MD5'    => '1.01',
 		'HTTP::BrowserDetect' => '0.98',
 		'Image::Magick'       => '6.2.4',
 		'Mail::Sender'        => '0.8.13',
 		'Text::Diff'          => '0.35',
-		'Time::Local'         => '1.11',
 		'Scalar::Util::Clone' => '0.04',
 		'Session'             => '0.01'
 	},

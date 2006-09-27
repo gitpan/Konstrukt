@@ -3,13 +3,14 @@
 use strict;
 use warnings;
 
-use Test::More tests => 90;
+use Test::More tests => 96;
 
 #list generated using:
 # find -type f -iname "*pm" | perl -ne '$line = $_; $line = substr($line, 2, length($line)-6); $line =~ s/\//::/g; print "use_ok(\"$line\");\n"' | sort
 
 BEGIN {
 	use_ok("Konstrukt");
+	use_ok("Konstrukt::Attributes");
 	use_ok("Konstrukt::Cache");
 	use_ok("Konstrukt::DBI");
 	use_ok("Konstrukt::Debug");
@@ -61,38 +62,33 @@ BEGIN {
 	use_ok("Konstrukt::Plugin::browserstats::DBI");
 	use_ok("Konstrukt::Plugin::calendar");
 	use_ok("Konstrukt::Plugin::calendar::DBI");
-#	use_ok("Konstrukt::Plugin::_crlf2br");
+	use_ok("Konstrukt::Plugin::captcha");
+	use_ok("Konstrukt::Plugin::captcha::text");
 	use_ok("Konstrukt::Plugin::date");
 	use_ok("Konstrukt::Plugin::diff");
-	use_ok("Konstrukt::Plugin::perl");
 	use_ok("Konstrukt::Plugin::env");
+	use_ok("Konstrukt::Plugin::errors");
 	use_ok("Konstrukt::Plugin::formvalidator");
-#	use_ok("Konstrukt::Plugin::_forum");
-#	use_ok("Konstrukt::Plugin::forum::content");
-#	use_ok("Konstrukt::Plugin::forum::content::mysql");
-#	use_ok("Konstrukt::Plugin::forum::userdata");
-#	use_ok("Konstrukt::Plugin::forum::userdata::anicheck");
-#	use_ok("Konstrukt::Plugin::forum::userdata::mysql");
 	use_ok("Konstrukt::Plugin::guestbook");
 	use_ok("Konstrukt::Plugin::guestbook::DBI");
 	use_ok("Konstrukt::Plugin::hitstats");
 	use_ok("Konstrukt::Plugin::hitstats::DBI");
 	use_ok("Konstrukt::Plugin::if");
-#	use_ok("Konstrukt::Plugin::incomplete::browser");
-#	use_ok("Konstrukt::Plugin::incomplete::language");
-#	use_ok("Konstrukt::Plugin::incomplete::shrinkhtml");
 	use_ok("Konstrukt::Plugin::kill");
 	use_ok("Konstrukt::Plugin::log");
 	use_ok("Konstrukt::Plugin::log::DBI");
 	use_ok("Konstrukt::Plugin::mail::obfuscator");
 	use_ok("Konstrukt::Plugin::param");
+	use_ok("Konstrukt::Plugin::perl");
 	use_ok("Konstrukt::Plugin::perlvar");
 	use_ok("Konstrukt::Plugin::sortlines");
 	use_ok("Konstrukt::Plugin::sql");
 	use_ok("Konstrukt::Plugin::svar");
+	use_ok("Konstrukt::Plugin::tags");
+	use_ok("Konstrukt::Plugin::tags::DBI");
 	use_ok("Konstrukt::Plugin::template");
-	use_ok("Konstrukt::Plugin::test");
 	use_ok("Konstrukt::Plugin::upcase");
+	use_ok("Konstrukt::Plugin::uriencode");
 	use_ok("Konstrukt::Plugin::usermanagement");
 	
     SKIP: {
@@ -110,8 +106,6 @@ BEGIN {
 	use_ok("Konstrukt::Plugin::usermanagement::level::DBI");
 	use_ok("Konstrukt::Plugin::usermanagement::personal");
 	use_ok("Konstrukt::Plugin::usermanagement::personal::DBI");
-#	use_ok("Konstrukt::Plugin::vdr");
-#	use_ok("Konstrukt::Plugin::vdr::DBI");
 	use_ok("Konstrukt::Plugin::wiki");
 	use_ok("Konstrukt::Plugin::wiki::backend");
 	use_ok("Konstrukt::Plugin::wiki::backend::article");
