@@ -1,6 +1,6 @@
 =head1 NAME
 
-Konstrukt::Tutorial::Blog - Using the blog plugin to create a blog
+Konstrukt::Doc::Tutorial::Usage::Blog - Using the blog plugin to create a blog
 
 =head1 DESCRIPTION
 

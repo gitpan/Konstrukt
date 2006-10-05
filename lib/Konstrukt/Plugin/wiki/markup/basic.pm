@@ -227,6 +227,10 @@ __DATA__
 
 <nowiki><add class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></add></nowiki>
 
+-- 8< -- textfile: markup/code.template -- >8 --
+
+<nowiki><code class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></code></nowiki>
+
 -- 8< -- textfile: markup/del.template -- >8 --
 
 <nowiki><del class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></del></nowiki>
@@ -242,4 +246,12 @@ __DATA__
 -- 8< -- textfile: markup/strong2.template -- >8 --
 
 <nowiki><strong class="wiki alternate"></nowiki><+$ content $+><+$ / $+><nowiki></strong></nowiki>
+
+-- 8< -- textfile: markup/sub.template -- >8 --
+
+<nowiki><sub class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></sub></nowiki>
+
+-- 8< -- textfile: markup/sup.template -- >8 --
+
+<nowiki><sup class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></sup></nowiki>
 

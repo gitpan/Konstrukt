@@ -241,6 +241,8 @@ The result of this tutorial is a
 
 	<& note / &>
 
+=back
+
 =head1 WHAT'S NEXT?
 
 You might want to add the L<author|Konstrukt::Plugin::usermanagement/Perl interface>
