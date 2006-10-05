@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::SimplePlugin - Base class for simple Konstrukt plugins.
@@ -24,18 +22,20 @@ Konstrukt::SimplePlugin - Base class for simple Konstrukt plugins.
 	 
 	
 	#write methods for your actions (will be called with page.html?${yourpluginname}_action=some_action)
-	sub some_action :Action {
+	sub some_action : Action {
 		my ($self, $tag, $content, $params) = @_;
 		#...
 	}
 	
 	#will be called when no sub matches the action name
-	sub default :Action {
+	sub default : Action {
 		my ($self, $tag, $content, $params) = @_;
 		#...
 	}
 	
 	#...
+	
+	1;
 
 =head2 Using existing plugins (within your plugin)
 
@@ -89,7 +89,7 @@ L<default settings|Konstrukt::Settings/default>.
 Should be overridden by the inheriting class.
 
 =cut
-#inherited from Konstrukt::Plugin
+#init() inherited from Konstrukt::Plugin
 
 =head2 install
 
@@ -220,7 +220,7 @@ sub print_event {
 }
 #= /print_event
 
-=head2 some_action :action
+=head2 some_action : Action
 
 You have to write a method for each "action" of your plugin. Your method
 will then be called with the parameters listed below.
@@ -248,7 +248,8 @@ the tag attributes:
 
 	my $source = $tag->{tag}->{attributes}->{src};
 
-and the content inside the tag (via the parse tree nodes):
+and the content inside the tag (via the parse tree nodes), which should be only
+text and comment nodes:
 
 	my $node = $tag->{first_child};
 	while (defined $node) {
@@ -265,7 +266,7 @@ and the content inside the tag (via the parse tree nodes):
 
 =cut
 
-=head2 default :action
+=head2 default : Action
 
 The default action handler of this plugin. This method will be called, when
 no action has been specified. For some more info take a look at L</some_action>.
@@ -285,7 +286,7 @@ B<Parameters>:
 =back
 
 =cut
-sub default :Action {
+sub default : Action {
 	my ($self, $tag, $content, $params) = @_;
 	
 	$Konstrukt::Debug->error_message("Not overloaded!") if Konstrukt::Debug::ERROR;

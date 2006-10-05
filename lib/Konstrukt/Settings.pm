@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Settings - Settings management
@@ -98,9 +96,11 @@ sub load_settings {
 		foreach (@lines) {
 			if ($_) {
 				if (/\#/) {#We have an inline comment. Kill everything behind it
-					$_ =~ s/\#.*//o;
+					$_ =~ s/\#.*//;
 				}
-				$_ =~ s/\s*$//o;#Kill tailing spaces
+				#kill leading and tailing spaces
+				$_ =~ s/\s*$//;
+				$_ =~ s/^\s*//;
 				($setting,$value) = (split /\s+/, $_, 2);
 				#no undefs please
 				$value = "" if not defined $value;

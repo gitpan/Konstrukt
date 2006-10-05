@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::replace - Inline plugin to handle simple replacements

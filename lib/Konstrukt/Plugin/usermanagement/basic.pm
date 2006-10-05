@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: send password: parse customizable mail with template
 #TODO: currently only working on apache mod_perl! (r->{...})
 
@@ -718,13 +716,13 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugins::usermanagement::basic::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
+L<Konstrukt::Plugin::usermanagement::basic::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 =cut
 
 __DATA__
 
-== 8< == textfile: layout/change_password_form.form == >8 ==
+-- 8< -- textfile: layout/change_password_form.form -- >8 --
 
 $form_name = 'changepass';
 $form_specification =
@@ -734,7 +732,7 @@ $form_specification =
 	new_pass2 => { name => 'New password (confirmation)', minlength => 1, maxlength => 256, match => '' },
 };
 
-== 8< == textfile: layout/change_password_form.template == >8 ==
+-- 8< -- textfile: layout/change_password_form.template -- >8 --
 
 <& formvalidator form="change_password_form.form" / &>
 <script type="text/javascript">
@@ -776,7 +774,7 @@ function checkChangePassForm() {
 	</form>
 </div>
 
-== 8< == textfile: layout/deregistration_form.form == >8 ==
+-- 8< -- textfile: layout/deregistration_form.form -- >8 --
 
 $form_name = 'deregister';
 $form_specification =
@@ -784,7 +782,7 @@ $form_specification =
 	confirmation => { name => 'Confirmation of deregistration', minlength => 0, maxlength => 1, match => '1' },
 };
 
-== 8< == textfile: layout/deregistration_form.template == >8 ==
+-- 8< -- textfile: layout/deregistration_form.template -- >8 --
 
 <& formvalidator form="deregistration_form.form" / &>
 <div class="usermanagement form">
@@ -804,7 +802,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/login_form.form == >8 ==
+-- 8< -- textfile: layout/login_form.form -- >8 --
 
 $form_name = 'login';
 $form_specification =
@@ -813,7 +811,7 @@ $form_specification =
 	pass  => { name => 'password (not empty)'           , minlength => 1, maxlength => 256, match => '' },
 };
 
-== 8< == textfile: layout/login_form.template == >8 ==
+-- 8< -- textfile: layout/login_form.template -- >8 --
 
 <& formvalidator form="login_form.form" / &>
 <div class="usermanagement form">
@@ -836,7 +834,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/logout_form.template == >8 ==
+-- 8< -- textfile: layout/logout_form.template -- >8 --
 
 <div class="usermanagement form">
 	<h1>Log out</h1>
@@ -850,7 +848,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/registration_form.form == >8 ==
+-- 8< -- textfile: layout/registration_form.form -- >8 --
 
 $form_name = 'register';
 $form_specification =
@@ -858,7 +856,7 @@ $form_specification =
 	email => { name => 'Email address (name@domain.tld)', minlength => 1, maxlength => 256, match => '^.+?\@.+\..+$' },
 };
 
-== 8< == textfile: layout/registration_form.template == >8 ==
+-- 8< -- textfile: layout/registration_form.template -- >8 --
 
 <& formvalidator form="registration_form.form" / &>
 <div class="usermanagement form">
@@ -882,7 +880,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/send_password_form.form == >8 ==
+-- 8< -- textfile: layout/send_password_form.form -- >8 --
 
 $form_name = 'sendpass';
 $form_specification =
@@ -890,7 +888,7 @@ $form_specification =
 	email => { name => 'Email address (name@domain.tld)', minlength => 1, maxlength => 256, match => '^.+?\@.+\..+$' },
 };
 
-== 8< == textfile: layout/send_password_form.template == >8 ==
+-- 8< -- textfile: layout/send_password_form.template -- >8 --
 
 <& formvalidator form="send_password_form.form" / &>
 <div class="usermanagement form">
@@ -912,21 +910,21 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/send_password_mail.email == >8 ==
+-- 8< -- textfile: layout/send_password_mail.email -- >8 --
 
 $mail = {
 	subject => 'Your password',
 	body    => "With this password you have access to the advanced features of this website\nYour temporary password for the email address \$email\$ is: \$pass\$\nYou can change the password after your login.",
 }
 
-== 8< == textfile: messages/change_password_failed.template == >8 ==
+-- 8< -- textfile: messages/change_password_failed.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Password not changed</h1>
 	<p>An internal error occurred while updating the password</p>
 </div>
 
-== 8< == textfile: messages/change_password_failed_unmatched.template == >8 ==
+-- 8< -- textfile: messages/change_password_failed_unmatched.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Password not changed</h1>
@@ -935,7 +933,7 @@ $mail = {
 	<p>The password has not been changed.</p>
 </div>
 
-== 8< == textfile: messages/change_password_failed_wrong_pass.template == >8 ==
+-- 8< -- textfile: messages/change_password_failed_wrong_pass.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Password not changed</h1>
@@ -944,7 +942,7 @@ $mail = {
 	<p>The password has not been changed.</p>
 </div>
 
-== 8< == textfile: messages/change_password_successful.template == >8 ==
+-- 8< -- textfile: messages/change_password_successful.template -- >8 --
 
 <div class="usermanagement message success">
 	<h1>Password updated</h1>
@@ -952,7 +950,7 @@ $mail = {
 	<p>The password has been updated successfully.</p>
 </div>
 
-== 8< == textfile: messages/deregistration_failed.template == >8 ==
+-- 8< -- textfile: messages/deregistration_failed.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Deregistration failed</h1>
@@ -960,7 +958,7 @@ $mail = {
 	<p>An internal error occurred during the deregistration.</p>
 </div>
 
-== 8< == textfile: messages/deregistration_failed_not_confirmed.template == >8 ==
+-- 8< -- textfile: messages/deregistration_failed_not_confirmed.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Deregistration failed</h1>
@@ -969,7 +967,7 @@ $mail = {
 	<p>The confirmation checkbox was not checked!</p>
 </div>
 
-== 8< == textfile: messages/deregistration_successful.template == >8 ==
+-- 8< -- textfile: messages/deregistration_successful.template -- >8 --
 
 <div class="usermanagement message success">
 	<h1>Deregistration successful</h1>
@@ -977,7 +975,7 @@ $mail = {
 	<p>Your account has been removed from the database.</p>
 </div>
 
-== 8< == textfile: messages/login_failed.template == >8 ==
+-- 8< -- textfile: messages/login_failed.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Login failed</h1>
@@ -986,7 +984,7 @@ $mail = {
 	<p>Either a wrong username password has been entered.</p>
 </div>
 
-== 8< == textfile: messages/login_successful.template == >8 ==
+-- 8< -- textfile: messages/login_successful.template -- >8 --
 
 <div class="usermanagement message success">
 	<h1>Login successful</h1>
@@ -994,7 +992,7 @@ $mail = {
 	<p>You have logged in successfully.</p>
 </div>
 
-== 8< == textfile: messages/logout_successful.template == >8 ==
+-- 8< -- textfile: messages/logout_successful.template -- >8 --
 
 <div class="usermanagement message success">
 	<h1>Logout successful</h1>
@@ -1002,7 +1000,7 @@ $mail = {
 	<p>You have logged out successful.</p>
 </div>
 
-== 8< == textfile: messages/registration_failed.template == >8 ==
+-- 8< -- textfile: messages/registration_failed.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Registration failed</h1>
@@ -1010,7 +1008,7 @@ $mail = {
 	<p>An internal error occurred while registering.</p>
 </div>
 
-== 8< == textfile: messages/registration_failed_email_exists.template == >8 ==
+-- 8< -- textfile: messages/registration_failed_email_exists.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Registration failed</h1>
@@ -1019,7 +1017,7 @@ $mail = {
 	<p>The specified email address <+$ email / $+> does already exist.</p>
 </div>
 
-== 8< == textfile: messages/registration_successful.template == >8 ==
+-- 8< -- textfile: messages/registration_successful.template -- >8 --
 
 <div class="usermanagement message success">
 	<h1>Registration successful</h1>
@@ -1029,7 +1027,7 @@ $mail = {
 	<p>You can change your password after your login.</p>
 </div>
 
-== 8< == textfile: messages/send_password_failed.template == >8 ==
+-- 8< -- textfile: messages/send_password_failed.template -- >8 --
 
 <div class="usermanagement message failed">
 	<h1>Password not sent</h1>
@@ -1038,7 +1036,7 @@ $mail = {
 	<p>Maybe the specified email address is not registered here or an internal error occurred.</p>
 </div>
 
-== 8< == textfile: messages/send_password_failed_email_not_exists.template == >8 ==
+-- 8< -- textfile: messages/send_password_failed_email_not_exists.template -- >8 --
 
 <div class="usermanagement message failed">
 	<h1>Password not sent</h1>
@@ -1047,7 +1045,7 @@ $mail = {
 	<p>The email address <+$ email / $+> is not registered on this site.</p>
 </div>
 
-== 8< == textfile: messages/send_password_successful.template == >8 ==
+-- 8< -- textfile: messages/send_password_successful.template -- >8 --
 
 <div class="usermanagement message success">
 	<h1>Password sent</h1>

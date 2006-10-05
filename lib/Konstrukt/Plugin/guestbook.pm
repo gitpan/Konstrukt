@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: use stored user data, if a logged in user posts a comment
 
 =head1 NAME
@@ -39,7 +37,7 @@ See the documentation of the backend modules
 	guestbook/template_path        /templates/guestbook/
 	guestbook/entries_per_page     10
 	#administration
-	guestbook/userlevel_admin      2
+	guestbook/userlevel_admin      3
 
 =cut
 
@@ -84,7 +82,7 @@ sub init {
 	$Konstrukt::Settings->default("guestbook/backend"          => "DBI");
 	$Konstrukt::Settings->default("guestbook/template_path"    => '/templates/guestbook/');
 	$Konstrukt::Settings->default("guestbook/entries_per_page" => 10);
-	$Konstrukt::Settings->default("guestbook/userlevel_admin"  => 2);
+	$Konstrukt::Settings->default("guestbook/userlevel_admin"  => 3);
 	
 	#create content object
 	$self->{backend}       = use_plugin "guestbook::" . $Konstrukt::Settings->get("guestbook/backend") or return undef;
@@ -341,7 +339,7 @@ L<Konstrukt::Plugin::guestbook::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: layout/add_form.form == >8 ==
+-- 8< -- textfile: layout/add_form.form -- >8 --
 
 $form_name = 'add';
 $form_specification =
@@ -357,7 +355,7 @@ $form_specification =
 	text      => { name => 'Text (mandatory!)'        , minlength => 1, maxlength => 65536, match => '' },
 };
 
-== 8< == textfile: layout/add_form.template == >8 ==
+-- 8< -- textfile: layout/add_form.template -- >8 --
 
 <& formvalidator form="add_form.form" / &>
 <div class="guestbook form">
@@ -416,7 +414,7 @@ $form_specification =
 	<p class="clear" />
 </div>
 
-== 8< == textfile: layout/add_form_captcha.template == >8 ==
+-- 8< -- textfile: layout/add_form_captcha.template -- >8 --
 
 
 <label>Antispam:</label>
@@ -426,7 +424,7 @@ $form_specification =
 <input name="captcha_hash" type="hidden" value="<+$ hash / $+>" />
 <br />
 
-== 8< == textfile: layout/add_form_captcha_js.template == >8 ==
+-- 8< -- textfile: layout/add_form_captcha_js.template -- >8 --
 
 <script type="text/javascript">
 <& perl &>
@@ -456,7 +454,7 @@ $form_specification =
 
 <input name="captcha_hash" type="hidden" value="<+$ hash / $+>" />
 
-== 8< == textfile: layout/delete_form.form == >8 ==
+-- 8< -- textfile: layout/delete_form.form -- >8 --
 
 $form_name = 'del';
 $form_specification =
@@ -465,7 +463,7 @@ $form_specification =
 	confirmation => { name => 'Confirmation'            , minlength => 0, maxlength => 1,   match => '1' },
 };
 
-== 8< == textfile: layout/delete_form.template == >8 ==
+-- 8< -- textfile: layout/delete_form.template -- >8 --
 
 <& formvalidator form="delete_form.form" / &>
 <div class="guestbook form">
@@ -495,7 +493,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entries.template == >8 ==
+-- 8< -- textfile: layout/entries.template -- >8 --
 
 <+@ entries @+>
 	<div class="guestbook entry">
@@ -518,7 +516,7 @@ $form_specification =
 <+@ / @+>
 
 
-== 8< == textfile: layout/entries_nav.template == >8 ==
+-- 8< -- textfile: layout/entries_nav.template -- >8 --
 
 <& if condition="'<+$ prev_page $+>0<+$ / $+>'" &>
 	<div style="float: left;">
@@ -534,7 +532,7 @@ $form_specification =
 
 <p class="clear" />
 
-== 8< == textfile: layout/entry.template == >8 ==
+-- 8< -- textfile: layout/entry.template -- >8 --
 
 <div class="guestbook entry">
 	<h1>From <em><+$ name $+>(no name)<+$ / $+></em> on <+$ year $+>????<+$ / $+>-<+$ month $+>??<+$ / $+>-<+$ day $+>??<+$ / $+> at <+$ hour $+>??<+$ / $+>:<+$ minute $+>??<+$ / $+> <& if condition="<+$ may_delete $+>0<+$ / $+>" &><a href="?action=showdelete;id=<+$ id / $+>">[ delete ]</a><& / &></h1>
@@ -554,42 +552,42 @@ $form_specification =
 	</div>
 </div>
 
-== 8< == textfile: messages/add_failed.template == >8 ==
+-- 8< -- textfile: messages/add_failed.template -- >8 --
 
 <div class="guestbook message failure">
 	<h1>Entry not added</h1>
 	<p>An internal error occurred while adding the entry.</p>
 </div>
 
-== 8< == textfile: messages/add_failed_captcha.template == >8 ==
+-- 8< -- textfile: messages/add_failed_captcha.template -- >8 --
 
 <div class="guestbook message failure">
 	<h1>Entry not added</h1>
 	<p>The entry has not been added, because the antispam question hasn't been answered (corretly)!</p>
 </div>
 
-== 8< == textfile: messages/delete_failed.template == >8 ==
+-- 8< -- textfile: messages/delete_failed.template -- >8 --
 
 <div class="guestbook message failure">
 	<h1>Entry not deleted</h1>
 	<p>An internal error occurred while deleting the entry.</p>
 </div>
 
-== 8< == textfile: messages/delete_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/delete_failed_permission_denied.template -- >8 --
 
 <div class="guestbook message failure">
 	<h1>Entry not deleted</h1> 
 	<p>The entry has not been deleted, because only an administrator can delete entries!</p>
 </div>
 
-== 8< == textfile: messages/delete_successful.template == >8 ==
+-- 8< -- textfile: messages/delete_successful.template -- >8 --
 
 <div class="guestbook message success">
 	<h1>Entry deleted</h1>
 	<p>The entry has been deleted successfully!</p>
 </div>
 
-== 8< == textfile: messages/guestbook_empty.template == >8 ==
+-- 8< -- textfile: messages/guestbook_empty.template -- >8 --
 
 <p>No entries yet.</p>
 

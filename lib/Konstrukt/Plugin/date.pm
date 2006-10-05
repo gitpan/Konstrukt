@@ -1,16 +1,20 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::date - Displays the current date
 
 =head1 SYNOPSIS
 	
+B<Usage:>
+
 	<& date / &>
+
+B<Result:>
+
+	April 23, 2006 - 10:45:16
 
 =head1 DESCRIPTION
 
-This plugin will display the current date (in german notation).
+This plugin will display the current date.
 
 =cut
 
@@ -19,74 +23,28 @@ package Konstrukt::Plugin::date;
 use strict;
 use warnings;
 
-use base 'Konstrukt::Plugin'; #inheritance
+use base 'Konstrukt::SimplePlugin';
 
-use Konstrukt::Parser::Node;
+=head1 ACTIONS
 
-=head1 METHODS
-
-=head2 prepare
-
-The date is a very volatile data. We don't want to cache it...
-
-B<Parameters>:
-
-=over
-
-=item * $tag - Reference to the tag (and its children) that shall be handled.
-
-=back
-
-=cut
-sub prepare {
-	my ($self, $tag) = @_;
-	
-	#Don't do anything beside setting the dynamic-flag
-	$tag->{dynamic} = 1;
-	
-	return undef;
-}
-#= /prepare
-
-=head2 execute
+=head2 default
 
 Put out the date.
 
-B<Parameters>:
-
-=over
-
-=item * $tag - Reference to the tag (and its children) that shall be handled.
-
-=back
-
 =cut
-sub execute {
-	my ($self, $tag) = @_;
-
-	#reset the collected nodes
-	$self->reset_nodes();
+sub default : Action {
+	my ($self, $tag, $content, $params) = @_;
 	
 	#Return Date and Time
-	my (@months)     = (0,'January','February','March','April','May','June','July','August','September','October','November','December');
-	my (@months_ger) = (0,'Januar', 'Februar', 'März', 'April','Mai','Juni','Juli','August','September','Oktober','November','Dezember');
-	my ($thissec,$thismin,$thishour,$mday,$mon,$thisyear) = localtime(time);
-	$mon++;
-	$thisyear += 1900;
-	my ($thisdate)     = "$months[$mon] $mday, $thisyear";
-	my ($thisdate_ger) = "$mday. $months_ger[$mon] $thisyear";
-	if (length($thishour) < 2) {	$thishour = "0$thishour"; }
-	if (length($thismin)  < 2) {	$thismin  = "0$thismin"; }
-	if (length($thissec)  < 2) {	$thissec  = "0$thissec"; }	
-	my ($thistime) = "$thishour:$thismin:$thissec";
-
-	$self->add_node("$thisdate_ger - $thistime");
-	
-	return $self->get_nodes();
+	my @months = qw/January February March April May June July August September October November December/;
+	my ($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
+	$year += 1900;
+	my $date = sprintf("$months[$mon] %02d, %04d - %02d:%02d:%02d", $mday, $year, $hour, $min, $sec);
+	print $date;
 }
-#= /execute
+#= /default
 
-return 1;
+1;
 
 =head1 AUTHOR
 
@@ -97,6 +55,6 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugin>, L<Konstrukt>
+L<Konstrukt::SimplePlugin>, L<Konstrukt>
 
 =cut

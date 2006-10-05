@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: framed images
 
 =head1 NAME
@@ -140,7 +138,7 @@ sub handle {
 	#defaults
 	my $parameters = {
 		width => '180',
-		align => 'none',
+		align => undef,
 		text  => $link
 	};
 	foreach my $parameter (@parameters) {
@@ -281,7 +279,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/image_link_exists.template == >8 ==
+-- 8< -- textfile: markup/image_link_exists.template -- >8 --
 
 <div class="wiki image block <+$ align $+>default<+$ / $+>" style="width: <+$ width / $+>px">
 	<p class="image">
@@ -295,15 +293,15 @@ __DATA__
 	<p class="description"><+$ text $+>(no description)<+$ / $+></p>
 </div>
 
-== 8< == textfile: markup/image_link_external.template == >8 ==
+-- 8< -- textfile: markup/image_link_external.template -- >8 --
 
 <nowiki><a class="wiki image link external" target="_blank" href="<+$ title $+><+$ / $+>"><+$ text $+>(Kein Titel)<+$ / $+></a></nowiki>
 
-== 8< == textfile: markup/image_link_external_embed.template == >8 ==
+-- 8< -- textfile: markup/image_link_external_embed.template -- >8 --
 
 <nowiki><img class="wiki image external" src="<+$ title $+><+$ / $+>" alt="<+$ text $+>(Kein Text)<+$ / $+>" /></nowiki>
 
-== 8< == textfile: markup/image_link_not_exists.template == >8 ==
+-- 8< -- textfile: markup/image_link_not_exists.template -- >8 --
 
 <a class="wiki image notexists" href="/wiki/?action=image_show;title=<+$ title_uri_encoded $+><+$ / $+>" title="<+$ title $+><+$ / $+>"><+$ text $+>(no title)<+$ / $+></a>(?)
 

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: use templates instead of printing HTML?
 
 =head1 NAME

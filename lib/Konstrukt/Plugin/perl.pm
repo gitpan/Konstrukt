@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: parse again?
 #FEATURE: use Safe; ?
 #FEATURE: compile?
@@ -17,7 +15,13 @@ Konstrukt::Plugin::perl - Embedding perl code in your pages/templates
 
 =head1 SYNOPSIS
 	
-	<& perl &>print "hi!"<& / &>
+B<Usage:>
+
+	<& perl &>print "foo"<& / &>
+
+B<Result:>
+
+	foo
 	
 =head1 DESCRIPTION
 

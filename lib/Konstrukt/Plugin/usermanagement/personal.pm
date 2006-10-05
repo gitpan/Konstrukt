@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: 
 
 =head1 NAME
@@ -38,7 +36,7 @@ when the user deregisters.
 
 To know when a user (de)registers, this plugin has to register itself for the
 C<registered> and C<deregistered> events, that the
-L<basic usermanagement|Konstrukt::Plugins::usermanagement::basic/EVENTS> plugin fires.
+L<basic usermanagement|Konstrukt::Plugin::usermanagement::basic/EVENTS> plugin fires.
 
 So this plugin must be initialized before the basic user management plugin is
 executed. For this to happen, you can preload this plugin like this on the page,
@@ -449,13 +447,13 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugins::usermanagement::personal::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
+L<Konstrukt::Plugin::usermanagement::personal::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 =cut
 
 __DATA__
 
-== 8< == textfile: layout/change.template == >8 ==
+-- 8< -- textfile: layout/change.template -- >8 --
 
 <& formvalidator form="change_form.form" / &>
 <div class="usermanagement form">
@@ -542,7 +540,7 @@ __DATA__
 	</form>
 </div>
 
-== 8< == textfile: layout/change_form.form == >8 ==
+-- 8< -- textfile: layout/change_form.form -- >8 --
 
 $form_name = 'change';
 $form_specification =
@@ -564,7 +562,7 @@ $form_specification =
 	homepage    => { name => 'Homepage (http://*.*)'   , minlength => 0, maxlength => 256, match => '^([hH][tT][tT][pP]\:\/\/\S+\.\S+|)$' },
 };
 
-== 8< == textfile: layout/show.template == >8 ==
+-- 8< -- textfile: layout/show.template -- >8 --
 
 <& formvalidator form="change_form.form" / &>
 <div class="usermanagement personal">
@@ -604,7 +602,7 @@ $form_specification =
 	</table>
 </div>
 
-== 8< == textfile: layout/show_form.form == >8 ==
+-- 8< -- textfile: layout/show_form.form -- >8 --
 
 $form_name = 'changeshow';
 $form_specification =
@@ -612,28 +610,28 @@ $form_specification =
 	id => { name => 'User ID (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: messages/change_failed.template == >8 ==
+-- 8< -- textfile: messages/change_failed.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Personal information not changed</h1>
 	<p>An internal error occurred while updating your personal information</p>
 </div>
 
-== 8< == textfile: messages/change_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/change_failed_permission_denied.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Personal information not changed</h1>
 	<p>The personal information has not been updated, because only the person itself can change its personal data!</p>
 </div>
 
-== 8< == textfile: messages/change_successful.template == >8 ==
+-- 8< -- textfile: messages/change_successful.template -- >8 --
 
 <div class="usermanagement message success">
 	<h1>Personal information updated</h1>
 	<p>Your personal information has been updated successfully</p>
 </div>
 
-== 8< == textfile: messages/not_logged_in.template == >8 ==
+-- 8< -- textfile: messages/not_logged_in.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>Not logged in</h1>

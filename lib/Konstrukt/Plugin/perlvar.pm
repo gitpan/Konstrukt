@@ -1,17 +1,25 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::perlvar - Access to Perl variables
 
 =head1 SYNOPSIS
 	
-	<!-- set value -->
-	<& perlvar var="$some->{perl}->{var}->[$index]" set="value"/ &>
+B<Usage:>
 
+	<!-- set value -->
+	<& perlvar var="$Foo::Bar" set="baz"/ &>
+	
 	<!-- print out value -->
-	<& perlvar var="$some->{perl}->{var}" / &>
+	<& perlvar var="$Foo::Bar" / &>
 	<& perlvar var="undef" &>this default will be used<& / &>
+
+B<Result:>
+
+	<!-- set value -->
+	
+	<!-- print out value -->
+	baz
+	this default will be used
 	
 =head1 DESCRIPTION
 
@@ -27,7 +35,7 @@ package Konstrukt::Plugin::perlvar;
 use strict;
 use warnings;
 
-use base 'Konstrukt::Plugin'; #inheritance
+use base 'Konstrukt::SimplePlugin'; #inheritance
 
 use Konstrukt::Parser::Node;
 

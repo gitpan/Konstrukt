@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin - Base class for the Konstrukt plugins.
@@ -60,7 +58,7 @@ some of the methods of this class.
 Take a look at the documentation of the methods and at the L</SYNOPSIS> to get an
 overview of what has to be done to create an own plugin.
 
-You might also want to take a look at L<Konstrukt::Doc::PluginDevelopment>, at
+You might also want to take a look at L<Konstrukt::Doc::CreatingPlugins>, at
 L<Konstrukt::SimplePlugin> and at the plugins that already exist.
 
 =cut

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Lib - Common function library
@@ -582,7 +580,7 @@ The statements in each block are separated through semicolons.
 
 Example:
 
-	== 8< == dbi: create == >8 ==
+	-- 8< -- dbi: create -- >8 --
 	
 	CREATE TABLE IF NOT EXISTS foo ( <definition> );
 	CREATE TABLE IF NOT EXISTS bar ( <definition> );
@@ -680,14 +678,14 @@ basepath. It will be put into the document root.
 
 Example:
 
-	== 8< == textfile: layout/display.template == >8 ==
+	-- 8< -- textfile: layout/display.template -- >8 --
 	
 	This is the data:
 	<+$ data $+>(no data specified)<+$ / $+>
 
-	== 8< == textfile: layout/display_something_else.template == >8 ==
+	-- 8< -- textfile: layout/display_something_else.template -- >8 --
 	
-	== 8< == binaryfile: /gfx/some_icon.gif == >8 ==
+	-- 8< -- binaryfile: /gfx/some_icon.gif -- >8 --
 	
 	R0lGODlhEAAQAKIAAEuVzf+MO////v96G/fMrdDj8v/izf+1fyH5BAAAAAAALAAAAAAQABAAAANE
 	KLrcziQMOZ8gI2sCOliYNhmC9wmHWCkmqh6MGWpw7M0D4cgi2fCi2qKVCto6iqIm4GspcCNBYVpg
@@ -768,16 +766,16 @@ This method takes all this data and returns multiple sections of this data
 
 Where the text after __DATA__ is organized like that:
 
-	== 8< == name_of_section1 == >8 ==
+	-- 8< -- name_of_section1 -- >8 --
 	
 	content1
 	
-	== 8< == name_of_section2 == >8 ==
+	-- 8< -- name_of_section2 -- >8 --
 	
 	content2
 
-The sections have to be separated by "== 8< ==" followed by the identifier of
-the section followed by "== >8 ==" all on one line.
+The sections have to be separated by "-- 8< --" followed by the identifier of
+the section followed by "-- >8 --" all on one line.
 	
 B<Parameters:>
 
@@ -811,8 +809,8 @@ sub extract_data_sections {
 	#split into sections
 	my $identifier = '';
 	my $sections;
-	for (split /^(== 8< ==\s+.*?\s+== >8 ==)$/m, $data) {
-		if (/^== 8< ==\s+(.*?)\s+== >8 ==$/) {
+	for (split /^(-- 8< --\s+.*?\s+-- >8 --)$/m, $data) {
+		if (/^-- 8< --\s+(.*?)\s+-- >8 --$/) {
 			$identifier = $1;
 		} else {
 			s/^\s*//; s/\s*$//; #trim leading/trailing whitespaces

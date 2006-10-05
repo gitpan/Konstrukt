@@ -1,16 +1,18 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::uriencode - URI-encode the text 
 
 =head1 SYNOPSIS
 	
+B<Usage:>
+
 	<& uriencode &>Some Text<& / &>
-	<!-- Result: Some%20Text -->
-	
 	<& uriencode encode="all" &>Some Text<& / &>
-	<!-- Result: %53%6F%6D%65%20%54%65%78%74 -->
+
+B<Result:>
+
+	Some%20Text
+	%53%6F%6D%65%20%54%65%78%74
 
 =head1 DESCRIPTION
 

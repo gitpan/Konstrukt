@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::blockplugin - Base class for wiki block plugins

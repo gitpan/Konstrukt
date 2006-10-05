@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::inlineplugin - Base class for wiki inline plugins

@@ -1,8 +1,6 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
-Konstrukt::Plugin::wiki::markup::list - Block plugin to handle ordered and unoderered lists
+Konstrukt::Plugin::wiki::markup::list - Block plugin to handle ordered and unoderered lists (using templates)
 
 =head1 SYNOPSIS
 	

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: distinguish ABBR and ACR
 
 =head1 NAME
@@ -140,7 +138,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/acronym.template == >8 ==
+-- 8< -- textfile: markup/acronym.template -- >8 --
 
 <nowiki><span class="wiki_acronym" title="<+$ description $+>(no description)<+$ / $+>"><+$ acronym / $+></span></nowiki>
 

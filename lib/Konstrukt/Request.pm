@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: add env()-method and remove $Konstrukt::Handler->{ENV}
 #TODO: move $Konstrukt::Handler->{abs_filename} and $Konstrukt::Handler->{filename} to this object
 #FEATURE: cookie handling? currently done through $Konstrukt::Handler->{cookies} and CGI::Cookie->new();

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::headline - Block plugin to handle headlines
@@ -117,7 +115,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/headline.template == >8 ==
+-- 8< -- textfile: markup/headline.template -- >8 --
 
 <nowiki><h<+$ level $+>1<+$ / $+> class="wiki"></nowiki><+$ content $+>(no title)<+$ / $+><nowiki></h<+$ level $+>1<+$ / $+>></nowiki>
 

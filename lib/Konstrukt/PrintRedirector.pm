@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::PrintRedirector - Catches the print statements and fires an event on each print.

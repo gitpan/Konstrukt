@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Handler::File - Handler for the processing of a given filename
@@ -20,6 +18,10 @@ package Konstrukt::Handler::File;
 use strict;
 use warnings;
 
+use Time::HiRes 'time';
+
+use Konstrukt::Request;
+use Konstrukt::Response;
 use Konstrukt::Debug;
 use base 'Konstrukt::Handler';
 
@@ -64,6 +66,10 @@ Handles the file and prints out the result
 =cut
 sub handler {
 	my ($self) = @_;
+	
+	#dummy request/response
+	$Konstrukt::Request  = Konstrukt::Request->new(uri => $self->{filename}, method => 'GET', headers => {});
+	$Konstrukt::Response = Konstrukt::Response->new(status => 200, headers => { 'Content-Type' => 'text/html' });
 	
 	#print result
 	my $result = $self->process();

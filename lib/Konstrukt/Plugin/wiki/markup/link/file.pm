@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::link::file - Plugin to handle links to internal files.
@@ -209,12 +207,12 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/file_link_exists.template == >8 ==
+-- 8< -- textfile: markup/file_link_exists.template -- >8 --
 
 <a class="wiki file exists" href="/wiki/?action=file_show;title=<+$ title_uri_encoded $+><+$ / $+>" title="<+$ title $+><+$ / $+>"><+$ description $+>(no title)<+$ / $+></a>
 <a class="wiki file content exists" href="/wiki/file/?action=file_content;title=<+$ title_uri_encoded $+><+$ / $+>" title="Direct download">[ direct dl ]</a>
 
-== 8< == textfile: markup/file_link_not_exists.template == >8 ==
+-- 8< -- textfile: markup/file_link_not_exists.template -- >8 --
 
 <a class="wiki file notexists" href="/wiki/?action=file_show;title=<+$ title_uri_encoded $+><+$ / $+>" title="<+$ title $+><+$ / $+>"><+$ description $+>(no title)<+$ / $+></a>(?)
 

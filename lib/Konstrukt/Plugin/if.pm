@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: execute_again really not needed?
 #TODO: perl-interface to create if-nodes
 
@@ -9,6 +7,8 @@ Konstrukt::Plugin::if - Conditional blocks
 
 =head1 SYNOPSIS
 	
+B<Usage:>
+
 	<!-- will put out "elsif1" -->
 	<& if condition="0" &>
 		<$ then $>then<$ / $>
@@ -22,6 +22,15 @@ Konstrukt::Plugin::if - Conditional blocks
 	<& if condition="2 > 1" &>
 		The condition is true!
 	<& / &>
+
+B<Result:>
+
+	<!-- will put out "elsif1" -->
+	elsif1
+	
+	<!-- shortcut, when only using "then" and no elsif or else -->
+	<!-- will put out "The condition is true!" -->
+		The condition is true!
 
 =head1 DESCRIPTION
 

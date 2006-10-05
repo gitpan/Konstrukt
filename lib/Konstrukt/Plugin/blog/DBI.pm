@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::blog::DBI - Konstrukt blogging DBI backend
@@ -435,13 +433,13 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugins::blog>, L<Konstrukt>
+L<Konstrukt::Plugin::blog>, L<Konstrukt>
 
 =cut
 
 __DATA__
 
-== 8< == dbi: create == >8 ==
+-- 8< -- dbi: create -- >8 --
 
 CREATE TABLE IF NOT EXISTS blog_entry
 (

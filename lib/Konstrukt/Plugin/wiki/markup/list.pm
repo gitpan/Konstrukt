@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: use templates instead of printing HTML? See list_template.pm
 
 =head1 NAME

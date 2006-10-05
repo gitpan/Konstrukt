@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: documentataion for CGI configuration
 
 =head1 NAME
@@ -12,47 +10,43 @@ use Konstrukt;
 
 =head1 DESCRIPTION
 
-The basic idea (which is not new) is to compose each page with the aid of
-special tags that offer functionalities beyond the plain markup of HTML.
+This framework aims (beside L<others|/GOALS>) for separation of presentation,
+logic and content.
 
-The tags are used to structure the pages and the content, add dynamics to your
-website and encapsulate complex applications and common functionalities in
-plugins, which can very easily be integrated in your website.
-Additionally strict separation of code, content and layout is maintained.
+The B<presentation> is basically accomplished with a very powerful
+L<templating system|Konstrukt::Plugin::template>, which allows fine grained
+modularization of the presentation components (templates can be nested as deep
+as you want) and has an easy to use interface, that any non-programmer will
+understand.
 
-Covered functionalitys include:
+The B<logic> is encapsulated in plugins, which can be integrated seamlessly
+into the websites using a simple tag-interface. You can develop your own plugins
+easily and also use the existing plugins for your own ones through the perl-interface
+of the existing plugins. The Konstrukt core will do all the nasty donkeywork
+for you, so you can concentrate on the logic of your application.
 
-=over
+The B<content> for each application-plugin is stored in a database using perl
+L<DBI>. The data backends for each plugin are implemented as a separate plugin,
+which can be exchanged easily, so the applications can adapt to various
+data stores. Static content (layout, static web pages, ...) will be stored
+in modular templates.
 
-=item * A powerful templating system
+Your web pages will only describe B<what> they contain, not B<how> they are
+generated. They will be as simple as:
 
-=item * Blog
+	<!-- use a template for the page layout, set the page title to "blog"
+	     and use the blog plugin as the content -->
+	
+	<& template src="/templates/layout.template" title="blog" &>
+		<$ content $>
+			<& blog / &>
+		<$ / $>
+	<& / &>
 
-=item * Wiki
+For more information about the Konstrukt Framework and its design goals take a
+look at L<Konstrukt::Doc::About>.
 
-=item * Calendar
-
-=item * Guestbook
-
-=item * Embedded Perl
-
-=item * and much more...
-
-=back 
-
-You may build powerful web sites in an instant and have full control over the
-look and feel through the template system.
-
-You may also nest (and thus combine) the tags/plugins into each other, which makes it a very
-powerful but still easy to use system.
-
-=head2 Further information
-
-For more in-depth information you may want to take a look at L<Konstrukt::Doc>
-and the docs/ directory in this package.
-
-There you will find information on the usage of this
-framework and on plugin development as well as on the framework internals.
+An overview of the supplied documentation can be found in L<Konstrukt::Doc>. 
 
 =cut
 
@@ -74,28 +68,19 @@ Many... Currently tracked for each module at its beginning:
 	#TODO: ...
 	#FEATURE: ...
 
-You may get an overview of these by using the supplied C<todo_list.pl> script.
-
-=head1 AUTHOR
-
-Thomas Wittek
-
-mail at gedankenkonstrukt dot de
-
-http://gedankenkonstrukt.de
+You may get an overview of these by using the supplied C<todo_list.pl> script
+or looking in the TODO file.
 
 =head1 AUTHOR
 
 Copyright 2006 Thomas Wittek (mail at gedankenkonstrukt dot de). All rights reserved. 
-
-=head1 LICENSE
 
 This document is free software.
 It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Doc>, L<HTML::Mason>, L<Embperl>, L<perl>
+L<Konstrukt::Doc>, L<HTML::Mason>, L<Template>, L<Embperl>, L<perl>
 
 =cut
 

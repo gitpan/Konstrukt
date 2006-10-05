@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: download the target file, if it's text/* and look for <title> tag
 #         which can be used for <a title="page title">
 
@@ -127,7 +125,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/external_link.template == >8 ==
+-- 8< -- textfile: markup/external_link.template -- >8 --
 
 <nowiki><& if condition="'<+$ type / $+>' eq 'mailto'" &>
 	<$ then $><& mail::obfuscator text="<+$ link $+><+$ / $+>" html="<a class='wiki external' href='mailto:<+$ link $+><+$ / $+>'><+$ description / $+></a>" / &><$ / $>

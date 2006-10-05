@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::code - Block plugin to handle code/preformatted sections
@@ -117,7 +115,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/code.template == >8 ==
+-- 8< -- textfile: markup/code.template -- >8 --
 
 <nowiki><pre class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></pre></nowiki>
 

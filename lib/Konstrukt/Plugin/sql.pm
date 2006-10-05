@@ -1,28 +1,35 @@
-#!/usr/bin/perl
-
 #TODO: see bug in the SYNOPSIS
 
 =head1 NAME
 
-Konstrukt::Plugin::sql - Perform SQL queries.
+Konstrukt::Plugin::sql - Perform SQL queries. Usually combined with
+templates to display the results.
 
 =head1 SYNOPSIS
 	
 =head2 SELECT queries
 
+B<Usage:>
+
 	<!-- put query results into a template using the dbi default settings defined in your konstrukt.settings
 	     see the Konstrukt::DBI documentation for the configuration of the default settings -->
 	<& sql query="SELECT * FROM some_table" template="list_layout.template" / &>
 	<!-- you must have a list <+@ sql @+> in your template file to which the results are passed.
-	     the fields inside the list must be named like the columns in your query. -->
-	
+	     the fields inside the list should be named like the columns in your query. -->
+
+or
+
 	<!-- but you may also define the listname yourself -->
 	<& sql query="SELECT * FROM some_table" template="list_layout.template" list="some_list_name" / &>
 	<!-- then you should have a list <+@ some_list_name @+> in your template file. -->
-	
+
+or
+
 	<!-- using custom connection settings -->
 	<& sql query="..." template="..." source="dbi_dsn" user="username" pass="password" / &>
-	
+
+=begin doesntwork
+
 	<!-- manually define the template.
 	     more flexible, but a bit slower.
 	     #TODO: actually this one doesn't work correctly at the moment due to a bug in the template plugin -->
@@ -40,6 +47,8 @@ Konstrukt::Plugin::sql - Perform SQL queries.
 		...
 	<@ / @>
 	<!-- so you can put this data into a template as done in the example above. -->
+
+=end doesntwork
 
 =head2 Other queries
 

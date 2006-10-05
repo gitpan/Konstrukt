@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: Skip blocks containing only of a <nowiki>..</nowiki> area
 #      (will be put converted in a paragraph otherwise)
 #TODO: see TODO in the source (of the other modules)
@@ -710,7 +708,7 @@ L<Konstrukt::Plugin>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: /styles/wiki.css == >8 ==
+-- 8< -- textfile: /styles/wiki.css -- >8 --
 
 /* CSS definitions for the Konstrukt wiki plugin */
 

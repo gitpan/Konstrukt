@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: also display debug messages?
 
 =head1 NAME
@@ -8,7 +6,13 @@ Konstrukt::Plugin::errors - Display the error messages that occured during the p
 
 =head1 SYNOPSIS
 
+B<Usage:>
+
 	<& errors / &>
+
+B<Result:>
+
+A list of the errors, that occurred during the processing of the file, if any.
 
 =head1 DESCRIPTION
 
@@ -122,7 +126,7 @@ L<Konstrukt::Debug>, L<Konstrukt::SimplePlugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: errors.template == >8 ==
+-- 8< -- textfile: errors.template -- >8 --
 
 <div class="error">
 	<h1>There have been errors/warnings during the processing of this page:</h1>

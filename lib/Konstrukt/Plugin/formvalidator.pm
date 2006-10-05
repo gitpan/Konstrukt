@@ -1,6 +1,10 @@
-#!/usr/bin/perl
-
-#TODO: shortcut?:
+#TODO: include strings.js from script.js. don't load it explicitly in the HTML
+#function include(file) {
+#    document.write("<script type=\"text/javascript\" src=\"" + file + "\"></script>\n");
+#}
+#TODO: -Also ignore _fields in the JS-Part
+#TODO: -validate(): Does the silent-Option make sense?
+#FEATURE: shortcut?:
 #	my $form = Konstrukt::Plugin::formvalidator->new();
 #	$form->load('/path/to/form.form');
 #	$form->retrieve_values('cgi');
@@ -9,12 +13,6 @@
 #=>
 #	my $form = Konstrukt::Plugin::formvalidator->new('/path/to/form.form'[, 'cgi']);
 #  if ($form->validate()) { ... }
-#TODO: include strings.js from script.js. don't load it explicitly in the HTML
-#function include(file) {
-#    document.write("<script type=\"text/javascript\" src=\"" + file + "\"></script>\n");
-#}
-#TODO: -Also ignore _fields in the JS-Part
-#TODO: -validate(): Does the silent-Option make sense?
 
 =head1 NAME
 
@@ -22,15 +20,28 @@ Konstrukt::Plugin::formvalidator - HTML form validator
 
 =head1 SYNOPSIS
 	
+B<Usage:>
+
 	<!-- add form validation code to your page -->
 	<& formvalidator form="some_dialogue.form" / &>
-	
+
+or
+
 	<!-- the same but explicitly define the JS files -->
 	<& formvalidator
 		form="/some/dialogue.form"
 	   script="/formvalidator/formvalidator.js"
 	   strings="/formvalidator/formvalidator_strings.js"
 	/ &>
+
+B<Result:>
+
+	<!-- add form validation code to your page -->
+	<script type="text/javascript" src="/formvalidator/formvalidator.js"></script>
+	<script type="text/javascript" src="/formvalidator/formvalidator_strings.js"></script>
+	<script type="text/javascript">
+		<!-- JS definitions of your form ... -->
+	</script>
 
 =head1 DESCRIPTION
 
@@ -454,7 +465,7 @@ L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: error.template == >8 ==
+-- 8< -- textfile: error.template -- >8 --
 
 <div class="formvalidator error">
 	<h1>There have been mistakes in your form input!</h1>
@@ -464,7 +475,7 @@ __DATA__
 	</ul>
 </div>
 
-== 8< == textfile: formvalidator.js == >8 ==
+-- 8< -- textfile: formvalidator.js -- >8 --
 
 /* formvalidator.js
  *  A JavaScript to check forms for consitency with a common interface
@@ -563,7 +574,7 @@ function validateForm(form) {
 	return retval;
 }//validateForm()
 
-== 8< == textfile: formvalidator_strings.js == >8 ==
+-- 8< -- textfile: formvalidator_strings.js -- >8 --
 
 /* formvalidator_strings.js
  *  The message strings, which will be put out upon a validation error.

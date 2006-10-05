@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: update CONFIGURATION docs and quote the right sql tables
 
 =head1 NAME
@@ -467,7 +465,7 @@ L<Konstrukt::Plugin>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == dbi: create == >8 ==
+-- 8< -- dbi: create -- >8 --
 
 CREATE TABLE IF NOT EXISTS wiki_image
 (

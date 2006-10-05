@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: user administration: manually add, delete, modify users
 #FEATURE: access control lists: user/group/object
 
@@ -134,6 +132,7 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugins::usermanagement::basic>, L<Konstrukt::Plugins::usermanagement::level>, L<Konstrukt::Plugins::usermanagement::personal>, L<Konstrukt::Plugin>, L<Konstrukt>
+L<Konstrukt::Plugin::usermanagement::basic>, L<Konstrukt::Plugin::usermanagement::level>,
+L<Konstrukt::Plugin::usermanagement::personal>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 =cut

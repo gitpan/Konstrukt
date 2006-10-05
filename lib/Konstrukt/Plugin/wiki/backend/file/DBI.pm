@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::backend::file::DBI - File backend driver for storage
@@ -388,7 +386,7 @@ L<Konstrukt::Plugin>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == dbi: create == >8 ==
+-- 8< -- dbi: create -- >8 --
 
 CREATE TABLE IF NOT EXISTS wiki_file
 (

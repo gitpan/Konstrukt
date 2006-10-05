@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: better week templating?
 #TODO: test DBI->get_range with special cases.
 #TODO: take a look at http://search.cpan.org/~fglock/DateTime-Set-0.25/
@@ -67,8 +65,8 @@ See the documentation of the backend modules
 	#layout
 	calendar/template_path            /templates/calendar/
 	#user levels
-	calendar/userlevel_write          1 #every registered user may add events
-	calendar/userlevel_admin          2
+	calendar/userlevel_write          2
+	calendar/userlevel_admin          3
 	#rss2 export
 	calendar/rss2_template            /templates/calendar/export/rss2.template
  
@@ -117,8 +115,8 @@ sub init {
 	#set default settings
 	$Konstrukt::Settings->default("calendar/backend"         => 'DBI');
 	$Konstrukt::Settings->default("calendar/template_path"   => '/templates/calendar/');
-	$Konstrukt::Settings->default("calendar/userlevel_write" => 1);
-	$Konstrukt::Settings->default("calendar/userlevel_admin" => 2);
+	$Konstrukt::Settings->default("calendar/userlevel_write" => 2);
+	$Konstrukt::Settings->default("calendar/userlevel_admin" => 3);
 	$Konstrukt::Settings->default("calendar/rss2_template"   => $Konstrukt::Settings->get("calendar/template_path") . "export/rss2.template");
 
 	$self->{backend} = use_plugin "calendar::" . $Konstrukt::Settings->get("calendar/backend") or return undef;
@@ -1105,7 +1103,7 @@ L<Konstrukt::Plugin::calendar::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: export/rss2.template == >8 ==
+-- 8< -- textfile: export/rss2.template -- >8 --
 
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <rss version="2.0" 
@@ -1145,7 +1143,7 @@ __DATA__
 	</channel>
 </rss>
 
-== 8< == textfile: layout/all.template == >8 ==
+-- 8< -- textfile: layout/all.template -- >8 --
 
 <div class="calendar allevents">
 	<h1>All events</h1>
@@ -1163,14 +1161,14 @@ __DATA__
 	<+@ / @+>
 </div>
 
-== 8< == textfile: layout/all_empty.template == >8 ==
+-- 8< -- textfile: layout/all_empty.template -- >8 --
 
 <div class="calendar allevents">
 	<h1>All events</h1>
 	<p>No events yet</p>
 </div>
 
-== 8< == textfile: layout/day.template == >8 ==
+-- 8< -- textfile: layout/day.template -- >8 --
 
 <div class="calendar day">
 	<h1>Day view
@@ -1204,7 +1202,7 @@ __DATA__
 	<+@ / @+>
 </div>
 
-== 8< == textfile: layout/day_empty.template == >8 ==
+-- 8< -- textfile: layout/day_empty.template -- >8 --
 
 <div class="calendar day">
 	<h1>Day view
@@ -1227,7 +1225,7 @@ __DATA__
 	<p>No events at this day.</p>
 </div>
 
-== 8< == textfile: layout/entry_add.form == >8 ==
+-- 8< -- textfile: layout/entry_add.form -- >8 --
 
 $form_name = 'addentry';
 $form_specification =
@@ -1243,7 +1241,7 @@ $form_specification =
 	private      => { name => 'Private'                     , minlength => 0, maxlength => 1,   match => '' },
 };
 
-== 8< == textfile: layout/entry_add_show.template == >8 ==
+-- 8< -- textfile: layout/entry_add_show.template -- >8 --
 
 <& formvalidator form="entry_add.form" / &>
 <div class="calendar form">
@@ -1291,7 +1289,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_delete.form == >8 ==
+-- 8< -- textfile: layout/entry_delete.form -- >8 --
 
 $form_name = 'delentry';
 $form_specification =
@@ -1300,7 +1298,7 @@ $form_specification =
 	confirmation => { name => 'Confirmation'            , minlength => 0, maxlength => 1, match => '1' },
 };
 
-== 8< == textfile: layout/entry_delete_show.form == >8 ==
+-- 8< -- textfile: layout/entry_delete_show.form -- >8 --
 
 $form_name = 'deleteentryshow';
 $form_specification =
@@ -1308,7 +1306,7 @@ $form_specification =
 	id => { name => 'ID of the entry (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/entry_delete_show.template == >8 ==
+-- 8< -- textfile: layout/entry_delete_show.template -- >8 --
 
 <& formvalidator form="entry_delete.form" / &>
 <div class="calendar form">
@@ -1334,7 +1332,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_edit.form == >8 ==
+-- 8< -- textfile: layout/entry_edit.form -- >8 --
 
 $form_name = 'editentry';
 $form_specification =
@@ -1351,7 +1349,7 @@ $form_specification =
 	private      => { name => 'Private'                     , minlength => 0, maxlength => 1,   match => '' },
 };
 
-== 8< == textfile: layout/entry_edit_show.form == >8 ==
+-- 8< -- textfile: layout/entry_edit_show.form -- >8 --
 
 $form_name = 'editentryshow';
 $form_specification =
@@ -1359,7 +1357,7 @@ $form_specification =
 	id => { name => 'ID of the entry (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/entry_edit_show.template == >8 ==
+-- 8< -- textfile: layout/entry_edit_show.template -- >8 --
 
 <& formvalidator form="entry_edit.form" / &>
 <div class="calendar form">
@@ -1408,7 +1406,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_show.form == >8 ==
+-- 8< -- textfile: layout/entry_show.form -- >8 --
 
 $form_name = 'editentryshow';
 $form_specification =
@@ -1416,7 +1414,7 @@ $form_specification =
 	id => { name => 'ID of the entry (number)' , minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/entry_show.template == >8 ==
+-- 8< -- textfile: layout/entry_show.template -- >8 --
 
 <div class="calendar entry">
 	<h1>View entry</h1>
@@ -1447,7 +1445,7 @@ $form_specification =
 	</table>
 </div>
 
-== 8< == textfile: layout/month.template == >8 ==
+-- 8< -- textfile: layout/month.template -- >8 --
 
 <div class="calendar month">
 	
@@ -1524,7 +1522,7 @@ $form_specification =
 	
 </div>
 
-== 8< == textfile: layout/week.template == >8 ==
+-- 8< -- textfile: layout/week.template -- >8 --
 
 $week_template =
 	{
@@ -1536,7 +1534,7 @@ $week_template =
 		img_delete  => '[ delete ] ',
 	}
 
-== 8< == textfile: layout/week_select.template == >8 ==
+-- 8< -- textfile: layout/week_select.template -- >8 --
 
 	<hr />
 	
@@ -1566,7 +1564,7 @@ $week_template =
 	
 	<hr />
 
-== 8< == textfile: layout/week_title.template == >8 ==
+-- 8< -- textfile: layout/week_title.template -- >8 --
 
 <div class="weektitle">
 	<& perl &>
@@ -1582,74 +1580,74 @@ $week_template =
 	<& / &>
 </div>
 
-== 8< == textfile: messages/entry_add_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_add_failed.template -- >8 --
 
 <div class="calendar message failure">
 	<h1>Entry not added</h1>
 	<p>An internal error occured while adding the entry.</p>
 </div>
 
-== 8< == textfile: messages/entry_add_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/entry_add_failed_permission_denied.template -- >8 --
 
 <div class="calendar message failure">
 	<h1>Entry not added</h1>
 	<p>The entry has not been added, because you don't have the appropriate permissions!</p>
 </div>
 
-== 8< == textfile: messages/entry_add_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_add_successful.template -- >8 --
 
 <div class="calendar message success">
 	<h1>Entry added</h1>
 	<p>The entry has been added successfully!</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_failed.template -- >8 --
 
 <div class="calendar message failure">
 	<h1>Entry not deleted</h1>
 	<p>An internal error occurred while deleting the entry.</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_failed_permission_denied.template -- >8 --
 
 <div class="calendar message failure">
 	<h1>Entry not deleted</h1>
 	<p>The entry has not been deleted, because only the author of this entry or an administrator can delete it!</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_successful.template -- >8 --
 
 <div class="calendar message success">
 	<h1>Entry deleted</h1>
 	<p>The entry has been deleted successfully!</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_failed.template -- >8 --
 
 <div class="calendar message failure">
 	<h1>Entry not updated</h1>
 	<p>An internal error occured while updating the entry.</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_failed_permission_denied.template -- >8 --
 
 <div class="calendar message failure">
 	<h1>Entry not updated</h1>
 	<p>The entry has not been updated, because only the author of this entry can update it!</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_successful.template -- >8 --
 
 <div class="calendar message success">
 	<h1>Entry updated</h1>
 	<p>The entry has been updated successfully!</p>
 </div>
 
-== 8< == textfile: /calendar/rss2/index.html == >8 ==
+-- 8< -- textfile: /calendar/rss2/index.html -- >8 --
 
 <& calendar show="rss2" / &>
 
-== 8< == textfile: /calendar/rss2/info/index.html == >8 ==
+-- 8< -- textfile: /calendar/rss2/info/index.html -- >8 --
 
 <html>
 	<head>
@@ -1674,14 +1672,14 @@ $week_template =
 	</body>
 </html>
 
-== 8< == binaryfile: /img/calendar/rss2.gif == >8 ==
+-- 8< -- binaryfile: /img/calendar/rss2.gif -- >8 --
 
 R0lGODlhMgAPALMAAGZmZv9mAP///4mOeQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAACwAAAAAMgAPAAAEexDISau9OFvBu/9gKI6dJARoqq4sKgxwLM/0IJhtnr91T9+Ak26Y4vmO
 NpyLo+oUmUVZ52eUKgPC7Eq4rVV5VRiQ63w2ua4ZRy3+XU9o17Yp9bbVbzkWuo9/p0ZrbkFEhWFI
 g3GFLIeIVoSLOo2OYiYkl5iZQBqcnZ4TEQA7
 
-== 8< == textfile: /styles/calendar.css == >8 ==
+-- 8< -- textfile: /styles/calendar.css -- >8 --
 
 /* CSS definitions for the Konstrukt calendar plugin */
 

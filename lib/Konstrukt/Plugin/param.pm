@@ -1,12 +1,16 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
-Konstrukt::Plugin::date - Displays the value of a specified HTTP parameter
+Konstrukt::Plugin::param - Displays the value of a specified HTTP parameter
 
 =head1 SYNOPSIS
 	
-	<& param var="param_name" &>default value if not defined<& / &>
+B<Usage:>
+
+	<& param key="param_name" &>default value if not defined<& / &>
+
+B<Result:> (when invoked like: /page.html?param_name=foo)
+
+	foo
 
 =head1 DESCRIPTION
 

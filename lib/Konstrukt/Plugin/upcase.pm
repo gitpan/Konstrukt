@@ -1,12 +1,16 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::upcase - Convert all text into upper case
 
 =head1 SYNOPSIS
 	
+B<Usage:>
+
 	<& upcase &>upper case<& / &>
+
+B<Result:>
+
+	UPPER CASE
 
 =head1 DESCRIPTION
 

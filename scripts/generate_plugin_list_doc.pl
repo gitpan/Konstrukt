@@ -47,6 +47,7 @@ sub extract_sections_from_plugins {
 		#remove the plugin name from the short description
 		$selection =~ s/^Konstrukt::Plugin::$plugin\s+-\s*//gm;
 		$text .= $selection;
+		$text .= "Complete documentation: L<Konstrukt::Plugin::$plugin>.";
 	}
 	#decrease headings level
 	return $text;

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: Synopsis
 
 =head1 NAME
@@ -174,13 +172,13 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugins::browserstats>, L<Konstrukt>
+L<Konstrukt::Plugin::browserstats>, L<Konstrukt>
 
 =cut
 
 __DATA__
 
-== 8< == dbi: create == >8 ==
+-- 8< -- dbi: create -- >8 --
 
 CREATE TABLE IF NOT EXISTS browserstats
 (

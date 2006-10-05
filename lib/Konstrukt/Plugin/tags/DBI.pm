@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: remove tag_string code
 #TODO: expand string length of plugin and entry to 255. MySQL complains that
 #      a key can only have a max length of 500 bytes
@@ -354,13 +352,13 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugins::blog>, L<Konstrukt>
+L<Konstrukt::Plugin::blog>, L<Konstrukt>
 
 =cut
 
 __DATA__
 
-== 8< == dbi: create == >8 ==
+-- 8< -- dbi: create -- >8 --
 
 CREATE TABLE IF NOT EXISTS tag
 (

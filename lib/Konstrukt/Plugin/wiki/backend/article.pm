@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: customizable diff-table headers
 
 =head1 NAME
@@ -601,7 +599,7 @@ L<Konstrukt::Plugin>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: layout/article.template == >8 ==
+-- 8< -- textfile: layout/article.template -- >8 --
 
 <div class="wiki article">
 	<div class="content">
@@ -615,7 +613,7 @@ __DATA__
 	<& / &>
 </div>
 
-== 8< == textfile: layout/article_diff.template == >8 ==
+-- 8< -- textfile: layout/article_diff.template -- >8 --
 
 <div class="wiki article diff">
 	<h1>Diff for <+$ title $+>(no title)<+$ / $+> (Revision <+$ diff1 $+>?<+$ / $+> &hArr; <+$ diff2 $+>?<+$ / $+>)</h1>
@@ -623,7 +621,7 @@ __DATA__
 	<+$ diff $+>(no content)<+$ / $+>
 </div>
 
-== 8< == textfile: layout/article_edit_form.form == >8 ==
+-- 8< -- textfile: layout/article_edit_form.form -- >8 --
 
 $form_name = 'edit';
 $form_specification =
@@ -633,7 +631,7 @@ $form_specification =
 	preview   => { name => 'Preview'          , minlength => 0, maxlength => 1,     match => '' },
 };
 
-== 8< == textfile: layout/article_edit_form.template == >8 ==
+-- 8< -- textfile: layout/article_edit_form.template -- >8 --
 
 <& formvalidator form="article_edit_form.form" / &>
 <div class="wiki form">
@@ -655,7 +653,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/article_preview.template == >8 ==
+-- 8< -- textfile: layout/article_preview.template -- >8 --
 
 <div class="wiki article preview">
 	<h1>Preview: <+$ title $+>(no title)<+$ / $+></h1>
@@ -666,7 +664,7 @@ $form_specification =
 	<hr />
 </div>
 	
-== 8< == textfile: layout/article_revision_list.template == >8 ==
+-- 8< -- textfile: layout/article_revision_list.template -- >8 --
 
 <div class="wiki revisionlist">
 	<h1>Revisionlist for: <+$ title $+>(no title)<+$ / $+></h1>
@@ -712,77 +710,77 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: messages/article_diff_failed.template == >8 ==
+-- 8< -- textfile: messages/article_diff_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Difference for '<+$ title $+>(no title)<+$ / $+>' cannot be displayed</h1>
 	<p>An internal error occurred!</p>
 </div>
 
-== 8< == textfile: messages/article_diff_failed_incomplete.template == >8 ==
+-- 8< -- textfile: messages/article_diff_failed_incomplete.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Difference for '<+$ title $+>(no title)<+$ / $+>' cannot be displayed</h1>
 	<p>The needed information (title, revisions) are incomplete.</p>
 </div>
 
-== 8< == textfile: messages/article_diff_failed_no_diff.template == >8 ==
+-- 8< -- textfile: messages/article_diff_failed_no_diff.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>No difference for '<+$ title $+>(no title)<+$ / $+>'</h1>
 	<p>The revisions are identical. There is no difference.</p>
 </div>
 
-== 8< == textfile: messages/article_edit_failed.template == >8 ==
+-- 8< -- textfile: messages/article_edit_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Article '<+$ title $+>(no title)<+$ / $+>' not saved</h1>
 	<p>An internal error occurred while saving this article!</p>
 </div>
 
-== 8< == textfile: messages/article_edit_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/article_edit_failed_permission_denied.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Article '<+$ title $+>(no title)<+$ / $+>' cannot be edited</h1>
 	<p>You don't have the appropriate permissions!</p>
 </h1>
 
-== 8< == textfile: messages/article_edit_no_change.template == >8 ==
+-- 8< -- textfile: messages/article_edit_no_change.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>No change for page '<+$ title $+>(no title)<+$ / $+>'</h1>
 	<p>No new/different content has been entered.</p>
 </div>
 
-== 8< == textfile: messages/article_restore_failed.template == >8 ==
+-- 8< -- textfile: messages/article_restore_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Article '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>An internal error occurred while restoring this article.</p>
 </div>
 
-== 8< == textfile: messages/article_restore_failed_incomplete.template == >8 ==
+-- 8< -- textfile: messages/article_restore_failed_incomplete.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Article '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The needed information (title, revisions) are incomplete.</p>
 </div>
 
-== 8< == textfile: messages/article_restore_failed_no_change.template == >8 ==
+-- 8< -- textfile: messages/article_restore_failed_no_change.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Article '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The requested restore has not been performed as it would leed to no change. The revision to restore is identical to the current one.</p>
 </div>
 
-== 8< == textfile: messages/article_restore_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/article_restore_failed_permission_denied.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Article '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The article has not been restored, because you don't have the appropriate permissions!</p>
 </div>
 
-== 8< == textfile: messages/article_revision_list_failed.template == >8 ==
+-- 8< -- textfile: messages/article_revision_list_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Cannot display revision list for article '<+$ title $+>(no title)<+$ / $+>'</h1>

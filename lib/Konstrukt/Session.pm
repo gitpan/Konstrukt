@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: Test if, the DBI-pool really gets used
 #TODO: session TableName parameter seems to be unsupported
 #FEATURE: SID tracking through GET/POST
@@ -435,7 +433,7 @@ L<Session>, L<Apache::Session>, L<Apache::Session::Flex>, L<Konstrukt>
 
 __DATA__
 
-== 8< == dbi: create == >8 ==
+-- 8< -- dbi: create -- >8 --
 
 CREATE TABLE IF NOT EXISTS sessions
 (

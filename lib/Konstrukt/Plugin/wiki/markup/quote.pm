@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::quote - Block plugin to handle quotes
@@ -117,7 +115,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/quote.template == >8 ==
+-- 8< -- textfile: markup/quote.template -- >8 --
 
 <nowiki><blockquote class="wiki"></nowiki>
 <+$ content $+><+$ / $+>

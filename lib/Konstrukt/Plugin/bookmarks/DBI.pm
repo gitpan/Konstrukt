@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: Synopsis
 #TODO: Configuration doc
 
@@ -442,13 +440,13 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugins::bookmarks>, L<Konstrukt>
+L<Konstrukt::Plugin::bookmarks>, L<Konstrukt>
 
 =cut
 
 __DATA__
 
-== 8< == dbi: create == >8 ==
+-- 8< -- dbi: create -- >8 --
 
 CREATE TABLE IF NOT EXISTS bookmark_category
 (

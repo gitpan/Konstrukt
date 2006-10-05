@@ -1,6 +1,6 @@
 =head1 NAME
 
-Konstrukt::Doc::PluginDevelopment - Create your own plugins
+Konstrukt::Doc::CreatingPlugins - Create your own plugins
 
 =head1 BASICS
 
@@ -9,13 +9,17 @@ L<Plugin|Konstrukt::Plugin> module and add your own logic by overwriting
 the stub methods. So you might want to take a look at the documentation
 of those plugins, which explains the plugin creation interfaces.
 
+=head1 CONVENTIONS
+
+TODO
+
 =head1 PARSE-TREE AND CACHING
 
 TODO: Motivation, tree, nodes, caching.
 
 =head1 CORE MODULES
 
-Our goals include rapid development and code reuse.
+The goals of this framework include rapid development and code reuse.
 This includes that most nasty work like session management and so on will
 already be done for you.
 
@@ -120,6 +124,12 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Doc>
+Next: L<Konstrukt::Doc::CoreDevelopment>
+
+Previous: L<Konstrukt::Doc::ApplicationPlugins>
+
+Parent: L<Konstrukt::Doc>
+
+See also: L<Konstrukt::Doc::PluginList>
 
 =cut

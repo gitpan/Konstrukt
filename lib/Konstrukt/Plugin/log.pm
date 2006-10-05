@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: admin: clear stats (for specific rage/for hits older than ...)
 
 =head1 NAME
@@ -270,14 +268,14 @@ sub put {
 	if ($Konstrukt::Settings->get('log/use')) {
 		my $host = $Konstrukt::Handler->{ENV}->{REMOTE_ADDR};
 		
-		
 		#send email if a recipient is defined
 		#and log entries of this type should be mailed
 		my $mail_to = $Konstrukt::Settings->get('log/sendmail');
 		#generate ignore regexp
 		my @ignore = $Konstrukt::Lib->quoted_string_to_word($Konstrukt::Settings->get('log/sendmail_ignore'));
 		my $ignore_regexp = "(" . join('|', map { $_ =~ s/(\W)/\\$1/g; lc $_; } @ignore) . ")";
-		if ($mail_to and (not @ignore or ($type !~ /$ignore_regexp/ and $description !~ /$ignore_regexp/)) and $description !~ /Konstrukt::Lib->mail/) {
+		
+		if ($mail_to and (not @ignore or ($type !~ /$ignore_regexp/i and $description !~ /$ignore_regexp/i)) and $description !~ /Konstrukt::Lib->mail/i) {
 			my $subject = "Log: $type";
 			my $text = "Description:\n$description\n\nHost: $host\n\nKeys:\n" . join("\n", map { defined $_ ? $_ : () } @keys);
 			$Konstrukt::Lib->mail($subject, $text, $mail_to);
@@ -328,7 +326,7 @@ L<Konstrukt::Plugin::log::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: layout/list_0keys.template == >8 ==
+-- 8< -- textfile: layout/list_0keys.template -- >8 --
 
 <table>
 	<tr>
@@ -346,7 +344,7 @@ __DATA__
 	<+@ / @+>
 </table>
 
-== 8< == textfile: layout/list_1keys.template == >8 ==
+-- 8< -- textfile: layout/list_1keys.template -- >8 --
 
 <table>
 	<tr>
@@ -366,7 +364,7 @@ __DATA__
 	<+@ / @+>
 </table>
 
-== 8< == textfile: layout/list_2keys.template == >8 ==
+-- 8< -- textfile: layout/list_2keys.template -- >8 --
 
 <table>
 	<tr>
@@ -388,7 +386,7 @@ __DATA__
 	<+@ / @+>
 </table>
 
-== 8< == textfile: layout/list_3keys.template == >8 ==
+-- 8< -- textfile: layout/list_3keys.template -- >8 --
 
 <table>
 	<tr>
@@ -412,7 +410,7 @@ __DATA__
 	<+@ / @+>
 </table>
 
-== 8< == textfile: layout/list_4keys.template == >8 ==
+-- 8< -- textfile: layout/list_4keys.template -- >8 --
 
 <table>
 	<tr>
@@ -438,7 +436,7 @@ __DATA__
 	<+@ / @+>
 </table>
 
-== 8< == textfile: layout/list_5keys.template == >8 ==
+-- 8< -- textfile: layout/list_5keys.template -- >8 --
 
 <table>
 	<tr>
@@ -466,11 +464,11 @@ __DATA__
 	<+@ / @+>
 </table>
 
-== 8< == textfile: layout/list_empty.template == >8 ==
+-- 8< -- textfile: layout/list_empty.template -- >8 --
 
 <p>No entries yet.</p>
 
-== 8< == textfile: messages/view_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/view_failed_permission_denied.template -- >8 --
 
 <div class="log message failure">
 	<h1>You cannot access the logs!</h1>

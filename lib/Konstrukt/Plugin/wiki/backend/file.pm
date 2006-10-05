@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: Caching of the files somewhere inside the docroot and redirect to
 #         the static file? Will this gain performance?
 
@@ -607,7 +605,7 @@ L<Konstrukt::Plugin>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: layout/file_edit_form.form == >8 ==
+-- 8< -- textfile: layout/file_edit_form.form -- >8 --
 
 $form_name = 'edit';
 $form_specification =
@@ -617,7 +615,7 @@ $form_specification =
 	content           => { name => 'Content'          , minlength => 0, maxlength => 4294967296, match => '' },
 };
 
-== 8< == textfile: layout/file_edit_form.template == >8 ==
+-- 8< -- textfile: layout/file_edit_form.template -- >8 --
 
 <& formvalidator form="file_edit_form.form" / &>
 <div class="wiki form">
@@ -670,7 +668,7 @@ $form_specification =
 	<p>It's possible to create a new file without a description and without a content. Those can be added later.</p>
 </div>
 
-== 8< == textfile: layout/file_info.template == >8 ==
+-- 8< -- textfile: layout/file_info.template -- >8 --
 
 <div class="wiki file info">
 	<h1>File: <+$ title $+>(no title)<+$ / $+></h1>
@@ -694,7 +692,7 @@ $form_specification =
 	<& / &>
 </div>
 
-== 8< == textfile: layout/file_revision_list.template == >8 ==
+-- 8< -- textfile: layout/file_revision_list.template -- >8 --
 
 <div class="wiki file revisionlist">
 	<h1>Revisionlist for file: <+$ title $+>(no title)<+$ / $+></h1>
@@ -741,70 +739,70 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: messages/file_edit_failed.template == >8 ==
+-- 8< -- textfile: messages/file_edit_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>File '<+$ title $+>(no title)<+$ / $+>' cannot be edited</h1>
 	<p>An internal error occurred.</p>
 </div>
 
-== 8< == textfile: messages/file_edit_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/file_edit_failed_permission_denied.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>File '<+$ title $+>(no title)<+$ / $+>' cannot be edited!</h1>
 	<p>You don't have the appropriate permissions.</p>
 </div>
 
-== 8< == textfile: messages/file_edit_no_change.template == >8 ==
+-- 8< -- textfile: messages/file_edit_no_change.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>No change for file '<+$ title $+>(no title)<+$ / $+>'</h1>
 	<p>Neither a new description nor a new file have been specified (or the specified contents are identical to the current ones) and there already exists an entry for this file title.</p>
 </div>
 
-== 8< == textfile: messages/file_info_no_file_specified.template == >8 ==
+-- 8< -- textfile: messages/file_info_no_file_specified.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>File cannot be displayed</h1>
 	<p>No file specified.</p>
 </div>
 
-== 8< == textfile: messages/file_restore_failed.template == >8 ==
+-- 8< -- textfile: messages/file_restore_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Contents of the file '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>An internal error occurred.</p>
 </div>
 
-== 8< == textfile: messages/file_restore_failed_incomplete.template == >8 ==
+-- 8< -- textfile: messages/file_restore_failed_incomplete.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>File '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The needed information (title, revision, data to restore) are incomplete.</p>
 </div>
 
-== 8< == textfile: messages/file_restore_failed_no_change.template == >8 ==
+-- 8< -- textfile: messages/file_restore_failed_no_change.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>File '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The requested restore has not been performed as it would leed to no change. The revision to restore is identical to the current one.</p>
 </div>
 
-== 8< == textfile: messages/file_restore_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/file_restore_failed_permission_denied.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>File '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The file has not been restored, because you don't have the appropriate permissions!</p>
 </div>
 
-== 8< == textfile: messages/file_revision_list_failed.template == >8 ==
+-- 8< -- textfile: messages/file_revision_list_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Cannot display revision list for file '<+$ title $+>(no title)<+$ / $+>'</h1>
 	<p>Either this file does not exist or an internal error occurred.</p>
 </div>
 
-== 8< == textfile: /wiki/file/index.html == >8 ==
+-- 8< -- textfile: /wiki/file/index.html -- >8 --
 
 <& wiki::backend::file / &>
 

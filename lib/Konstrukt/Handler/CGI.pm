@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: test this!
 #TODO: config doc
 

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: allow users to delete their own category, when all links in this category have been created by this user
 #FEATURE: limit depth of category recursion
 #FEATURE: category only mode
@@ -13,11 +11,11 @@ Konstrukt::Plugin::bookmarks - Bookmark management for registered users
 
 =head1 SYNOPSIS
 	
-	You may simply integrate it by putting
+You may simply integrate it by putting
 		
 		<& bookmarks / &>
 		
-	somewhere in your website.
+somewhere in your website.
 	
 =head1 DESCRIPTION
 
@@ -54,8 +52,8 @@ See the documentation of the backend modules
 	bookmarks/template_path      /templates/bookmarks/
 	bookmarks/root_title         Links
 	#user levels
-	bookmarks/userlevel_write    0 #every registered user may add bookmarks
-	bookmarks/userlevel_admin    2
+	bookmarks/userlevel_write    2
+	bookmarks/userlevel_admin    3
 
 =cut
 
@@ -98,8 +96,8 @@ sub init {
 	#set default settings
 	$Konstrukt::Settings->default("bookmarks/backend"         => 'DBI');
 	$Konstrukt::Settings->default("bookmarks/template_path"   => '/templates/bookmarks/');
-	$Konstrukt::Settings->default("bookmarks/userlevel_write" => 0);
-	$Konstrukt::Settings->default("bookmarks/userlevel_admin" => 2);
+	$Konstrukt::Settings->default("bookmarks/userlevel_write" => 2);
+	$Konstrukt::Settings->default("bookmarks/userlevel_admin" => 3);
 	$Konstrukt::Settings->default("bookmarks/root_title"      => 'Links');
 
 	$self->{backend} = use_plugin "bookmarks::" . $Konstrukt::Settings->get("bookmarks/backend") or return undef;
@@ -884,7 +882,7 @@ L<Konstrukt::Plugin::bookmarks::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: layout/category_add.form == >8 ==
+-- 8< -- textfile: layout/category_add.form -- >8 --
 
 $form_name = 'addcat';
 $form_specification =
@@ -894,7 +892,7 @@ $form_specification =
 	private   => { name => 'Private'                           , minlength => 0, maxlength => 1,   match => '' },
 };
 
-== 8< == textfile: layout/category_add_show.form == >8 ==
+-- 8< -- textfile: layout/category_add_show.form -- >8 --
 
 $form_name = 'addcatshow';
 $form_specification =
@@ -902,7 +900,7 @@ $form_specification =
 	id => { name => 'ID of the parent-category (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/category_add_show.template == >8 ==
+-- 8< -- textfile: layout/category_add_show.template -- >8 --
 
 <& formvalidator form="category_add.form" / &>
 <div class="bookmarks form">
@@ -933,7 +931,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/category_delete.form == >8 ==
+-- 8< -- textfile: layout/category_delete.form -- >8 --
 
 $form_name = 'delcat';
 $form_specification =
@@ -942,7 +940,7 @@ $form_specification =
 	confirmation => { name => 'Confirmation'               , minlength => 0, maxlength => 1, match => '1' },
 };
 
-== 8< == textfile: layout/category_delete_show.form == >8 ==
+-- 8< -- textfile: layout/category_delete_show.form -- >8 --
 
 $form_name = 'delcatshow';
 $form_specification =
@@ -950,7 +948,7 @@ $form_specification =
 	id => { name => 'ID of the category (number)' , minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/category_delete_show.template == >8 ==
+-- 8< -- textfile: layout/category_delete_show.template -- >8 --
 
 <& formvalidator form="category_delete.form" / &>
 <div class="bookmarks form">
@@ -971,7 +969,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/category_edit.form == >8 ==
+-- 8< -- textfile: layout/category_edit.form -- >8 --
 
 $form_name = 'editcat';
 $form_specification =
@@ -982,7 +980,7 @@ $form_specification =
 	private   => { name => 'Private'                    , minlength => 0, maxlength => 1,   match => '' },
 };
 
-== 8< == textfile: layout/category_edit_show.form == >8 ==
+-- 8< -- textfile: layout/category_edit_show.form -- >8 --
 
 $form_name = 'editcategoryshow';
 $form_specification =
@@ -990,7 +988,7 @@ $form_specification =
 	id => { name => 'ID of the category (number)' , minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/category_edit_show.template == >8 ==
+-- 8< -- textfile: layout/category_edit_show.template -- >8 --
 
 <& formvalidator form="category_edit.form" / &>
 <div class="bookmarks form">
@@ -1027,7 +1025,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_add.form == >8 ==
+-- 8< -- textfile: layout/entry_add.form -- >8 --
 
 $form_name = 'addentry';
 $form_specification =
@@ -1038,7 +1036,7 @@ $form_specification =
 	private   => { name => 'Private'                    , minlength => 0, maxlength => 1,   match => '' },
 };
 
-== 8< == textfile: layout/entry_add_show.form == >8 ==
+-- 8< -- textfile: layout/entry_add_show.form -- >8 --
 
 $form_name = 'addentryshow';
 $form_specification =
@@ -1046,7 +1044,7 @@ $form_specification =
 	id => { name => 'ID of the category (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/entry_add_show.template == >8 ==
+-- 8< -- textfile: layout/entry_add_show.template -- >8 --
 
 <& formvalidator form="entry_add.form" / &>
 <div class="bookmarks form">
@@ -1078,7 +1076,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_delete.form == >8 ==
+-- 8< -- textfile: layout/entry_delete.form -- >8 --
 
 $form_name = 'delentry';
 $form_specification =
@@ -1087,7 +1085,7 @@ $form_specification =
 	confirmation => { name => 'Confirmation'               , minlength => 0, maxlength => 1, match => '1' },
 };
 
-== 8< == textfile: layout/entry_delete_show.form == >8 ==
+-- 8< -- textfile: layout/entry_delete_show.form -- >8 --
 
 $form_name = 'deleteentryshow';
 $form_specification =
@@ -1095,7 +1093,7 @@ $form_specification =
 	id => { name => 'Bookmark-ID (number)' , minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/entry_delete_show.template == >8 ==
+-- 8< -- textfile: layout/entry_delete_show.template -- >8 --
 
 <& formvalidator form="entry_delete.form" / &>
 <div class="bookmarks form">
@@ -1116,7 +1114,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_edit.form == >8 ==
+-- 8< -- textfile: layout/entry_edit.form -- >8 --
 
 $form_name = 'editentry';
 $form_specification =
@@ -1128,7 +1126,7 @@ $form_specification =
 	private   => { name => 'Private'                    , minlength => 0, maxlength => 1,   match => '' },
 };
 
-== 8< == textfile: layout/entry_edit_show.form == >8 ==
+-- 8< -- textfile: layout/entry_edit_show.form -- >8 --
 
 $form_name = 'editentryshow';
 $form_specification =
@@ -1136,7 +1134,7 @@ $form_specification =
 	id => { name => 'ID of the bookmark (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/entry_edit_show.template == >8 ==
+-- 8< -- textfile: layout/entry_edit_show.template -- >8 --
 
 <& formvalidator form="entry_edit.form" / &>
 	<h1>Edit bookmark</h1>
@@ -1173,7 +1171,7 @@ $form_specification =
 	</form>
 </div>	
 
-== 8< == textfile: layout/entry_show.form == >8 ==
+-- 8< -- textfile: layout/entry_show.form -- >8 --
 
 $form_name = 'entryshow';
 $form_specification =
@@ -1181,7 +1179,7 @@ $form_specification =
 	id => { name => 'ID of the bookmark (number)' , minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/entry_show.template == >8 ==
+-- 8< -- textfile: layout/entry_show.template -- >8 --
 
 <div class="bookmarks details">
 	<h1>Bookmark details</h1>
@@ -1200,7 +1198,7 @@ $form_specification =
 	</table>
 </div>
 
-== 8< == textfile: layout/symbol_legend.template == >8 ==
+-- 8< -- textfile: layout/symbol_legend.template -- >8 --
 
 <hr />
 
@@ -1220,7 +1218,7 @@ $form_specification =
 <h3>[ add entry ]</h3>
 <p><strong>Add</strong> a new bookmark.</p>
 
-== 8< == textfile: layout/tree_category.template == >8 ==
+-- 8< -- textfile: layout/tree_category.template -- >8 --
 
 <div class="bookmark_category_tree<+$ tree $+>0<+$ / $+>">
 	<& if condition="'<+$ tree $+>0<+$ / $+>'" &>
@@ -1280,7 +1278,7 @@ $form_specification =
 	<& template src="symbol_legend.template" / &>
 <& / &>
 
-== 8< == textfile: layout/visit.form == >8 ==
+-- 8< -- textfile: layout/visit.form -- >8 --
 
 $form_name = 'visit';
 $form_specification =
@@ -1288,119 +1286,119 @@ $form_specification =
 	id => { name => 'ID of the bookmark (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: messages/category_add_failed.template == >8 ==
+-- 8< -- textfile: messages/category_add_failed.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Category not added</h1>
 	<p>An internal error occurred while adding the category.</p>
 </div>
 
-== 8< == textfile: messages/category_add_successful.template == >8 ==
+-- 8< -- textfile: messages/category_add_successful.template -- >8 --
 
 <div class="bookmarks message success">
 	<h1>Category added</h1>
 	<p>The category has been added successfully!</p>
 </div>
 
-== 8< == textfile: messages/category_delete_failed.template == >8 ==
+-- 8< -- textfile: messages/category_delete_failed.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Category not deleted</h1>
 	<p>An internal error occurred while deleting the category.</p>
 </div>
 
-== 8< == textfile: messages/category_delete_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/category_delete_failed_permission_denied.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Category not deleted</h1>
 	<p>The category has not been deleted, because only administrators can delete categories!</p>
 </div>
 
-== 8< == textfile: messages/category_delete_successful.template == >8 ==
+-- 8< -- textfile: messages/category_delete_successful.template -- >8 --
 
 <div class="bookmarks message success">
 	<h1>Category deleted</h1>
 	<p>The category has been deleted successfully!</p>
 </div>
 
-== 8< == textfile: messages/category_edit_failed.template == >8 ==
+-- 8< -- textfile: messages/category_edit_failed.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Category not updated</h1>
 	<p>An internal error occurred while updating the category.</p>
 </div>
 
-== 8< == textfile: messages/category_edit_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/category_edit_failed_permission_denied.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Category not updated</h1>
 	<p>The category has not been updated, because you have to be the author of this category or an administrator!</p>
 </div>
 
-== 8< == textfile: messages/category_edit_successful.template == >8 ==
+-- 8< -- textfile: messages/category_edit_successful.template -- >8 --
 
 <div class="bookmarks message success">
 	<h1>Category updated</h1>
 	<p>The category has been updated successfully</p>
 </div>
 
-== 8< == textfile: messages/entry_add_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_add_failed.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Bookmark not added</h1>
 	<p>An internal error occurred while adding the bookmark.</p>
 </div>
 
-== 8< == textfile: messages/entry_add_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_add_successful.template -- >8 --
 
 <div class="bookmarks message success">
 	<h1>Bookmark added</h1>
 	<p>The bookmark has been added successfully!</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_failed.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Bookmark not deleted</h1>
 	<p>An internal error occurred while deleting the bookmark.</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_failed_permission_denied.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Bookmark not deleted</h1>
 	<p>The bookmark has not been deleted, because only the author of this bookmark or an administrator can delete this bookmark!</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_successful.template -- >8 --
 
 <div class="bookmarks message success">
 	<h1>Bookmark deleted</h1>
 	<p>The bookmark has been deleted successfully!</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_failed.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Bookmark not updated</h1>
 	<p>An internal error occured while updating this bookmark.</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_failed_permission_denied.template -- >8 --
 
 <div class="bookmarks message failure">
 	<h1>Bookmark not updated</h1>
 	<p>The bookmark has not been updated, because only the author of this bookmark can update it!</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_successful.template -- >8 --
 
 <div class="bookmarks message success">
 	<h1>Bookmark updated</h1>
 	<p>The bookmark has been updated successfully!</p>
 </div>
 
-== 8< == textfile: /styles/bookmarks.css == >8 ==
+-- 8< -- textfile: /styles/bookmarks.css -- >8 --
 
 /* CSS definitions for the Konstrukt bookmarks plugin */
 
@@ -1437,32 +1435,32 @@ div.bookmark_category_tree2 span.actions, div.bookmark_category_tree3 span.actio
 	font-size: 1.2em;
 } 
 
-== 8< == binaryfile: /img/bookmarks/tree1.gif == >8 ==
+-- 8< -- binaryfile: /img/bookmarks/tree1.gif -- >8 --
 
 R0lGODlhFAAUAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUABQAAAIjlC+By6gNz4twUmav
 0y3z9C0eN2rldVJptFbh9hptF8s1eBUAOw==
 
-== 8< == binaryfile: /img/bookmarks/tree2.gif == >8 ==
+-- 8< -- binaryfile: /img/bookmarks/tree2.gif -- >8 --
 
 R0lGODlhFAAUAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUABQAAAImlC+By6gNz4twUmav
 0y3z9C3BSJZkF26p4XGt9l4xNUd1tbI5eBUAOw==
 
-== 8< == binaryfile: /img/bookmarks/tree3.gif == >8 ==
+-- 8< -- binaryfile: /img/bookmarks/tree3.gif -- >8 --
 
 R0lGODlhFAAUAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUABQAAAIelC+By6gNz4twUmav
 0y3z9C3BSJZkiKbqyrbuC8cFADs=
 
-== 8< == binaryfile: /img/bookmarks/tree1bg.gif == >8 ==
+-- 8< -- binaryfile: /img/bookmarks/tree1bg.gif -- >8 --
 
 R0lGODlhFAAUAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUABQAAAIjlC+By6gNz4twUmav
 0y3z9C0eN2rldVJptFbh9hptF8s1eBUAOw==
 
-== 8< == binaryfile: /img/bookmarks/tree2bg.gif == >8 ==
+-- 8< -- binaryfile: /img/bookmarks/tree2bg.gif -- >8 --
 
 R0lGODlhFAAoAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUACgAAAI9lC+By6gNz4twUmav
 0y3z9C0eN2rldVJptFbh9hptF8t1EuT6ntP1jLkBRcLizxgbwpLIl1LSDD1txyqlAAA7
 
-== 8< == binaryfile: /img/bookmarks/tree3bg.gif == >8 ==
+-- 8< -- binaryfile: /img/bookmarks/tree3bg.gif -- >8 --
 
 R0lGODlhFAAoAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUACgAAAIzlC+By6gNz4twUmav
 0y3z9C0eN2rldVJptFbh9hptF8vBjed3zff+DwwKh8Si8YhMKjUFADs=

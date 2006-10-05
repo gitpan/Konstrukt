@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: Synopsis
 #TODO: Configuration doc
 #TODO: DATE field with 0-fields also allowed in other databases than mysql?
@@ -370,7 +368,7 @@ L<Konstrukt>
 
 __DATA__
 
-== 8< == dbi: create == >8 ==
+-- 8< -- dbi: create -- >8 --
 
 CREATE TABLE IF NOT EXISTS calendar_event
 (

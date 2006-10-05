@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: images as links?
 #FEATURE: anchors
 

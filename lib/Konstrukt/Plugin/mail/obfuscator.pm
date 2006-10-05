@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: Use template to generate the link and remove htmllink/textlink interface?!
 
 =head1 NAME
@@ -10,10 +8,12 @@ Konstrukt::Plugin::mail::obfuscator - Hide email addresses from SPAM harvesters.
 
 =head2 Tag interface
 
+B<Usage:>
+
 	<& mail::obfucator name="John Doe" mail="john@doe.com" / &>
-	
-Will generate something like this:
-	
+
+B<Result:>
+
 	<!-- used to decrypt the email address -->
 	<script type="text/javascript">
 	<!--
@@ -32,7 +32,7 @@ Will generate something like this:
 	-->
 	</script>
 	<noscript>
-	John Doe: john<img src="/at_image.gif" alt="&gt; add @-character here &lt;" />doe.com
+	John Doe: john<img src="/gfx/layout/s.gif" alt="&gt; add @-character here &lt;" />doe.com
 	</noscript>
 
 You can also optionally specifiy the complete HTML-link and "text link" if you

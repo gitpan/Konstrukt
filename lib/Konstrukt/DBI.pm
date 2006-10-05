@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::DBI - Database handle pool
@@ -37,6 +35,11 @@ Otherwise it will just pass the already existing handle.
 It will return undef and bail out an error message, if the connection failed.
 
 Take a look at the L</SYNOPSIS> for the usage of this module.
+
+Additionally, this module will register a error handler, which will catch
+the errors that may occur during the database queries. The errors will be logged
+and put out on the website, if you use the L<error plugin|Konstrukt::Plugin::error>
+on your website.
 
 Note:	A further performance advantage may be achieved by using the module
 L<Apache::DBI>, which not only chaches the handles within a single request but

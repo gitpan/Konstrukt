@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::basic - Inline plugin to handle basic markup
@@ -225,23 +223,23 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/add.template == >8 ==
+-- 8< -- textfile: markup/add.template -- >8 --
 
 <nowiki><add class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></add></nowiki>
 
-== 8< == textfile: markup/del.template == >8 ==
+-- 8< -- textfile: markup/del.template -- >8 --
 
 <nowiki><del class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></del></nowiki>
 
-== 8< == textfile: markup/em.template == >8 ==
+-- 8< -- textfile: markup/em.template -- >8 --
 
 <nowiki><em class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></em></nowiki>
 
-== 8< == textfile: markup/strong.template == >8 ==
+-- 8< -- textfile: markup/strong.template -- >8 --
 
 <nowiki><strong class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></strong></nowiki>
 
-== 8< == textfile: markup/strong2.template == >8 ==
+-- 8< -- textfile: markup/strong2.template -- >8 --
 
 <nowiki><strong class="wiki alternate"></nowiki><+$ content $+><+$ / $+><nowiki></strong></nowiki>
 

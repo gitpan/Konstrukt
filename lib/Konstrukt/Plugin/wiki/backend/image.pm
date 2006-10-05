@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: Caching of the image somewhere inside the docroot and redirect to
 #         the static file
 
@@ -627,7 +625,7 @@ L<Konstrukt::Plugin>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: layout/image_edit_form.form == >8 ==
+-- 8< -- textfile: layout/image_edit_form.form -- >8 --
 
 $form_name = 'edit';
 $form_specification =
@@ -637,7 +635,7 @@ $form_specification =
 	content           => { name => 'Content'          , minlength => 0, maxlength => 4294967296, match => '' },
 };
 
-== 8< == textfile: layout/image_edit_form.template == >8 ==
+-- 8< -- textfile: layout/image_edit_form.template -- >8 --
 
 <& formvalidator form="image_edit_form.form" / &>
 <div class="wiki form">
@@ -693,7 +691,7 @@ $form_specification =
 	<p>It's possible to create a new image without a description and without a content. Those can be added later.</p>
 </div>
 
-== 8< == textfile: layout/image_info.template == >8 ==
+-- 8< -- textfile: layout/image_info.template -- >8 --
 
 <div class="wiki image info">
 	<h1>Image: <+$ title $+>(no title)<+$ / $+></h1>
@@ -721,7 +719,7 @@ $form_specification =
 	<& / &>
 </div>
 
-== 8< == textfile: layout/image_revision_list.template == >8 ==
+-- 8< -- textfile: layout/image_revision_list.template -- >8 --
 
 <div class="wiki image revisionlist">
 	<h1>Revisionlist for image: <+$ title $+>(no title)<+$ / $+></h1>
@@ -772,14 +770,14 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: messages/image_edit_failed.template == >8 ==
+-- 8< -- textfile: messages/image_edit_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Image '<+$ title $+>(no title)<+$ / $+>' could be updated!</h1>
 	<p>An internal error occurred</p>
 </div>
 
-== 8< == textfile: messages/image_edit_failed_invalid_image.template == >8 ==
+-- 8< -- textfile: messages/image_edit_failed_invalid_image.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>The uploaded image is invalid</h1>
@@ -787,63 +785,63 @@ $form_specification =
 	<p>Maybe the upload was interrupted or the image is broken.</p>
 </div>
 
-== 8< == textfile: messages/image_edit_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/image_edit_failed_permission_denied.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Image '<+$ title $+>(no title)<+$ / $+>' cannot be edited!</h1>
 	<p>You don't have the appropriate permissions!</p>
 </div>
 
-== 8< == textfile: messages/image_edit_no_change.template == >8 ==
+-- 8< -- textfile: messages/image_edit_no_change.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>No changes for image '<+$ title $+>(no title)<+$ / $+>'</h1>
 	<p>Neither a new description nor a new image have been specified (or the specified contents are identical to the current ones) and there already exists an entry for this image title.</p>
 </div>
 
-== 8< == textfile: messages/image_info_no_file_specified.template == >8 ==
+-- 8< -- textfile: messages/image_info_no_file_specified.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Image cannot be displayed</h1>
 	<p>No image specified.</p>
 <& / &>
 
-== 8< == textfile: messages/image_restore_failed.template == >8 ==
+-- 8< -- textfile: messages/image_restore_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Contents of the image '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>An internal error occurred.</p>
 </div>
 
-== 8< == textfile: messages/image_restore_failed_incomplete.template == >8 ==
+-- 8< -- textfile: messages/image_restore_failed_incomplete.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Image '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The needed information (title, revision, data to restore) are incomplete.</p>
 </div>
 
-== 8< == textfile: messages/image_restore_failed_no_change.template == >8 ==
+-- 8< -- textfile: messages/image_restore_failed_no_change.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Image '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The requested restore has not been performed as it would leed to no change. The revision to restore is identical to the current one.</p>
 </div>
 
-== 8< == textfile: messages/image_restore_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/image_restore_failed_permission_denied.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Image '<+$ title $+>(no title)<+$ / $+>' not restored</h1>
 	<p>The image has not been restored, because you don't have the appropriate permissions!</p>
 </div>
 
-== 8< == textfile: messages/image_revision_list_failed.template == >8 ==
+-- 8< -- textfile: messages/image_revision_list_failed.template -- >8 --
 
 <div class="wiki message failure">
 	<h1>Cannot display revision list for image '<+$ title $+>(no title)<+$ / $+>'</h1>
 	<p>Either this file does not exist or an internal error occurred.</p>
 </div>
 
-== 8< == textfile: /wiki/image/index.html == >8 ==
+-- 8< -- textfile: /wiki/image/index.html -- >8 --
 
 <& wiki::backend::image / &>
 

@@ -1,7 +1,5 @@
-#!/usr/bin/perl
-
-#TODO: use <& tags / &> in templates instead of writing code to pass the data to the templates?
-#TODO: rss/rdf-"export": benchmark
+#TODO: can the <& tags / &> plugin set the tags itself so that the blog plugin
+#      doesn't have to call $tags->set()?!
 #FEATURE: headline for each new day
 #FEATURE: small list of topics
 #FEATURE: count entry views
@@ -59,8 +57,8 @@ plugin know where to get its data and which layout to use. Default:
 	blog/template_path            /templates/blog/
 	
 	#user levels
-	blog/userlevel_write          1
-	blog/userlevel_admin          2
+	blog/userlevel_write          2
+	blog/userlevel_admin          3
 	
 	#rss export
 	blog/rss2_template            /templates/blog/export/rss2.template
@@ -122,8 +120,8 @@ sub init {
 	$Konstrukt::Settings->default("blog/backend"          => 'DBI');
 	$Konstrukt::Settings->default("blog/entries_per_page" => 5);
 	$Konstrukt::Settings->default("blog/template_path"    => '/templates/blog/');
-	$Konstrukt::Settings->default("blog/userlevel_write"  => 1);
-	$Konstrukt::Settings->default("blog/userlevel_admin"  => 2);
+	$Konstrukt::Settings->default("blog/userlevel_write"  => 2);
+	$Konstrukt::Settings->default("blog/userlevel_admin"  => 3);
 	$Konstrukt::Settings->default("blog/rss2_entries"     => 20);
 	$Konstrukt::Settings->default("blog/rss2_template"    => $Konstrukt::Settings->get("blog/template_path") . "export/rss2.template");
 	$Konstrukt::Settings->default("blog/cache_prefix"     => '/blog_article_cache/');
@@ -204,7 +202,7 @@ sub execute {
 		my $action = $Konstrukt::CGI->param('action') || '';
 		
 		#user logged in?
-		if ($self->{user_basic}->id() and $self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_write')) {
+		if ($self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_write')) {
 			#operations that are accessible to "bloggers"
 			if ($action eq 'showadd') {
 				$self->add_entry_show();
@@ -224,6 +222,8 @@ sub execute {
 				$self->add_comment();
 			} elsif ($action eq 'deletecomment') {
 				$self->delete_comment();
+			} elsif ($action eq 'filter') {
+				$self->show_entries();
 			} else {
 				$Konstrukt::Debug->error_message("Invalid action '$action'!") if Konstrukt::Debug::ERROR and $action;
 				$self->show_entries();
@@ -354,7 +354,7 @@ sub edit_entry {
 		my $tags     = use_plugin 'tags';
 		
 		#get data
-		my ($id, $title, $description, $content, $private, $update, $tagstring) = map { $form->get_value($_); } qw/id title description content private update_date tags/;
+		my ($id, $title, $description, $content, $private, $update, $tagstring) = map { $form->get_value($_) } qw/id title description content private update_date tags/;
 		
 		#delete cache file for this article as the content may have changed
 		$self->delete_cache_content($id);
@@ -480,7 +480,7 @@ sub show_entry {
 		my $template   = use_plugin 'template';
 		my $tags       = use_plugin 'tags';
 		my $entry      = $self->{backend}->get_entry($id);
-		my $may_edit   = ($entry->{author} == $self->{user_basic}->id());
+		my $may_edit   = ($entry->{author} == $self->{user_basic}->id() or $entry->{author} == 0);
 		my $may_delete = ($may_edit or $self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_admin'));
 		if (not $entry->{private} or $may_edit) {
 			#prepare data
@@ -536,39 +536,35 @@ sub show_entries {
 	my $tags     = use_plugin 'tags';
 	
 	#filters?
-	my $tagstring = $Konstrukt::CGI->param('tags');
-	my $author    = $Konstrukt::CGI->param('author');
-	my $year      = $Konstrukt::CGI->param('year');
-	my $month     = $Konstrukt::CGI->param('month');
-	my $text      = $Konstrukt::CGI->param('text');
 	my $select;
-	$select->{tags}   = $tagstring if defined $tagstring and length($tagstring);
-	$select->{author} = $author    if defined $author    and $author   > 0;
-	$select->{year}   = $year      if defined $year      and $year     > 0;
-	$select->{month}  = $month     if defined $month     and $month    > 0 and $month < 13;
-	$select->{text}   = $text      if defined $text      and length($text);
-	
-	#calculate page range
-	my $page  = $Konstrukt::CGI->param('page') || 0;
-	$page = 1 unless $page > 0;
-	my $count = $Konstrukt::Settings->get('blog/entries_per_page') || 10;
-	my $pages = ceil(($self->{backend}->get_entries_count() || 0) / $count);
-	my $start = ($page - 1) * $count;
+	if (($Konstrukt::CGI->param('action') || '') eq 'filter') {
+		my ($tagstring, $author, $year, $month, $text) = map { $Konstrukt::CGI->param($_) } qw/tags author year month text/;
+		$select->{tags}   = $tagstring if defined $tagstring and length($tagstring);
+		$select->{author} = $author    if defined $author    and $author   > 0;
+		$select->{year}   = $year      if defined $year      and $year     > 0;
+		$select->{month}  = $month     if defined $month     and $month    > 0 and $month < 13;
+		$select->{text}   = $text      if defined $text      and length($text);
+	}
 	
 	#show admin features?
-	if ($self->{user_basic}->id() and $self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_admin')) {
-		#$self->add_node($template->node("$self->{template_path}layout/category_manage_link.template"));
-		$self->add_node($template->node("$self->{template_path}layout/entry_add_link.template"));
-	}
+	my $is_admin = $self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_admin');
+	$self->add_node($template->node("$self->{template_path}layout/entry_add_link.template"))
+		if $is_admin;
+		
+	#calculate page range
+	my $page  = $Konstrukt::CGI->param('page') || 1;
+	$page = 1 unless $page > 0;
+	my $count = $Konstrukt::Settings->get('blog/entries_per_page');
+	my $pages = ceil($self->{backend}->get_entries_count($select) / $count);
+	my $start = ($page - 1) * $count;
 	
 	#show entries
 	my $entries = $self->{backend}->get_entries($select, $start, $count);
 	if (@{$entries}) {
 		my $uid = $self->{user_basic}->id();
-		my $is_admin = $self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_admin');
 		foreach my $entry (@{$entries}) {
 			#private entries will only be visible to the author
-			my $may_edit   = ($entry->{author} == $uid);
+			my $may_edit   = ($entry->{author} == $uid or $entry->{author} == 0);
 			my $may_delete = ($may_edit or $is_admin);
 			if (not $entry->{private} or $may_edit) {
 				#prepare data
@@ -896,7 +892,7 @@ L<Konstrukt::Plugin::blog::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: export/rss2.template == >8 ==
+-- 8< -- textfile: export/rss2.template -- >8 --
 
 <?xml version="1.0" encoding="ISO-8859-15"?>
 <rss version="2.0" 
@@ -943,7 +939,7 @@ __DATA__
 	</channel>
 </rss>
 
-== 8< == textfile: layout/comment_add_form.form == >8 ==
+-- 8< -- textfile: layout/comment_add_form.form -- >8 --
 
 $form_name = 'addcomment';
 $form_specification =
@@ -954,7 +950,7 @@ $form_specification =
 	id          => { name => 'ID (number)'       , minlength => 1, maxlength => 8,     match => '^\d+$' },
 };
 
-== 8< == textfile: layout/comment_add_form.template == >8 ==
+-- 8< -- textfile: layout/comment_add_form.template -- >8 --
 
 <& formvalidator form="comment_add_form.form" / &>
 <div class="blog form">
@@ -984,7 +980,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/comment_add_form_captcha.template == >8 ==
+-- 8< -- textfile: layout/comment_add_form_captcha.template -- >8 --
 
 <label>Antispam:</label>
 <div>
@@ -993,7 +989,7 @@ $form_specification =
 <input name="captcha_hash" type="hidden" value="<+$ hash / $+>" />
 </div>
 
-== 8< == textfile: layout/comment_add_form_captcha_js.template == >8 ==
+-- 8< -- textfile: layout/comment_add_form_captcha_js.template -- >8 --
 
 <script type="text/javascript">
 <& perl &>
@@ -1023,7 +1019,7 @@ $form_specification =
 
 <input name="captcha_hash" type="hidden" value="<+$ hash / $+>" />
 
-== 8< == textfile: layout/comment_add_form_registered.template == >8 ==
+-- 8< -- textfile: layout/comment_add_form_registered.template -- >8 --
 
 <& formvalidator form="comment_add_form.form" / &>
 <div class="blog form">
@@ -1051,7 +1047,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/comment_delete_form.form == >8 ==
+-- 8< -- textfile: layout/comment_delete_form.form -- >8 --
 
 $form_name = 'delcomment';
 $form_specification =
@@ -1059,7 +1055,7 @@ $form_specification =
 	id => { name => 'ID' , minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/comments.template == >8 ==
+-- 8< -- textfile: layout/comments.template -- >8 --
 
 <div class="blog comments">
 	<h1>Comments</h1>
@@ -1093,15 +1089,15 @@ $form_specification =
 
 </div>
 
-== 8< == textfile: layout/comments_empty.template == >8 ==
+-- 8< -- textfile: layout/comments_empty.template -- >8 --
 
 <p>Currently no comments.</p>
 
-== 8< == textfile: layout/entries_empty.template == >8 ==
+-- 8< -- textfile: layout/entries_empty.template -- >8 --
 
 <p>Currently no entries (for the current filter conditions).</p>
 
-== 8< == textfile: layout/entries_nav.template == >8 ==
+-- 8< -- textfile: layout/entries_nav.template -- >8 --
 
 <& if condition="'<+$ prev_page $+>0<+$ / $+>'" &>
 	<div style="float: left;">
@@ -1117,7 +1113,7 @@ $form_specification =
 
 <p class="clear" />
 
-== 8< == textfile: layout/entry_add_form.form == >8 ==
+-- 8< -- textfile: layout/entry_add_form.form -- >8 --
 
 $form_name = 'add';
 $form_specification =
@@ -1129,7 +1125,7 @@ $form_specification =
 	private     => { name => 'Private'            , minlength => 0, maxlength => 1,     match => '' },
 };
 
-== 8< == textfile: layout/entry_add_form.template == >8 ==
+-- 8< -- textfile: layout/entry_add_form.template -- >8 --
 
 <& formvalidator form="entry_add_form.form" / &>
 <div class="blog form">
@@ -1173,11 +1169,11 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_add_link.template == >8 ==
+-- 8< -- textfile: layout/entry_add_link.template -- >8 --
 
 <p style="text-align: right;"><a href="?action=showadd">[ Create new entry ]</a></p>
 
-== 8< == textfile: layout/entry_delete_form.form == >8 ==
+-- 8< -- textfile: layout/entry_delete_form.form -- >8 --
 
 $form_name = 'del';
 $form_specification =
@@ -1186,7 +1182,7 @@ $form_specification =
 	confirmation => { name => 'Confirmation'  , minlength => 0, maxlength => 1,   match => '1' },
 };
 
-== 8< == textfile: layout/entry_delete_form.template == >8 ==
+-- 8< -- textfile: layout/entry_delete_form.template -- >8 --
 
 <& formvalidator form="entry_delete_form.form" / &>
 <div class="blog form">
@@ -1206,7 +1202,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_edit_form.form == >8 ==
+-- 8< -- textfile: layout/entry_edit_form.form -- >8 --
 
 $form_name = 'edit';
 $form_specification =
@@ -1220,7 +1216,7 @@ $form_specification =
 	private     => { name => 'Private'            , minlength => 0, maxlength => 1,     match => '' },
 };
 
-== 8< == textfile: layout/entry_edit_form.template == >8 ==
+-- 8< -- textfile: layout/entry_edit_form.template -- >8 --
 
 <& formvalidator form="entry_edit_form.form" / &>
 <div class="blog form">
@@ -1270,7 +1266,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/entry_full.template == >8 ==
+-- 8< -- textfile: layout/entry_full.template -- >8 --
 
 <div class="blog entry">
 	<h1>
@@ -1287,7 +1283,7 @@ $form_specification =
 			my @tags = @{$template_values->{lists}->{tags}};
 			if (@tags) {
 				print "Tag" . (@tags > 1 ? 's' : '') . ": ";
-				print join ", ", (map { "<a href=\"?tags=" . $Konstrukt::Lib->uri_encode($_->{fields}->{title}) . "\">$_->{fields}->{title}</a>" } @tags);
+				print join ", ", (map { "<a href=\"?action=filter;tags=" . $Konstrukt::Lib->uri_encode($_->{fields}->{title}) . "\">$_->{fields}->{title}</a>" } @tags);
 				print "."
 			};
 		<& / &>
@@ -1295,7 +1291,7 @@ $form_specification =
 	</div>
 </div> 
 
-== 8< == textfile: layout/entry_short.template == >8 ==
+-- 8< -- textfile: layout/entry_short.template -- >8 --
 
 <div class="blog entry">
 	<h1>
@@ -1312,7 +1308,7 @@ $form_specification =
 			my @tags = @{$template_values->{lists}->{tags}};
 			if (@tags) {
 				print "Tag" . (@tags > 1 ? 's' : '') . ": ";
-				print join ", ", (map { "<a href=\"?tags=" . $Konstrukt::Lib->uri_encode($_->{fields}->{title}) . "\">$_->{fields}->{title}</a>" } @tags);
+				print join ", ", (map { "<a href=\"?action=filter;tags=" . $Konstrukt::Lib->uri_encode($_->{fields}->{title}) . "\">$_->{fields}->{title}</a>" } @tags);
 				print "."
 			};
 		<& / &>
@@ -1320,7 +1316,7 @@ $form_specification =
 	</div>
 </div> 
 
-== 8< == textfile: layout/entry_show.form == >8 ==
+-- 8< -- textfile: layout/entry_show.form -- >8 --
 
 $form_name = 'show';
 $form_specification =
@@ -1328,7 +1324,7 @@ $form_specification =
 	id => { name => 'ID (not empty)' , minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/filter_form.template == >8 ==
+-- 8< -- textfile: layout/filter_form.template -- >8 --
 
 <script type="text/javascript">
 <!--
@@ -1352,6 +1348,8 @@ function hideFilter () {
 	<div class="blog form" id="filterbox">
 		<h1>Find entry</h1>
 		<form name="filter" action="" method="post" onsubmit="return submitFilter()">
+			<input type="hidden" name="action" value="filter" />
+			
 			<label>Tags: (<a href="#" onclick="if (document.getElementById('tagexplain').style.display == 'block') { document.getElementById('tagexplain').style.display = 'none' } else { document.getElementById('tagexplain').style.display = 'block' }">Help</a>)</label>
 			<input name="tags" id="tags" value="<& param var="tags" &><& / &>" />
 			<br />
@@ -1423,116 +1421,116 @@ function hideFilter () {
 
 <p style="text-align: right; margin-bottom: 5px;"><a href="#" id="filterlink" onclick="showFilter();">[ Find entry ]</a></p>
 
-== 8< == textfile: messages/comment_add_failed.template == >8 ==
+-- 8< -- textfile: messages/comment_add_failed.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Comment not added</h1>
 	<p>An internal error occurred while adding your comment</p>
 </div>
 
-== 8< == textfile: messages/comment_add_failed_captcha.template == >8 ==
+-- 8< -- textfile: messages/comment_add_failed_captcha.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Comment not added</h1>
 	<p>The comment could not be added, as the antispam question has not been answered (correctly)!</p>
 </div>
 
-== 8< == textfile: messages/comment_add_successful.template == >8 ==
+-- 8< -- textfile: messages/comment_add_successful.template -- >8 --
 
 <div class="blog message success">
 	<h1>Comment added</h1>
 	<p>Your comment has been added successfully!</p>
 </div>
 
-== 8< == textfile: messages/comment_delete_failed.template == >8 ==
+-- 8< -- textfile: messages/comment_delete_failed.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Comment not deleted</h1>
 	<p>An internal error occurred while deleting the comment.</p>
 </div>
 
-== 8< == textfile: messages/comment_delete_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/comment_delete_failed_permission_denied.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Comment not deleted</h1>
 	<p>The comment hasn't been deleted, because it can only be deleted by an administator</p>
 </div>
 
-== 8< == textfile: messages/comment_delete_successful.template == >8 ==
+-- 8< -- textfile: messages/comment_delete_successful.template -- >8 --
 
 <div class="blog message success">
 	<h1>Comment deleted</h1>
 	<p>The comment has been deleted successfully!</p>
 </div>
 
-== 8< == textfile: messages/entry_add_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_add_failed.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Entry not added</h1>
 	<p>An internal error occurred while adding this entry.</p>
 </div>
 
-== 8< == textfile: messages/entry_add_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_add_successful.template -- >8 --
 
 <div class="blog message success">
 	<h1>Entry added</h1>
 	<p>The entry has been added successfully!</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_failed.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Entry not deleted</h1>
 	<p>An internal error occurred while deleting the entry.</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_failed_permission_denied.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Entry not deleted</h1>
 	<p>The entry could not be deleted, because it can only be deleted by an administrator!</p>
 </div>
 
-== 8< == textfile: messages/entry_delete_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_delete_successful.template -- >8 --
 
 <div class="blog message success">
 	<h1>Entry deleted</h1>
 	<p>The entry has been deleted successfully!</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_failed.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_failed.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Entry not updated</h1>
 	<p>An internal error occurred while updating the entry.</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_failed_permission_denied.template -- >8 --
 
 <div class="blog message failure">
 	<h1>Entry not updated</h1>
 	<p>The entry has not been updated, because it can only be updated by its author or an administrator!</p>
 </div>
 
-== 8< == textfile: messages/entry_edit_successful.template == >8 ==
+-- 8< -- textfile: messages/entry_edit_successful.template -- >8 --
 
 <div class="blog message success">
 	<h1>Entry updated</h1>
 	<p>The entry has been updated successfully</p>
 </div>
 
-== 8< == textfile: /blog/rss2/index.html == >8 ==
+-- 8< -- textfile: /blog/rss2/index.html -- >8 --
 
 <& blog show="rss2" / &>
 
-== 8< == binaryfile: /img/blog/rss2.gif == >8 ==
+-- 8< -- binaryfile: /img/blog/rss2.gif -- >8 --
 
 R0lGODlhMgAPALMAAGZmZv9mAP///4mOeQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAACwAAAAAMgAPAAAEexDISau9OFvBu/9gKI6dJARoqq4sKgxwLM/0IJhtnr91T9+Ak26Y4vmO
 NpyLo+oUmUVZ52eUKgPC7Eq4rVV5VRiQ63w2ua4ZRy3+XU9o17Yp9bbVbzkWuo9/p0ZrbkFEhWFI
 g3GFLIeIVoSLOo2OYiYkl5iZQBqcnZ4TEQA7
 
-== 8< == textfile: /styles/blog.css == >8 ==
+-- 8< -- textfile: /styles/blog.css -- >8 --
 
 /* CSS definitions for the Konstrukt blog plugin */
 

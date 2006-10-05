@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: admin: clear stats (for specific rage/for hits older than ...)
 #FEATURE: graphical representation
 
@@ -58,8 +56,8 @@ See the documentation of the backend modules
 	#don't count hits by robots
 	hitstats/ignore_robots        1
 	#access control
-	hitstats/userlevel_view       1 #userlevel to view the stats
-	hitstats/userlevel_clear      2 #userlevel to clear the logs
+	hitstats/userlevel_view       2 #userlevel to view the stats
+	hitstats/userlevel_clear      3 #userlevel to clear the logs
 
 =cut
 
@@ -101,8 +99,8 @@ sub init {
 	$Konstrukt::Settings->default("hitstats/aggregate"       => "all");
 	$Konstrukt::Settings->default("hitstats/unique"          => 0);
 	$Konstrukt::Settings->default("hitstats/ignore_robots"   => 1);
-	$Konstrukt::Settings->default("hitstats/userlevel_view"  => 1);
-	$Konstrukt::Settings->default("hitstats/userlevel_admin" => 2);
+	$Konstrukt::Settings->default("hitstats/userlevel_view"  => 2);
+	$Konstrukt::Settings->default("hitstats/userlevel_admin" => 3);
 	
 	#create user management objects, if needed
 	if ($Konstrukt::Settings->get("hitstats/userlevel_view") or $Konstrukt::Settings->get("hitstats/userlevel_admin")) {
@@ -342,15 +340,15 @@ L<Konstrukt::Plugin::hitstats::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: layout/counter.template == >8 ==
+-- 8< -- textfile: layout/counter.template -- >8 --
 
 <p style="text-align: center">Hits: <+$ count $+>(Counter not available)<+$ / $+></p>
 
-== 8< == textfile: layout/empty.template == >8 ==
+-- 8< -- textfile: layout/empty.template -- >8 --
 
 <p>No hit statistics available yet.</p>
 
-== 8< == textfile: layout/group.template == >8 ==
+-- 8< -- textfile: layout/group.template -- >8 --
 
 <div class="hitstats group">
 	<h1>
@@ -388,28 +386,28 @@ __DATA__
 </div>
 <& if condition="not '<+$ last_one $+>0<+$ / $+>'" &><hr /><& / &>
 
-== 8< == textfile: messages/counter_failed.template == >8 ==
+-- 8< -- textfile: messages/counter_failed.template -- >8 --
 
 <div class="hitstats message failure">
 	<h1>Counter cannot be shown</h1>
 	<p>An internal error occurred!</p>
 </div>
 
-== 8< == textfile: messages/view_failed.template == >8 ==
+-- 8< -- textfile: messages/view_failed.template -- >8 --
 
 <div class="hitstats message failure">
 	<h1>Hit statistics cannot be shown</h1>
 	<p>An internal error occurred!</p>
 </div>
 
-== 8< == textfile: messages/view_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/view_failed_permission_denied.template -- >8 --
 
 <div class="hitstats message failure">
 	<h1>Hit statistics cannot be shown</h1>
 	<p>The hit statistics cannot be shown, because you don't have the appropriate permissions!</p>
 </div>
 
-== 8< == textfile: /styles/hitstats.css == >8 ==
+-- 8< -- textfile: /styles/hitstats.css -- >8 --
 
 /* CSS definitions for the Konstrukt hitstats plugin */
 

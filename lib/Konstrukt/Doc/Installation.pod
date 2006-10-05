@@ -77,19 +77,41 @@ L<http://theoryx5.uwinnipeg.ca/ppms/>.
 
 =head2 Prerequisites
 
-This is a (complete?) list of 3rd-party perl modules used in this framework.
+This is a (hopefully) complete list of 3rd-party perl modules used in this framework.
+
+B<Test dependencies:>
+
+=over
+
+=item * Module::Build
+
+=item * Test::More
+
+=item * Test::Pod
+
+=item * Test::Pod::Coverage
+
+=back
 
 B<General dependencies:>
 
 =over
 
+=item * Clone
+
+=item * Cwd
+
 =item * CGI
 
-=item * Scalar::Util::Clone
+=item * Devel::UseAnyFunc
+
+=item * MIME::Base64
 
 =item * Storable
 
 =item * Time::HiRes
+
+=item * Time::Zone
 
 =back
 
@@ -119,14 +141,6 @@ Apache2/mod_perl2:
 
 =back
 
-B<CGI-Handler dependencies:>
-
-=over
-
-=item * CGI::Cookie
-
-=back
-
 B<Dependencies when using the session management:>
 
 =over
@@ -149,6 +163,16 @@ B<Dependencies when running in debug mode:>
 =over
 
 =item * Data::Dump
+
+=back
+
+B<Dependencies when sending emails:>
+
+=over
+
+=item * Digest::HMAC_MD5
+
+=item * Mail::Sender
 
 =back
 
@@ -182,7 +206,7 @@ Basically the same as above, with some differences:
 	./Build install
 
 Using CPAN for local installation: You might want to take a look at
-http://sial.org/howto/perl/life-with-cpan/non-root/
+L<http://sial.org/howto/perl/life-with-cpan/non-root/>
 
 =head1 CONFIGURATION
 
@@ -243,8 +267,9 @@ The apache module mod_apreq2.so might be needed. So you need a line
 
 	LoadModule apreq_module /usr/lib/apache2/modules/mod_apreq2.so
 	
-in your config. In Debian, you would just enable the mod by creating a symlink
-/etc/apache2/mods-enabled/apreq.load -> /etc/apache2/mods-available/apreq.load.
+in your config. In Debian, you would just enable the mod like this:
+
+	a2enmod apreq
 
 =head2 Apache .htaccess configuration
 
@@ -284,13 +309,10 @@ root of each website.
 
 Some modules/plugins need a backend, where they store their data. These backends
 have to be initialized before the first use of the website. There is an
-auto-initialization mechanism, which is turned off by default for performance
-reasons. The settings are documented in L<Konstrukt::Handler/CONFIGURATION>.
+L<auto-installation mechanism|/Auto-Installation>, which is turned off by default
+for performance reasons.
 You may turn it on before the first use, try out all pages/plugins and turn it
-off again. You may also want to take a look at the supplied
-C<KonstruktBackendInitialization.pl> script, which manually initializes all
-backends that you need. You should call this script as the same user as your
-webserver runs as.
+off again.
 
 For each plugin you want to use, you may have to define some settings (although
 the defaults will do in most cases). See L<below|/PLUGIN INSTALLATION AND CONFIGURATION>.
@@ -310,7 +332,7 @@ in the appropriate modules:
 
 =back
 
-The served files are processed by different handlers, whose configuration is
+The served files can be processed by different handlers, whose configuration is
 documented in the appropriate modules:
 
 =over
@@ -374,6 +396,10 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Doc>
+Next: L<Konstrukt::Doc::Basics>
+
+Previous: L<Konstrukt::Doc::About>
+
+Parent: L<Konstrukt::Doc>
 
 =cut

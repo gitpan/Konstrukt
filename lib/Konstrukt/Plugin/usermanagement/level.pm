@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: how should this plugin be preloaded to register the register/deregister events?
 #      maybe the basic plugin should load it (if it knows "somehow", that the level plugin will be used)
 
@@ -34,6 +32,7 @@ this number ist, the more operations will be allowed to this user.
 
 An user that is not registered/logged in has a level of 0.
 A user that has just registered get the user level 1.
+The first user that has just registered will get the super user level.
 
 An admin may set the levels of the other users. And the users may do some
 operations on the website according to their level.
@@ -54,7 +53,7 @@ when the user deregisters.
 
 To know when a user (de)registers, this plugin has to register itself for the
 C<registered> and C<deregistered> events, that the
-L<basic usermanagement|Konstrukt::Plugins::usermanagement::basic/EVENTS> plugin fires.
+L<basic usermanagement|Konstrukt::Plugin::usermanagement::basic/EVENTS> plugin fires.
 
 So this plugin must be initialized before the basic user management plugin is
 executed. For this to happen, you can preload this plugin like this on the page,
@@ -434,13 +433,13 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugins::usermanagement::level::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
+L<Konstrukt::Plugin::usermanagement::level::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 =cut
 
 __DATA__
 
-== 8< == textfile: layout/change_form.form == >8 ==
+-- 8< -- textfile: layout/change_form.form -- >8 --
 
 $form_name = 'change';
 $form_specification =
@@ -449,7 +448,7 @@ $form_specification =
 	level => { name => 'User level (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/change_form.template == >8 ==
+-- 8< -- textfile: layout/change_form.template -- >8 --
 
 <& formvalidator form="change_form.form" / &>
 <div class="usermanagement form">
@@ -473,7 +472,7 @@ $form_specification =
 	</form>
 </div>
 
-== 8< == textfile: layout/change_show_form.form == >8 ==
+-- 8< -- textfile: layout/change_show_form.form -- >8 --
 
 $form_name = 'changeshow';
 $form_specification =
@@ -481,7 +480,7 @@ $form_specification =
 	id => { name => 'User ID (number)', minlength => 1, maxlength => 8, match => '^\d+$' },
 };
 
-== 8< == textfile: layout/users.template == >8 ==
+-- 8< -- textfile: layout/users.template -- >8 --
 
 <div class="usermanagement levels">
 	<h1>Registered users</h1>
@@ -510,7 +509,7 @@ $form_specification =
 	</table>
 </div>
 
-== 8< == textfile: messages/change_failed.template == >8 ==
+-- 8< -- textfile: messages/change_failed.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>User level not updated</h1>
@@ -518,7 +517,7 @@ $form_specification =
 	<p>An internal error occurred while updating the user level.</p>
 </div>
 
-== 8< == textfile: messages/change_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/change_failed_permission_denied.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>User level not updated</h1>
@@ -526,7 +525,7 @@ $form_specification =
 	<p>The user level has not been updated, because only an authorized administrator can change user levels!</p>
 </div>
 
-== 8< == textfile: messages/show_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/show_failed_permission_denied.template -- >8 --
 
 <div class="usermanagement message failure">
 	<h1>No access to the user management</h1>
@@ -534,7 +533,7 @@ $form_specification =
 	<p>You cannot access the user management, because only an authorized administrator can do this!</p>
 </div>
 
-== 8< == textfile: messages/change_successful.template == >8 ==
+-- 8< -- textfile: messages/change_successful.template -- >8 --
 
 <div class="usermanagement message success">
 	<h1>User level updated</h1>

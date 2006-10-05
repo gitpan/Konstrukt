@@ -1,17 +1,12 @@
-#!/usr/bin/perl
-
-#TODO: Cloning:
-#      Try Clone::More and Clone::Fast
-#      Cloning as a method of Konstrukt::Parser::Node?
 #TODO: prepare_again = 1:
 #      a field may be substituted by a tag node that should be prepared!
 #TODO: template/allow_dynamic_field_value_generation doesn't work
-#TODO: mixed static/dynamic fields currently don't work (see also above TODO):
-# <& template src="bla" &>
-#   <$ static_field $>foo<$ / $>
-#   <& perl &>print '<$ dynamic_field $>bar<$ / $>'<& / &>
-# <& / &>
-# => fix doc
+#      mixed static/dynamic fields currently don't work:
+#      <& template src="bla" &>
+#        <$ static_field $>foo<$ / $>
+#        <& perl &>print '<$ dynamic_field $>bar<$ / $>'<& / &>
+#      <& / &>
+#      => fix doc?!
 #TODO: Nested fields don't work as the substitution doesn't
 #      recurse the tree itself.
 #      <+$ foo $+><+$ bar / $+><+$ / $+>
@@ -26,63 +21,154 @@ Konstrukt::Plugin::template - Konstrukt templating engine
 
 =head1 SYNOPSIS
 	
+=head2 Tag interface
+
 	<& template src="some.template" &>
 		<$ field $>will be inserted in the template<$ / $>
 	<& / &>
-	
+
+=head2 Perl interface
+
+	use_plugin 'template';
+	$self->add_node($template->node('path/to/some.template', { 
+		field1 => 'value1',
+		some_list => [
+			{ field1 => 'a', field2 => 'b' },
+			{ field1 => 'c', field2 => 'd' },
+			...
+		]
+	}));
+
 =head1 DESCRIPTION
 
-This is probably the most important plugin of this framework. It provides a mighty
-and very easy way of templating. There are two interfaces to this plugin. You may
-use special tags within your documents that will not annoy a non-programmer and
-fit seemlessly into the other markup. You may also use a perl-interface that will
-fit into your perl code (plugins or embedded perl).
+An important goal of this framework is the fast creation of maintainable static
+content. Therefore the template (L<Konstrukt::Plugin::template>) plugin was developed.
 
-=head2 Tag interface
+You are enouraged to encapsulate your web site components that are used in several
+places in templates, which then can be reused to avoid redundancy.
+A website usually consists of several components, that are used in many pages
+(layout, navigation, frames, tables, ...).
 
-Within the Konstrukt-templates (*.template) you define fields that will be replaced
-by content when using this template:
+Each template consists of static text and variable parts, that can be
+substituted on the usage of the template.
+
+There are two interfaces to this plugin.
+You may use special tags within your documents that will not annoy a non-programmer and
+fit seemlessly into the other markup.
+You may also use a perl-interface that will fit into your perl code
+(plugins or embedded perl).
+
+=head2 Tag interface / Syntax
+
+=head3 Fields
+
+Templates can contain single variable B<fields>, which can be substituted on the
+usage of the template and may have a default value.
+
+B<Definition>: some.template
+
+	some text here
+	this <+$ field_name $+>should be<+$ / $> replaced.
+	some text there
+	a field without a default value: <+$ no_default / $+>
+	end
+
+B<Usage>:
 	
-	This is a demotemplate. Some content goes here:
-	<+$ content / $+>
-	
-Within an other file you call the template like this:
-	
-	Other file's text...
-	<& template src="demo.template" &>
-		<$ content $>This is the content that will be inserted into the template.<$ / $>
+	here we will use the template:
+	<& template src="some.template" &>
+		<$ field_name $>has been<$ / $>
+		<$ no_default $>foo<$ / $>
 	<& / &>
 	
-You may specify default values, if no value for a field is passed:
+	you can also define the field values with a tag attribute:
+	<& template src="some.template" no_default="bar" / &>
+
+B<Result>: (whitespaces may vary...)
+
+	here we will use the template:
 	
-	<+$ content $+>Default content, that may be replaced<+$ / $+>
+	some text here
+	this has been replaced.
+	some text there
+	a field without a default value: foo
+	end
 	
-There is also support for lists. In the template you define one row of the list
-with some fields.
+	you can also define the field values with a tag attribute:
+	
+	some text here
+	this should be replaced.
+	some text there
+	a field without a default value: bar
+	end
+
+=head3 Lists
+
+You may define B<lists> to generate repetitive content inside a template.
+
+B<Definition>: some.template
 
 	<table>
-	<+@ my_list @+>	<tr><td><+$ field1 / $+></td><td><+$ field2 / $+></td></tr><+@ / @+>
+		<tr><th><+$ head1 / $+></th><th><+$ head2 / $+></th></tr>
+		<+@ items @+>
+		<tr><td><+$ col1 / $+></td><td><+$ col2 / $+></td></tr>
+		<+@ / @+>
 	</table>
 
-You will use the template like this:
+B<Usage>:
 
-	<& template src="list.template" &>
-		<@ my_list @>
-			<$ field1 $>1<$ / $><$ field2 $>a<$ / $>
-			<$ field1 $>2<$ / $><$ field2 $>b<$ / $>
-			<$ field1 $>3<$ / $><$ field2 $>c<$ / $>
+	<& template src="some.template" head1="Name" head2="Telephone number" &>
+		<@ items @>
+			<$ col1 $>foo<$ / $><$ col2 $>555-123456<$ / $>
+			<$ col1 $>bar<$ / $><$ col2 $>555-654321<$ / $>
+			<$ col1 $>baz<$ / $><$ col2 $>555-471123<$ / $>
 		<@ / @>
 	<& / &>
 
-The row will be repeated on usage of the template. The result would look like this:
+B<Result>: (whitespaces may vary...)
 
 	<table>
-		<tr><td>1</td><td>a</td></tr>
-		<tr><td>2</td><td>b</td></tr>
-		<tr><td>3</td><td>c</td></tr>
+		<tr><th>Name</th><th>Telephone number</th></tr>
+		<tr><td>foo</td><td>555-123456</td></tr>
+		<tr><td>bar</td><td>555-654321</td></tr>
+		<tr><td>baz</td><td>555-471123</td></tr>
 	</table>
 
 Note that lists of lists are currently not supported.
+
+=head2 Nested templates
+
+Templates can be nested (as any Konstrukt tag):
+
+	<& template src="layout.template" title="perl links" &>
+		<$ content $>
+			Some perl links:
+			<& template src="linklist.template" &>
+				<@ links @>
+					<$ target      $>http://www.cpan.org/<$ / $>
+					<$ description $>Comprehensive Perl Archive Network<$ / $>
+					
+					<$ target      $>http://dev.perl.org/perl6/<$ / $>
+					<$ description $>Perl 6 Development Page<$ / $>
+					
+					<$ target      $>http://www.perlfoundation.org/<$ / $>
+					<$ description $>The Perl Foundation<$ / $>
+				<@ / @>
+			<& / &>
+		<$ / $>
+	<& / &>
+
+Each used template can in turn contain template tags (and other special Konstrukt tags):
+
+B<linklist.template>:
+
+	<ul>
+	<+@ links @+>
+		<li><a href="<+$ target / $+>"><+$ description $+>(No Description)<+$ / $+></a></li>
+	<+@ / @+>
+	<& template src="linkdisclaimer.template" / &>
+
+The templates will be recursively processed.
 
 =head2 Perl interface
 
@@ -151,10 +237,11 @@ This plugin needs another modules to clone data structures. It will try to load
 them in this order:
 
 	1) Clone
-	2) Clone::Any
+	2) Clone::Fast
 	3) Scalar::Util::Clone
 	4) Storable
-	5) Clone::PP
+	5) Clone::More
+	6) Clone::PP
 
 This precedence list is approximateley built to try the module with the best
 performance first. So you should check, if you've got any of the first modules
@@ -171,13 +258,15 @@ use base 'Konstrukt::Plugin'; #inheritance
 
 use Konstrukt::Debug;
 
-#bench: Clone::PP < Storable < Scalar::Util::Clone < Clone::Any < Clone
+#bench: sorted by performance
 use Devel::UseAnyFunc 'clone',
 	'Clone'               => 'clone',
-#?	'Util'                => 'clone',
+	'Clone::Fast'         => 'clone',
 	'Scalar::Util::Clone' => 'clone',
 	'Storable'            => 'dclone',
-	'Clone::PP'           => 'clone';
+	'Clone::More'         => 'clone',
+	'Clone::PP'           => 'clone',
+;
 
 BEGIN {
 	require Data::Dump if Konstrukt::Debug::DEBUG;

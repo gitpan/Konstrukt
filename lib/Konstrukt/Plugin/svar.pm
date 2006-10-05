@@ -1,16 +1,23 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::svar - Access to session values
 
 =head1 SYNOPSIS
 	
+B<Usage:>
+
 	<!-- set value -->
-	<& svar var="var_name" set="value" / &>
+	<& svar var="var_name" set="value "/ &>
 	
 	<!-- print out value -->
 	<& svar var="var_name" / &>
+
+B<Result:>
+
+	<!-- set value -->
+	
+	<!-- print out value -->
+	value
 
 =head1 DESCRIPTION
 

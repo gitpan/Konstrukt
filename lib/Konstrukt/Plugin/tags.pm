@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: rss export of a tag search string
 
 =head1 NAME
@@ -9,6 +7,8 @@ Konstrukt::Plugin::tags - Tagging plugin
 =head1 SYNOPSIS
 	
 =head2 Tag interface
+
+B<Usage:>
 
 	<!-- display all tags as a cloud -->
 	<& tags template="/tags/cloud.template" limit="30" order="alpha|count" / &>
@@ -20,6 +20,11 @@ Konstrukt::Plugin::tags - Tagging plugin
 	<!-- list tags for a specified entry only.
 	     show, limit, order are ignored. the template attribute is applicable -->
 	<& tags plugin="blog" entry="42" / &>
+
+B<Result:>
+
+	Tags: <a href="?action=filter;tags=bar">bar</a>,
+	<a href="?action=filter;tags=foo">foo</a>, ...
 
 =head2 Perl interface
 
@@ -439,7 +444,7 @@ L<Konstrukt::Plugin::tags::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: cloud.template == >8 ==
+-- 8< -- textfile: cloud.template -- >8 --
 
 <script type="text/javascript">
 var tagbox = document.getElementById("tags");

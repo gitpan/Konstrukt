@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::TagHandler::Plugin - Plugin handler of the Konstrukt framework

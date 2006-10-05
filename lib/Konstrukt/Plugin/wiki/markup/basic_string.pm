@@ -1,8 +1,6 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
-Konstrukt::Plugin::wiki::markup::basic - Inline plugin to handle basic markup
+Konstrukt::Plugin::wiki::markup::basic_string - Inline plugin to handle basic markup (without templates)
 
 =head1 SYNOPSIS
 	

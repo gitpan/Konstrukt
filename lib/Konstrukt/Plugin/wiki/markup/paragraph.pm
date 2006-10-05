@@ -1,8 +1,6 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
-Konstrukt::Plugin::wiki::paragraph - Block plugin to handle paragraphs
+Konstrukt::Plugin::wiki::markup::paragraph - Block plugin to handle paragraphs
 
 =head1 SYNOPSIS
 	
@@ -101,7 +99,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/paragraph.template == >8 ==
+-- 8< -- textfile: markup/paragraph.template -- >8 --
 
 <nowiki><p class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></p></nowiki>
 

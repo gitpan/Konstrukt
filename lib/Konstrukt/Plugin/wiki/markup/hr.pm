@@ -1,8 +1,6 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
-Konstrukt::Plugin::wiki::hr - Block plugin to handle horizontal rules
+Konstrukt::Plugin::wiki::markup::hr - Block plugin to handle horizontal rules
 
 =head1 SYNOPSIS
 	
@@ -105,7 +103,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/hr.template == >8 ==
+-- 8< -- textfile: markup/hr.template -- >8 --
 
 <nowiki><hr class="wiki" /></nowiki>
 

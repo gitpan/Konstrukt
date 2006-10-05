@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: admin: clear stats (for specific rage/for hits older than ...)
 #FEATURE: graphical representation
 #FEATURE: explicitly log version numbers?
@@ -10,16 +8,26 @@ Konstrukt::Plugin::browserstats - Browser statistics plugin
 
 =head1 SYNOPSIS
 	
+B<Usage:>
+
 	<!-- add browser request to the db -->
 	<& browserstats / &>
-	
+
+or
+
 	<!-- display the overall top browsers -->
 	<& browserstats show="all" / &>
-	
+
+or
+
 	<!-- display the top browsers grouped by year -->
 	<!-- month and day will also work, if the data is stored in such a fine granularity -->
 	<!-- the display aggregation should not be finer than the setting browserstats/aggregate -->
 	<& browserstats show="year" / &>
+	
+B<Result:>
+
+A table displaying the statistics, if the attribute C<show> is set. Nothing otherwise.
 	
 =head1 DESCRIPTION
 
@@ -50,8 +58,8 @@ See the documentation of the backend modules
 	#only count unique visitors (determined by session)
 	browserstats/unique          1
 	#access control
-	browserstats/userlevel_view  1 #userlevel to view the stats
-	browserstats/userlevel_clear 2 #userlevel to clear the logs
+	browserstats/userlevel_view  2 #userlevel to view the stats
+	browserstats/userlevel_clear 3 #userlevel to clear the logs
 
 =cut
 
@@ -95,8 +103,8 @@ sub init {
 	$Konstrukt::Settings->default("browserstats/aggregate"       => "all");
 	$Konstrukt::Settings->default('browserstats/classes'         => "nsold => nav2 nav3 nav4 nav4up navgold, ns6 => nav6 nav6up, firefox => firefox, opera => opera, mozilla => mozilla, ie => ie, robot => robot, other => *");
 	$Konstrukt::Settings->default('browserstats/unique'          => 1);
-	$Konstrukt::Settings->default("browserstats/userlevel_view"  => 1);
-	$Konstrukt::Settings->default("browserstats/userlevel_admin" => 2);
+	$Konstrukt::Settings->default("browserstats/userlevel_view"  => 2);
+	$Konstrukt::Settings->default("browserstats/userlevel_admin" => 3);
 	
 	#create user management objects, if needed
 	if ($Konstrukt::Settings->get("browserstats/userlevel_view") or $Konstrukt::Settings->get("browserstats/userlevel_admin")) {
@@ -310,26 +318,29 @@ L<Konstrukt::Plugin::browserstats::DBI>, L<Konstrukt::Plugin>, L<Konstrukt>, L<H
 
 __DATA__
 
-== 8< == textfile: layout/empty.template == >8 ==
+-- 8< -- textfile: layout/empty.template -- >8 --
 
 <p>There are no browser statistics yet.</p>
 
-== 8< == textfile: layout/group.template == >8 ==
+-- 8< -- textfile: layout/group.template -- >8 --
 
 <div class="browserstats group">
 	<h1>
 		<& perl &>
 			my $date = '<+$ date $+>0000-00-00<+$ / $+>';
 			my $aggregate = '<+$ aggregate $+>all<+$ / $+>';
-			my %months = qw/01 Januar 02 Februar 03 März 04 April 05 Mai 06 Juni 07 Juli 08 August 09 September 10 Oktober 11 November 12 Dezember/;
+			my %months = qw/01 January 02 February 03 March 04 April 05 May 06 June 07 July 08 August 09 September 10 October 11 November 12 December/;
+			my $year  = substr($date, 0, 4);
+			my $month = substr($date, 5, 2);
+			my $day   = substr($date, 8, 2);
 			if ($aggregate eq 'year') {
-				print 'Besuche im Jahr ' . substr($date, 0, 4);
+				print "Visits in $year"; 
 			} elsif ($aggregate eq 'month') {
-				print 'Besuche im Monat ' . $months{substr($date, 5, 2)} . ' ' . substr($date, 0, 4);
+				print "Visits in the month $months{$month}, $year";
 			} elsif ($aggregate eq 'day') {
-				print 'Besuche am ' . substr($date, 8, 2) . '. ' . $months{substr($date, 5, 2)} . ' ' . substr($date, 0, 4);
+				print "Visits at $months{$month} $day, $year";
 			} else {
-				print 'Alle Besuche';
+				print 'All visits';
 			}
 		<& / &>
 	</h1>
@@ -352,21 +363,21 @@ __DATA__
 
 <& if condition="not '<+$ last_one $+>0<+$ / $+>'" &><hr /><& / &>
 
-== 8< == textfile: messages/view_failed.template == >8 ==
+-- 8< -- textfile: messages/view_failed.template -- >8 --
 
 <div class="browserstats failure">
 	<h1>The browserstats cannot be displayed</h1>
 	<p>An internal error occured!</p>
 </div>
 
-== 8< == textfile: messages/view_failed_permission_denied.template == >8 ==
+-- 8< -- textfile: messages/view_failed_permission_denied.template -- >8 --
 
 <div class="browserstats failure">
 	<h1>The browserstats cannot be displayed</h1>
 	<p>The browserstats cannot be displayed, because you don't have the appropriate permissions!</p>
 </div>
 
-== 8< == textfile: /styles/browserstats.css == >8 ==
+-- 8< -- textfile: /styles/browserstats.css -- >8 --
 
 /* CSS definitions for the Konstrukt browserstats plugin */
 

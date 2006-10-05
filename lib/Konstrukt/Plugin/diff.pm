@@ -1,12 +1,12 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::diff - Print out an XHTML table with the difference between two texts
 
 =head1 SYNOPSIS
-	
-	<& diff &>
+
+B<Usage:>
+
+ 	<& diff &>
 		<$ left $>
 		1
 		2
@@ -17,18 +17,25 @@ Konstrukt::Plugin::diff - Print out an XHTML table with the difference between t
 		3
 		<$ / $>
 	<& / &>
-	
+
+or
+
 	<!-- set another amount of "context" lines -->
 	<& diff context="2" &>
 		...
 	<& / &>
-	
+
+or
+
 	<!-- define a header for the columns -->
 	<& diff left_header="text a" right_header="text b" &>
 		...
 	<& / &>
 	
-	
+B<Result:>
+
+A table showing the difference between the two texts.
+
 =head1 DESCRIPTION
 
 With this plugin you compare two texts and put out the difference as an XHTML table.

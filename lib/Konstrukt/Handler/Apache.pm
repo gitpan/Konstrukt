@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Handler::Apache - Handler for an Apache request
@@ -173,7 +171,7 @@ sub handler {
 	#the apache request returns the absolute path to the requested file,
 	$Konstrukt::Handler->{abs_filename} = $request->filename();
 	$Konstrukt::Handler->{filename}     = $Konstrukt::File->relative_path($Konstrukt::Handler->{abs_filename});
-
+	
 	#create and initialize request and response objects
 	#$request->headers_in():
 	#-mod_perl1: List (key => value)

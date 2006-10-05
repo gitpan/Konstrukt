@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::wiki::markup::link::article - Plugin to handle wiki article links
@@ -232,11 +230,11 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
-== 8< == textfile: markup/article_link_exists.template == >8 ==
+-- 8< -- textfile: markup/article_link_exists.template -- >8 --
 
 <a class="wiki article exists" href="/wiki/?wiki_page=<+$ title_uri_encoded / $+><+$ anchor / $+>" title="<+$ title $+><+$ / $+>"><+$ description $+>(no title)<+$ / $+></a>
 
-== 8< == textfile: markup/article_link_not_exists.template == >8 ==
+-- 8< -- textfile: markup/article_link_not_exists.template -- >8 --
 
 <a class="wiki article notexists" href="/wiki/?wiki_page=<+$ title_uri_encoded / $+><+$ anchor / $+>" title="<+$ title $+><+$ / $+>"><+$ description $+>(no title)<+$ / $+></a>(?)
 

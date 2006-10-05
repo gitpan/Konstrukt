@@ -1,11 +1,11 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::sortlines - Sort all lines of plaintext nodes
 
 =head1 SYNOPSIS
 	
+B<Usage:>
+
 	<& sortlines &>
 		some
 		<!-- comments -->
@@ -15,6 +15,16 @@ Konstrukt::Plugin::sortlines - Sort all lines of plaintext nodes
 		here
 		<!-- on top of the list -->
 	<& / &>
+
+B<Result:>
+
+	<!-- comments -->
+	<!-- will be put -->
+	<!-- on top of the list -->
+	here
+	lines
+	some
+	unsorted
 
 =head1 DESCRIPTION
 

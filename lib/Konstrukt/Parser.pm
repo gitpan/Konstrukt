@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: (parse_again): no prepare on plugins with dynamic flag?
 #TODO: prepare_again: maybe option to skip parsing of plaintext nodes?
 #TODO: dynamic-field necessary? a node should be "dynamic" when there still is a tag-node left after the prepare run

@@ -1,12 +1,16 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
 Konstrukt::Plugin::kill - Remove content from a website
 
 =head1 SYNOPSIS
 	
-	<& kill &>this text won't be delivered to the client<& / &>
+B<Usage:>
+
+	We will never <& kill &>agree that we always <& / &>do censoring!
+
+B<Result:>
+
+	We will never do censoring!
 
 =head1 DESCRIPTION
 

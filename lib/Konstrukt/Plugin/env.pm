@@ -1,16 +1,23 @@
-#!/usr/bin/perl
-
 =head1 NAME
 
-Konstrukt::Plugin::env.pm - Access to the environment variables
+Konstrukt::Plugin::env - Access to the environment variables
 
 =head1 SYNOPSIS
+
+B<Usage:>
 	
 	<!-- set value -->
-	<& env var="var_name" set="value"/ &>
+	<& env var="var_name" set="value" / &>
 
 	<!-- print out value -->
 	<& env var="var_name" / &>
+
+B<Result:>
+
+	<!-- set value -->
+
+	<!-- print out value -->
+	value
 
 =head1 DESCRIPTION
 
@@ -23,36 +30,12 @@ package Konstrukt::Plugin::env;
 use strict;
 use warnings;
 
-use base 'Konstrukt::Plugin'; #inheritance
+use base 'Konstrukt::SimplePlugin';
+use Konstrukt::Debug; #import constants
 
-use Konstrukt::Parser::Node;
+=head1 ACTIONS
 
-=head1 METHODS
-
-=head2 prepare
-
-An environment variable is volatile. We don't want to cache it...
-
-B<Parameters>:
-
-=over
-
-=item * $tag - Reference to the tag (and its children) that shall be handled.
-
-=back
-
-=cut
-sub prepare {
-	my ($self, $tag) = @_;
-	
-	#Don't do anything beside setting the dynamic-flag
-	$tag->{dynamic} = 1;
-	
-	return undef;
-}
-#= /prepare
-
-=head2 execute
+=head2 default
 
 Put out the value of the passed ENV-variable or sets an ENV-variable.
 
@@ -62,21 +45,10 @@ With only var being passed, the according value of the environment will be put o
 
 With additionaly set being passed, the according value of the environment will be changed and nothing will be put out.
 
-B<Parameters>:
-
-=over
-
-=item * $tag - Reference to the tag (and its children) that shall be handled.
-
-=back
-
 =cut
-sub execute {
-	my ($self, $tag) = @_;
-
-	#reset the collected nodes
-	$self->reset_nodes();
-
+sub default : Action {
+	my ($self, $tag, $content, $params) = @_;
+	
 	if (exists($tag->{tag}->{attributes}->{var}) and defined($tag->{tag}->{attributes}->{var})) {
 		#var attribute is set
 		if (exists($tag->{tag}->{attributes}->{set}) and defined($tag->{tag}->{attributes}->{set})) {
@@ -86,17 +58,14 @@ sub execute {
 			#only var attribute. no set
 			#return the value if defined
 			if (defined $Konstrukt::Handler->{ENV}->{$tag->{tag}->{attributes}->{var}}) {
-				$self->add_node($Konstrukt::Handler->{ENV}->{$tag->{tag}->{attributes}->{var}});
+				print $Konstrukt::Handler->{ENV}->{$tag->{tag}->{attributes}->{var}};
 			} else {
 				$Konstrukt::Debug->debug_message("The environment variable '$tag->{tag}->{attributes}->{var}' is not defined!") if Konstrukt::Debug::INFO;
 			}
 		}
 	}
-	
-	#return result
-	return $self->get_nodes();
 }
-#= /execute
+#= /default
 
 1;
 
@@ -109,6 +78,6 @@ It is distributed under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Konstrukt::Plugin>, L<Konstrukt>
+L<Konstrukt::SimplePlugin>, L<Konstrukt>
 
 =cut

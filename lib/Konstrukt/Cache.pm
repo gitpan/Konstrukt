@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #FEATURE: Add a force cache-condition that will override the other conditions
 #         so that the cache is still valid although the other conditions fail.
 #         Cache timeout: <& template src="blub" cache="never/1h/1d..." / &>
@@ -96,10 +94,10 @@ This condition will only be added to file 1), as file 2) isn't tracked anymore.
 Note also that only earlier dates will be added. A later date won't be added as
 the file already gets invalid by the earlier date condition.
 
-Note: When a new file is read (with L<Konstrukt::File::read_and_track>) a file date
+Note: When a new file is read (with L<Konstrukt::File/read_and_track>) a file date
 condition will automatically added to each tracked file as
 it is supposed that the file depends on the files which have been read as the
-file was tracked. See also L<Konstrukt::File::read_and_track>.
+file was tracked. See also L<Konstrukt::File/read_and_track>.
 
 Now you might want to write the cache:
 

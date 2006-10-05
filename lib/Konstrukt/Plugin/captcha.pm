@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 #TODO: remove dirty hack: $Konstrukt::Session->get('user_id').
 #      cleaner: use user management plugin instead
 #FEATURE: implement graphical captcha
@@ -12,14 +10,42 @@ Konstrukt::Plugin::captcha - Put captchas in your forms easily.
 
 =head2 Tag interface
 
+B<Usage:>
+
 	<!-- the easy way -->
 	<& captcha / &>
-	
+
+or
+
 	<!-- defining your own settings that may differ from the defaults -->
-	<& captcha type="text" template="/captcha/text.template" / &>
+	<& captcha type="text" template="/templates/captcha/text.template" / &>
+
+B<Result:> (Something like this)
+
+	<script type="text/javascript">
+		var enctext = "%50%0A%3A%21%44%38%4C%0C%0D%0E%31%6C%13%2F%0D%12%18%00%3C%30%6E%2D%02%11%1B%06%26%73%11%38%15%12%09%5E%76%39%58%28%08%07%02%41%74%32%5D%2D%1F%11%51%41%2C%29%5D%6E%4C%14%0D%0F%21%34%0C%6E%5D%16%06%01%23%73%11%63%52%68";
+		var key = "lcTQ1Llb";
+		function xor_enc(text, key) {
+			var result = '';
+			for(i = 0; i < text.length; i++)
+				result += String.fromCharCode(key.charCodeAt(i % key.length) ^ text.charCodeAt(i));
+			return result;
+		}
+		document.write(xor_enc(unescape(enctext), key));
+	</script>
+	
+	<noscript>
+		<label>Antispam:</label>
+		<div>
+		<p>Please type the text '1tjbw' into this field:</p>
+		<input name="captcha_answer" />
+		</div>
+	</noscript>
+	
+	<input name="captcha_hash" type="hidden" value="3452c4fb13505c5ffa256f2352851ed2b9286af70c3f9ed65e3e888690e1ee69" />
 
 The captcha tag will usually be embedded in an existing C<<form>>. It will
-only generate (using a template) the question and two C<<input>> HTML-tags that
+only generate the question (using a template) and two C<<input>> HTML-tags that
 will accept the answer and pass a hash of the correct answer to the server.
 
 =head2 Perl interface
@@ -278,7 +304,7 @@ L<Konstrukt::SimplePlugin>, L<Konstrukt>
 
 __DATA__
 
-== 8< == textfile: text.template == >8 ==
+-- 8< -- textfile: text.template -- >8 --
 
 Please enter the text '<+$ answer / $+>' into this field:
 <br />
@@ -286,7 +312,7 @@ Please enter the text '<+$ answer / $+>' into this field:
 <input name="captcha_hash" type="hidden" value="<+$ hash / $+>" />
 <br />
 
-== 8< == textfile: text_js.template == >8 ==
+-- 8< -- textfile: text_js.template -- >8 --
 
 <script type="text/javascript">
 <& perl &>

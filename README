@@ -5,38 +5,45 @@ SYNOPSIS
     use Konstrukt;
 
 DESCRIPTION
-    The basic idea (which is not new) is to compose each page with the aid
-    of special tags that offer functionalities beyond the plain markup of
-    HTML.
+    This framework aims (beside others) for separation of presentation,
+    logic and content.
 
-    The tags are used to structure the pages and the content, add dynamics
-    to your website and encapsulate complex applications and common
-    functionalities in plugins, which can very easily be integrated in your
-    website. Additionally strict separation of code, content and layout is
-    maintained.
+    The presentation is basically accomplished with a very powerful
+    templating system, which allows fine grained modularization of the
+    presentation components (templates can be nested as deep as you want)
+    and has an easy to use interface, that any non-programmer will
+    understand.
 
-    Covered functionalitys include:
+    The logic is encapsulated in plugins, which can be integrated seamlessly
+    into the websites using a simple tag-interface. You can develop your own
+    plugins easily and also use the existing plugins for your own ones
+    through the perl-interface of the existing plugins. The Konstrukt core
+    will do all the nasty donkeywork for you, so you can concentrate on the
+    logic of your application.
 
-    * A powerful templating system
-    * Blog
-    * Wiki
-    * Calendar
-    * Guestbook
-    * Embedded Perl
-    * and much more...
+    The content for each application-plugin is stored in a database using
+    perl DBI. The data backends for each plugin are implemented as a
+    separate plugin, which can be exchanged easily, so the applications can
+    adapt to various data stores. Static content (layout, static web pages,
+    ...) will be stored in modular templates.
 
-    You may build powerful web sites in an instant and have full control
-    over the look and feel through the template system.
+    Your web pages will only describe what they contain, not how they are
+    generated. They will be as simple as:
 
-    You may also nest (and thus combine) the tags/plugins into each other,
-    which makes it a very powerful but still easy to use system.
+            <!-- use a template for the page layout, set the page title to "blog"
+                 and use the blog plugin as the content -->
+        
+            <& template src="/templates/layout.template" title="blog" &>
+                    <$ content $>
+                            <& blog / &>
+                    <$ / $>
+            <& / &>
 
-  Further information
-    For more in-depth information you may want to take a look at
-    Konstrukt::Doc and the docs/ directory in this package.
+    For more information about the Konstrukt Framework and its design goals
+    take a look at Konstrukt::Doc::About.
 
-    There you will find information on the usage of this framework and on
-    plugin development as well as on the framework internals.
+    An overview of the supplied documentation can be found in
+    Konstrukt::Doc.
 
 BUGS
     Many... Currently tracked for each module at its beginning:
@@ -46,23 +53,15 @@ BUGS
             #FEATURE: ...
 
     You may get an overview of these by using the supplied "todo_list.pl"
-    script.
-
-AUTHOR
-    Thomas Wittek
-
-    mail at gedankenkonstrukt dot de
-
-    http://gedankenkonstrukt.de
+    script or looking in the TODO file.
 
 AUTHOR
     Copyright 2006 Thomas Wittek (mail at gedankenkonstrukt dot de). All
     rights reserved.
 
-LICENSE
     This document is free software. It is distributed under the same terms
     as Perl itself.
 
 SEE ALSO
-    Konstrukt::Doc, HTML::Mason, Embperl, perl
+    Konstrukt::Doc, HTML::Mason, Template, Embperl, perl
 
