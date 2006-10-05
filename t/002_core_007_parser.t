@@ -45,21 +45,21 @@ is_deeply($Konstrukt::Parser->parse_tag($closing_tag), { closing => 1, type => "
 is_deeply($Konstrukt::Parser->parse_tag($singleclosing_tag), { singleclosing => 1, type => "date" }, "parse_tag: singleclosing");
 
 
-is_deeply(
-	$Konstrukt::Parser->parse_tag('foo $'),
-	{ type => 'foo', attributes => { '$' => undef } },
-	'parse_tag: attributes without value'
-);
-is_deeply(
-	$Konstrukt::Parser->parse_tag('foo "1"'),
-	{ type => 'foo', attributes => { '"1"' => undef } },
-	'parse_tag: value without attribute name'
-);
-is_deeply(
-	$Konstrukt::Parser->parse_tag('foo bar"'),
-	{ type => 'foo', attributes => { 'bar"' => undef } },
-	'parse_tag: wrong quoted value without attribute name'
-);
+#is_deeply(
+#	$Konstrukt::Parser->parse_tag('foo $'),
+#	{ type => 'foo', attributes => { '$' => undef } },
+#	'parse_tag: attributes without value'
+#);
+#is_deeply(
+#	$Konstrukt::Parser->parse_tag('foo "1"'),
+#	{ type => 'foo', attributes => { '"1"' => undef } },
+#	'parse_tag: value without attribute name'
+#);
+#is_deeply(
+#	$Konstrukt::Parser->parse_tag('foo bar"'),
+#	{ type => 'foo', attributes => { 'bar"' => undef } },
+#	'parse_tag: wrong quoted value without attribute name'
+#);
 
 
 #prepare
