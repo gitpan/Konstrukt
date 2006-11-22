@@ -37,12 +37,9 @@ ok(
 #unix
 $Konstrukt::Debug->format_debug_messages() eq
 <<EOT
-
-<!--
 Debug messages:
 main->(unknown): foo debug (Requested file: test - Package: main - Sub/Method: (unknown) - Source file: t/002_core_003_debug.t @ line 27)
 main->(unknown): foo short debug
--->
 EOT
 
 or
@@ -50,12 +47,9 @@ or
 #windows
 $Konstrukt::Debug->format_debug_messages() eq
 <<EOT
-
-<!--
 Debug messages:
 main->(unknown): foo debug (Requested file: test - Package: main - Sub/Method: (unknown) - Source file: t\\002_core_003_debug.t @ line 27)
 main->(unknown): foo short debug
--->
 EOT
 )
 , "debug_messages");
@@ -65,12 +59,9 @@ ok(
 #unix
 $Konstrukt::Debug->format_error_messages() eq
 <<EOT
-
-<!--
 Errors/Warnings:
 main->(unknown): bar error (Requested file: test - Package: main - Sub/Method: (unknown) - Source file: t/002_core_003_debug.t @ line 28)
 main->(unknown): bar short error
--->
 EOT
 
 or
@@ -78,12 +69,9 @@ or
 #windows
 $Konstrukt::Debug->format_error_messages() eq
 <<EOT
-
-<!--
 Errors/Warnings:
 main->(unknown): bar error (Requested file: test - Package: main - Sub/Method: (unknown) - Source file: t\\002_core_003_debug.t @ line 28)
 main->(unknown): bar short error
--->
 EOT
 )
 , "error_messages");

@@ -1,10 +1,8 @@
-#TODO: Skip blocks containing only of a <nowiki>..</nowiki> area
-#      (will be put converted in a paragraph otherwise)
 #TODO: see TODO in the source (of the other modules)
 #TODO: templates for internal image links, article links and file links must not
 #      use <nowiki>-tags.
 #      -	image: template is put out in the execute run, so no separate_nowiki will be run after that
-#      - article/file: template is nested inside an other plugin tag. separate_nowiki doesn't recurse and will not be recognized
+#      - article/file: template is nested inside template tag. separate_nowiki doesn't recurse and will not be recognized
 #TODO: post-plugin-cleanup only prepares template-plugins and no other plugin nodes
 #      possibly returned by the markup plugin
 #FEATURE: section overview (derived from the headlines) at the beginning of the page
@@ -12,7 +10,7 @@
 #FEATURE: enable sandbox editing for every user
 #FEATURE: option to allow wiki-editing without usermanagement
 #FEATURE: export other formats than HTML?
-#FEATURE: offer metadata for each article (like dublin core)?
+#FEATURE: offer metadata for each article (dublin core)?
 
 =head1 NAME
 
@@ -59,8 +57,6 @@ All these plugins are derived from the same base class
 
 =over
 
-=item * L<Konstrukt::Plugin::wiki::markup::code>
-
 =item * L<Konstrukt::Plugin::wiki::markup::definition>
 
 =item * L<Konstrukt::Plugin::wiki::markup::headline>
@@ -70,6 +66,8 @@ All these plugins are derived from the same base class
 =item * L<Konstrukt::Plugin::wiki::markup::list>
 
 =item * L<Konstrukt::Plugin::wiki::markup::paragraph>
+
+=item * L<Konstrukt::Plugin::wiki::markup::pre>
 
 =item * L<Konstrukt::Plugin::wiki::markup::quote>
 
@@ -158,7 +156,7 @@ to C<(default title)>.
 You may (but usually don't want to) configure the processing order of the markup plugins:
 
 	#defaults
-	wiki/block_plugins code quote headline hr list definition paragraph
+	wiki/block_plugins pre quote headline hr list definition paragraph
 	wiki/inline_plugins link acronym basic replace htmlescape
 
 Note that the block plugins will be executed one after another for each block until
@@ -274,7 +272,7 @@ sub init {
 	my ($self) = @_;
 
 	#set default settings
-	$Konstrukt::Settings->default("wiki/block_plugins"   => 'code quote headline hr list definition paragraph');
+	$Konstrukt::Settings->default("wiki/block_plugins"   => 'pre quote headline hr list definition paragraph');
 	$Konstrukt::Settings->default("wiki/inline_plugins"  => 'link acronym basic replace htmlescape');
 	$Konstrukt::Settings->default("wiki/backends"        => 'article file image');
 	$Konstrukt::Settings->default("wiki/backend_type"    => 'DBI');
@@ -473,6 +471,31 @@ sub convert_markup {
 	return $tag;
 }
 #= /convert_markup
+
+=head2 convert_markup_string
+
+Will convert a string containing wiki markup into another markup (usually HTML).
+
+Returns a containter node, that in turn contains nodes with the converted markup.
+
+B<Parameters>:
+
+=over
+
+=item * $markup - The string containing the markup to convert.
+
+=back
+
+=cut
+sub convert_markup_string {
+	my ($self, $markup) = @_;
+	
+	#put markup into a field container
+	my $cont = Konstrukt::Parser::Node->new({ type => 'tag', handler_type => '$' });
+	$cont->add_child(Konstrukt::Parser::Node->new({ type => 'plaintext', content => $markup }));
+	return $self->convert_markup($cont);
+}
+#= /convert_markup_string
 
 =head2 postprocess_output
 

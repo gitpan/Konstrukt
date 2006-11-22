@@ -4,21 +4,6 @@ Konstrukt::Plugin::wiki::syntax - Overview of the Syntax of the wiki plugin. For
 
 =head1 BLOCK SYNTAX
 
-=head2 code
-
-
-
-This one will match if the first character of the first line of the block is a
-whitespace or a tab.
-
-The block will then be enclosed by <code> and </code>. All child nodes will be
-tagged as finished to prevent further wiki parsing on them.
-
-Example:
-
-	 although only the first line is indented
-	the whole block will be marked as code.
-
 =head2 definition
 
 
@@ -110,7 +95,7 @@ Example:
 
 This one won't do much more but putting <p> and </p> around a block.
 
-It always matches and should be the last plugin in your filter chain so it
+It matches all blocks and should be the last plugin in your filter chain so it
 will catch all block that didn't match any other plugin.
 
 Example:
@@ -120,6 +105,21 @@ Example:
 	by <p> and </p>
 	
 	this one also
+
+=head2 pre
+
+
+
+This one will match if the first character of the first line of the block is a
+whitespace or a tab.
+
+The block will then be enclosed by <pre> and </pre>. All child nodes will be
+tagged as finished to prevent further wiki parsing on them.
+
+Example:
+
+	 although only the first line is indented
+	the whole block will be marked as code.
 
 =head2 quote
 
@@ -313,7 +313,7 @@ Internal images
 	center: centered alignment of the image
 	123px: width in pixels
 	thumb: alias for 100px width
-	text at the end: alternative text
+	text at the end: caption text (also alt-text)
 	
 	Default alignment: No special alignment, but may be overridden by the
 	template/stylesheet. 

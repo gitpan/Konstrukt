@@ -99,15 +99,15 @@ sub default :Action {
 }
 #= /default
 
-=head2 execution_stage
+=head2 executionstage
 
 This one should be executed last.
 
 =cut
-sub execution_stage {
+sub executionstage {
 	return 999_999;
 }
-#= /execution_stage
+#= /executionstage
 
 1;
 

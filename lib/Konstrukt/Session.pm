@@ -116,15 +116,9 @@ sub init {
 		my $db_pass        = $Konstrukt::Settings->get('session/pass');
 		#my $db_table       = $Konstrukt::Settings->get('session/table');
 		
-		#store specified?
-		unless ($backend_store) {
-			$Konstrukt::Debug->error_message("No Session backend store defined! Check your 'session/store' setting.") if Konstrukt::Debug::ERROR;
-			return;
-		}
-		
 		#determine backend type
 		my ($backend_type, $dbh);
-		if ($backend_store =~ /(informix|mysql|oracle|postgres|sybase)/oi) {
+		if ($backend_store =~ /(informix|mysql|oracle|postgres|sybase)/i) {
 			#get database handle from pool
 			$backend_type = 'db';
 			$dbh = $Konstrukt::DBI->get_connection($db_source, $db_user, $db_pass);
@@ -231,7 +225,6 @@ none
 =cut
 sub install {
 	my ($self) = @_;
-	
 	return unless $Konstrukt::Settings->get('autoinstall');
 	
 	if ($self->{backend_type} eq 'db') {

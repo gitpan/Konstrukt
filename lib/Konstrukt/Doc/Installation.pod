@@ -1,4 +1,5 @@
 #TODO: Update list of dependencies
+#TODO: documentataion for CGI configuration
 
 =head1 NAME
 
@@ -212,7 +213,7 @@ L<http://sial.org/howto/perl/life-with-cpan/non-root/>
 
 =head2 Apache configuration
 
-Basically the configuration for an apache vhost would look like this:
+Basically the configuration inside an apache vhost would look like this:
 
 	#Do not allow access to *.template, *.form and konstrukt.setting files
 	<FilesMatch "(\.template|\.form|konstrukt\.settings)$">
@@ -262,6 +263,14 @@ like this:
 		SetHandler modperl
 		PerlResponseHandler Konstrukt::Handler::Apache
 	</FilesMatch>
+
+Note that you might want to limit the processing of the files only to the files
+inside your document root. So you might want to put these directives just inside
+your
+
+	<Directory "/path/to/your/docroot"> 
+
+directive.
 
 The apache module mod_apreq2.so might be needed. So you need a line
 

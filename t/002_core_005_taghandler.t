@@ -23,12 +23,9 @@ is_deeply($taghandler_interface->prepare(), [], "prepare");
 is_deeply($taghandler_interface->execute(), [], "execute");
 is($Konstrukt::Debug->format_error_messages(),
 <<EOT
-
-<!--
 Errors/Warnings:
 Konstrukt::TagHandler->prepare: Not overloaded!
 Konstrukt::TagHandler->execute: Not overloaded!
--->
 EOT
 , "error_messages");
 

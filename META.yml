@@ -6,11 +6,14 @@ author:
 abstract: Web application/design framework
 license: perl
 requires:
+  Bundle::LWP: 1
   CGI: 3
   Clone: 0.2
   Cwd: 0
   DBI: 1.4
   Date::Calc: 5.4
+  DateTime: 0.2
+  DateTime::Format::Mail: 0.28
   Devel::UseAnyFunc: 1
   Digest::SHA: 5.32
   MIME::Base64: 3
@@ -36,6 +39,7 @@ build_requires:
   Test::More: 0
   Test::Pod: 0
   Test::Pod::Coverage: 0
+  Test::Strict: 0
 provides:
   Konstrukt:
     file: lib/Konstrukt.pm
@@ -176,8 +180,6 @@ provides:
     file: lib/Konstrukt/Plugin/wiki/markup/basic_string.pm
   Konstrukt::Plugin::wiki::markup::blockplugin:
     file: lib/Konstrukt/Plugin/wiki/markup/blockplugin.pm
-  Konstrukt::Plugin::wiki::markup::code:
-    file: lib/Konstrukt/Plugin/wiki/markup/code.pm
   Konstrukt::Plugin::wiki::markup::definition:
     file: lib/Konstrukt/Plugin/wiki/markup/definition.pm
   Konstrukt::Plugin::wiki::markup::headline:
@@ -208,6 +210,8 @@ provides:
     file: lib/Konstrukt/Plugin/wiki/markup/list_template.pm
   Konstrukt::Plugin::wiki::markup::paragraph:
     file: lib/Konstrukt/Plugin/wiki/markup/paragraph.pm
+  Konstrukt::Plugin::wiki::markup::pre:
+    file: lib/Konstrukt/Plugin/wiki/markup/pre.pm
   Konstrukt::Plugin::wiki::markup::quote:
     file: lib/Konstrukt/Plugin/wiki/markup/quote.pm
   Konstrukt::Plugin::wiki::markup::replace:

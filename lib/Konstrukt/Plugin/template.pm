@@ -7,12 +7,29 @@
 #        <& perl &>print '<$ dynamic_field $>bar<$ / $>'<& / &>
 #      <& / &>
 #      => fix doc?!
-#TODO: Nested fields don't work as the substitution doesn't
-#      recurse the tree itself.
-#      <+$ foo $+><+$ bar / $+><+$ / $+>
+#FEATURE: substitute: recursively replace lists => lists in lists
+#         <+@ items @+>
+#            <+$ description / $+>
+#            <+@ subitems @+>
+#              <+$ title / $+>
+#            <+@ / @+>
+#         <+@ / @+>
+#         
+#         <@ items @>
+#            <$ description $>foo<$ / $>
+#            <@ subitems @>
+#               <$ title $>a<$ / $>
+#               <$ title $>b<$ / $>
+#            <@ / @>
+#            
+#            <$ description $>bar<$ / $>
+#            <@ subitems @>
+#               <$ title $>c<$ / $>
+#               <$ title $>d<$ / $>
+#            <@ / @>
+#         <@ / @>
 #FEATURE: if a list value is not defined, use the field value if exists
 #FEATURE: default value for empty lists (see above?)
-#FEATURE: substitute: maybe recursively replace lists => lists in lists?
 #FEATURE: inherit templates from parent dirs? (mason/zope like)
 
 =head1 NAME
@@ -136,6 +153,42 @@ B<Result>: (whitespaces may vary...)
 
 Note that lists of lists are currently not supported.
 
+B<Special values>:
+
+Additionally to the explicitly specified values, you can access these additional
+values in each row:
+
+=over
+
+=item * index - The sequential number of that row. Starts with 1.
+
+=item * odd - 1 if it's an odd row. 0 otherwise. 
+
+=item * even - 1 if it's an even row. 0 otherwise. 
+
+=item * start - 1 if it's the first row. 0 otherwise.  
+
+=item * end - 1 if it's the last row. 0 otherwise.  
+
+=item * inner - 1 if it's not the first and not the last row. 0 otherwise.  
+
+=back
+
+Example:
+
+	<table>
+		<tr>
+			<th>ID</th>
+			<th>Name</th>
+		</tr>
+		<+@ items @+>
+		<tr<& if condition="<+$ even / $+>" &> style="background-color: #8888FF;"<& / &>>
+			<th><+$ index / $+></th>
+			<th><+$ name / $+></th>
+		</tr>
+		<+@ / @+>
+	</table>
+
 =head2 Nested templates
 
 Templates can be nested (as any Konstrukt tag):
@@ -169,6 +222,17 @@ B<linklist.template>:
 	<& template src="linkdisclaimer.template" / &>
 
 The templates will be recursively processed.
+
+=head2 Nested field definitions
+
+You can also nest field definitions. So you can say that the default for one
+field is the value of another field:
+
+	<+$ some_field $+><+$ default_for_some_field / $+><+$ / $+>
+	
+So if no value for C<some_field> is defined, it will default to the value of
+C<default_for_some_field>, which in turn could also have a default value and
+so on.
 
 =head2 Perl interface
 
@@ -636,7 +700,7 @@ sub scan_for_templates {
 	#process the children recursively
 	my $node = $tag->{first_child};
 	while (defined($node)) {
-		$Konstrukt::Debug->debug_message("TCHILD") if Konstrukt::Debug::DEBUG;
+		$Konstrukt::Debug->debug_message("TNODE") if Konstrukt::Debug::DEBUG;
 		if ($node->{type} eq 'tag') {
 			$Konstrukt::Debug->debug_message("TTAG $node->{handler_type} $node->{tag}->{type}") if Konstrukt::Debug::DEBUG;
 			if ($node->{handler_type} eq '+$') {
@@ -647,13 +711,13 @@ sub scan_for_templates {
 				my $list = $self->scan_for_templates($node);
 				$list->{node} = $node;
 				push @{$result->{lists}->{$node->{tag}->{type}}}, $list;
-			} else {
-				if (exists $node->{content}->{preliminary} and exists $node->{content}->{type} and $node->{content}->{type} = 'tagcontent') {
-					#preliminary tag. recurse
-					$Konstrukt::Debug->debug_message("TPRELTAGREC") if Konstrukt::Debug::DEBUG;
-					$self->scan_for_templates($node->{content}, $result);
-				}
-				#some other tag type (e.g. &). recurse
+			} elsif (exists $node->{content}->{preliminary} and exists $node->{content}->{type} and $node->{content}->{type} = 'tagcontent') {
+				#preliminary tag. recurse
+				$Konstrukt::Debug->debug_message("TPRELTAGREC") if Konstrukt::Debug::DEBUG;
+				$self->scan_for_templates($node->{content}, $result);
+			}
+			#recurse
+			if (exists $node->{first_child} and defined $node->{first_child} and $node->{handler_type} ne '+@') {
 				$Konstrukt::Debug->debug_message("TTAGREC") if Konstrukt::Debug::DEBUG;
 				$self->scan_for_templates($node, $result);
 			}
@@ -701,7 +765,7 @@ sub substitute {
 				$Konstrukt::Debug->debug_message("S FIELD SUBST $field") if Konstrukt::Debug::DEBUG;
 				#save a copy of the value
 				my $node = $values->{fields}->{$field};
-				#evtl. convert scalar to plaintext node
+				#eventually convert scalar to plaintext node
 				my $copy;
 				if (ref($node) eq 'Konstrukt::Parser::Node') {
 					if ($node->{type} eq 'tag' and $node->{handler_type} ne '$') {
@@ -748,6 +812,8 @@ sub substitute {
 				#the last node needs a parent that will be copied to the appended nodes
 				$last_node->{parent} = $deleted[0];
 				#insert rows
+				my $row_count = @{$values->{lists}->{$list}};
+				my $current_row = 1;
 				foreach my $value_row (@{$values->{lists}->{$list}}) {
 					$Konstrukt::Debug->debug_message("S LIST_ROW SUBST $list") if Konstrukt::Debug::DEBUG;
 					#create a copy of the list node (list row)
@@ -773,7 +839,7 @@ sub substitute {
 									my $new_node = Konstrukt::Parser::Node->new({ type => 'tag' });
 									$new_node->add_child($list_field_value);
 									$list_field_value = $new_node;
-								}								
+								}
 								#use the specified value
 								#create a copy of the data
 								$list_field_value->remove_cross_references();
@@ -785,6 +851,23 @@ sub substitute {
 								#replace the template field by the children of the copy
 								$list_field_template->replace_by_node($copy);
 								$copy->replace_by_children();
+							} elsif ($list_field eq 'index' or
+									   $list_field eq 'odd'   or 
+									   $list_field eq 'even'  or 
+									   $list_field eq 'start' or 
+									   $list_field eq 'end'   or 
+									   $list_field eq 'inner') {
+								my $value;
+								$value = $current_row if $list_field eq 'index';
+								$value = ($current_row % 2 ? 1 : 0) if $list_field eq 'odd';
+								$value = ($current_row % 2 ? 0 : 1) if $list_field eq 'even';
+								$value = ($current_row == 1 ? 1 : 0) if $list_field eq 'start';
+								$value = ($current_row == $row_count ? 1 : 0) if $list_field eq 'end';
+								$value = (($current_row != 1 and $current_row != $row_count) ? 1 : 0) if $list_field eq 'inner';
+								#replace by node
+								$list_field_template->replace_by_node(
+									Konstrukt::Parser::Node->new({ type => 'plaintext', content => $value })
+								);
 							} else {
 								#use default value
 								$Konstrukt::Debug->debug_message("S LIST FIELD SUBST $list_field: USING DEFAULT VALUE") if Konstrukt::Debug::DEBUG;
@@ -797,9 +880,13 @@ sub substitute {
 					$last_node->append($row->{node});
 					$last_node = $row->{node}->{last_child};
 					$row->{node}->replace_by_children();
+					
+					$current_row++;
 				}
 				#restore the deleted cross references
 				$list_template->{node}->restore_cross_references(@deleted);
+			} else {
+				#no list defined for that list template
 			}
 			#delete list
 			$list_template->{node}->delete();
@@ -900,7 +987,7 @@ sub node {
 	my ($self, $filename, $data) = @_;
 	
 	$self->normalize_input_data($data);
-
+	
 	#compose tag
 	my $tag = {
 		type => 'tag',

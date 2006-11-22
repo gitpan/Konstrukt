@@ -954,20 +954,24 @@ sub export_rss {
 		}
 		#pass data
 		push @items, { fields => {
-			id        => $entry->{id},
-			show_date => $show_date,
-			show_time => $show_time,
-			title     => $Konstrukt::Lib->xml_escape($entry->{description}),
-			author    => $Konstrukt::Lib->xml_escape($author),
-			date      => $Konstrukt::Lib->w3c_date_time($entry->{year}, $entry->{month}, $entry->{day}, $entry->{start_hour}, $entry->{start_minute}),
-			year      => sprintf('%04d', $entry->{year}),
+			id          => $entry->{id},
+			show_date   => $show_date,
+			show_time   => $show_time,
+			title       => $Konstrukt::Lib->xml_escape($entry->{description}),
+			author      => $Konstrukt::Lib->xml_escape($author),
+			date_w3c    => $Konstrukt::Lib->date_w3c($entry->{year}, $entry->{month}, $entry->{day}, $entry->{start_hour}, $entry->{start_minute}),
+			date_rfc822 => $Konstrukt::Lib->date_rfc822($entry->{year}, $entry->{month}, $entry->{day}, $entry->{start_hour}, $entry->{start_minute}),
+			year        => sprintf('%04d', $entry->{year}),
 			map { $_ => sprintf('%02d', $entry->{$_}) } qw/month day start_hour start_minute end_hour end_minute/,
 		} };
 	}
+	
 	#date of the feed
-	my $date = (@items ? $items[0]->{fields}->{date} : $Konstrukt::Lib->w3c_date_time($start_year, $start_month, $start_day, 0, 0));
+	my $date_w3c    = (@items ? $items[0]->{fields}->{date_w3c}    : $Konstrukt::Lib->date_w3c($start_year, $start_month, $start_day, 0, 0));
+	my $date_rfc822 = (@items ? $items[0]->{fields}->{date_rfc822} : $Konstrukt::Lib->date_rfc822($start_year, $start_month, $start_day, 0, 0));
+	
 	#put out feed
-	$self->add_node($template->node($Konstrukt::Settings->get('calendar/rss2_template'), { date => $date, items => \@items }));
+	$self->add_node($template->node($Konstrukt::Settings->get('calendar/rss2_template'), { date_w3c => $date_w3c, date_rfc822 => $date_rfc822, items => \@items }));
 
 	$Konstrukt::Response->header('Content-Type' => 'text/xml');
 }
@@ -1122,7 +1126,7 @@ __DATA__
 		<dc:language>en</dc:language>
 		<dc:creator>mail@your.site</dc:creator>
 		<dc:rights>Copyright 2000-2050</dc:rights>
-		<dc:date><+$ date / $+></dc:date>
+		<dc:date><+$ date_w3c / $+></dc:date>
 		<sy:updatePeriod>hourly</sy:updatePeriod>
 		<sy:updateFrequency>1</sy:updateFrequency>
 		<sy:updateBase>2000-01-01T12:00+00:00</sy:updateBase>
@@ -1137,7 +1141,8 @@ __DATA__
 			<title><& if condition="<+$ show_date / $+>" &><+$ day / $+>/<+$ month / $+>/<+$ year / $+> - <& / &><& if condition="<+$ show_time / $+>" &><+$ start_hour / $+>:<+$ start_minute / $+>-<+$ end_hour / $+>:<+$ end_minute / $+>: <& / &><+$ title / $+></title>
 			<link>http://your.site/calender/?action=showday;date=<+$ date / $+>#<+$ id / $+></link>
 			<guid isPermaLink="true">http://your.site/calender/?action=showday;date=<+$ date / $+>#<+$ id / $+></guid>
-			<dc:date><+$ date / $+></dc:date>
+			<pubDate><+$ date_rfc822 / $+></pubDate>
+			<dc:date><+$ date_w3c / $+></dc:date>
 			<dc:creator><+$ author / $+></dc:creator>
 		</item><+@ / @+>
 	</channel>

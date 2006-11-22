@@ -781,7 +781,7 @@ $form_specification =
 
 <div class="wiki message failure">
 	<h1>The uploaded image is invalid</h1>
-	<p>Only the following formats are supported: <a href="http://www.imagemagick.org/script/formats.php" target="_blank">ImageMagick formats</a></p>
+	<p>Only the following formats are supported: <a href="http://www.imagemagick.org/script/formats.php">ImageMagick formats</a></p>
 	<p>Maybe the upload was interrupted or the image is broken.</p>
 </div>
 

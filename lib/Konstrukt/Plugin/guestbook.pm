@@ -505,7 +505,7 @@ $form_specification =
 		
 		<div class="foot">
 			<& if condition="'<+$ show_email    / $+>'" &>Email: <& mail::obfuscator mail="<+$ email / $+>" / &><& / &>
-			<& if condition="'<+$ show_homepage / $+>'" &>Web: <a href="<+$ homepage / $+>" target="_blank"><+$ homepage / $+></a><& / &>
+			<& if condition="'<+$ show_homepage / $+>'" &>Web: <a href="<+$ homepage / $+>"><+$ homepage / $+></a><& / &>
 			<& if condition="'<+$ show_jabber   / $+>'" &>Jabber: <+$ jabber / $+><& / &>
 			<& if condition="'<+$ show_icq      / $+>'" &>ICQ: <+$ icq / $+><& / &>
 			<& if condition="'<+$ show_aim      / $+>'" &>AIM: <+$ aim / $+><& / &>
@@ -543,7 +543,7 @@ $form_specification =
 	
 	<div class="foot">
 		<& if condition="'<+$ show_email    / $+>'" &>Email: <& mail::obfuscator mail="<+$ email / $+>" / &><& / &>
-		<& if condition="'<+$ show_homepage / $+>'" &>Web: <a href="<+$ homepage / $+>" target="_blank"><+$ homepage / $+></a><& / &>
+		<& if condition="'<+$ show_homepage / $+>'" &>Web: <a href="<+$ homepage / $+>"><+$ homepage / $+></a><& / &>
 		<& if condition="'<+$ show_jabber   / $+>'" &>Jabber: <+$ jabber / $+><& / &>
 		<& if condition="'<+$ show_icq      / $+>'" &>ICQ: <+$ icq / $+><& / &>
 		<& if condition="'<+$ show_aim      / $+>'" &>AIM: <+$ aim / $+><& / &>

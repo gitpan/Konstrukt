@@ -11,7 +11,7 @@ Konstrukt::Plugin::wiki::markup::paragraph - Block plugin to handle paragraphs
 
 This one won't do much more but putting <p> and </p> around a block.
 
-It always matches and should be the last plugin in your filter chain so it
+It matches all blocks and should be the last plugin in your filter chain so it
 will catch all block that didn't match any other plugin.
 
 =head1 EXAMPLE
@@ -68,7 +68,22 @@ B<Parameters>:
 sub process {
 	my ($self, $block) = @_;
 	
-	#put out quote template
+	#check, if there is any textual content within this paragraph.
+	#<nowiki>-regions and image-links are no textual content.
+	my $image = use_plugin 'wiki::markup::link::image';
+	my ($image_implicit, $image_explicit) = map { s/[\$\^]//g; $_ } $image->matching_regexps();
+	my $has_content;
+	my $node = $block->{first_child};
+	while (defined $node) {
+		if (not $node->{wiki_finished} and $node->{type} eq 'plaintext' and length $node->{content} and $node->{content} !~ /^($image_implicit|\[\[$image_explicit\]\])$/o) {
+			$has_content = 1;
+			last;
+		}
+		$node = $node->{next};
+	}
+	return 1 unless $has_content;
+	
+	#put out paragraph template
 	my $template = use_plugin 'template';
 	my $template_path = $Konstrukt::Settings->get("wiki/template_path");
 	#create field node and put the block content into it

@@ -154,12 +154,9 @@ sub error_message {
 	#put server log entry
 	warn "$message\n" if $Konstrukt::Settings->get('debug/warn_error_messages');
 	
-	#put permanent log entry
-	if ($Konstrukt::Settings->get('debug/log_error_messages')) {
-		require Konstrukt::Plugin; #cannot C<use> this because this will lead into circular dependencies
-		my $log = Konstrukt::Plugin::use_plugin('log');
-		$log->put(__PACKAGE__ . '->error_message', $message);
-	}
+	$Konstrukt::Handler->emergency_exit() if $exit;
+	
+	#all operations after this point won't be executed on critical errors:
 	
 	#we don't want to cache a file with errors...
 	#add the condition for each tracked file
@@ -169,7 +166,12 @@ sub error_message {
 		}
 	}
 	
-	$Konstrukt::Handler->emergency_exit() if $exit;
+	#put permanent log entry. don't log on critical errors ^
+	if ($Konstrukt::Settings->get('debug/log_error_messages')) {
+		require Konstrukt::Plugin; #cannot C<use> this because this will lead into circular dependencies
+		my $log = Konstrukt::Plugin::use_plugin('log');
+		$log->put(__PACKAGE__ . '->error_message', $message);
+	}
 }
 #= /error_message
 
@@ -219,7 +221,7 @@ sub debug_message {
 
 =head2 format_error_messages
 
-Joins all error messages into an HTML-comment and returns them.
+Joins all error messages in a string returns them.
 
 =cut
 sub format_error_messages {
@@ -227,11 +229,10 @@ sub format_error_messages {
 
 	my $errors = '';
 	if (@{$self->{error_messages}}) {#do we have errors?
-		$errors .= "\n<!--\nErrors/Warnings:\n";
+		$errors .= "Errors/Warnings:\n";
 		foreach my $error (@{$self->{error_messages}}) {
 			$errors .= $error . "\n";
 		}
-		$errors .= "-->\n";
 	}
 	
 	return $errors;
@@ -240,7 +241,7 @@ sub format_error_messages {
 
 =head2 format_debug_messages
 
-Joins all debug messages into an HTML-comment and returns them.
+Joins all debug messages in a string returns them.
 
 =cut
 sub format_debug_messages {
@@ -248,11 +249,10 @@ sub format_debug_messages {
 	
 	my $debugs = '';
 	if (@{$self->{debug_messages}}) {#do we have debug messages?
-		$debugs .= "\n<!--\nDebug messages:\n";
+		$debugs .= "Debug messages:\n";
 		foreach my $debug (@{$self->{debug_messages}}) {
 			$debugs .= $debug . "\n";
 		}
-		$debugs .= "-->\n";
 	}
 	
 	return $debugs;

@@ -129,6 +129,6 @@ __DATA__
 
 <nowiki><& if condition="'<+$ type / $+>' eq 'mailto'" &>
 	<$ then $><& mail::obfuscator text="<+$ link $+><+$ / $+>" html="<a class='wiki external' href='mailto:<+$ link $+><+$ / $+>'><+$ description / $+></a>" / &><$ / $>
-	<$ else $><a class="wiki external" target="blank" href="<+$ link $+><+$ / $+>"><+$ description $+>(no title)<+$ / $+></a><$ / $>
+	<$ else $><a class="wiki external" href="<+$ link $+><+$ / $+>"><+$ description $+>(no title)<+$ / $+></a><$ / $>
 <& / &></nowiki>
 

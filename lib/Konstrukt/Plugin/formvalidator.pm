@@ -1,3 +1,6 @@
+#TODO: let the javascript modify the form to enable validation.
+#      no manual modification in the HTML source needed!
+#      http://jquery.com/docs/ProgressiveEnhancement/
 #TODO: include strings.js from script.js. don't load it explicitly in the HTML
 #function include(file) {
 #    document.write("<script type=\"text/javascript\" src=\"" + file + "\"></script>\n");
@@ -13,6 +16,7 @@
 #=>
 #	my $form = Konstrukt::Plugin::formvalidator->new('/path/to/form.form'[, 'cgi']);
 #  if ($form->validate()) { ... }
+#FEATURE: use Data::Domain? http://search.cpan.org/~dami/Data-Domain-0.01/lib/Data/Domain.pm
 
 =head1 NAME
 

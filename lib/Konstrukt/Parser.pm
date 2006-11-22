@@ -3,7 +3,6 @@
 #TODO: dynamic-field necessary? a node should be "dynamic" when there still is a tag-node left after the prepare run
 #      -> dynamic-field just saves the work to detect if there are tag-nodes left
 #      -> generate this field automatically?!
-#TODO: parse_tag: support tags that are not XML-compliant
 #TODO: Full documentation of the parsing process
 #TODO: error messages on syntax errors
 #TODO: wrong tag "<&>" won't be detected as error
@@ -153,8 +152,8 @@ sub prepare {
 		my $start = $tag_start . $key;
 		my $end   = $yek . $tag_end;
 		#escape meta characters:
-		$start =~ s/([\+\?\*\$\@\(\)\[\]\{\}\|\\])/\\$1/go;
-		$end   =~ s/([\+\?\*\$\@\(\)\[\]\{\}\|\\])/\\$1/go;
+		$start =~ s/([\+\?\*\$\@\(\)\[\]\{\}\|\\])/\\$1/g;
+		$end   =~ s/([\+\?\*\$\@\(\)\[\]\{\}\|\\])/\\$1/g;
 		push @split_delimiters, ($start, $end);
 		push @tag_starts, $start;
 		push @tag_ends, $end;
@@ -448,7 +447,7 @@ Should look like
 		...
 	}
 
-=item * $execution_stage - Optional: Only tags whose stage is <= the execution
+=item * $executionstage - Optional: Only tags whose stage is <= the execution
 stage will be executed. This parameter will only be set internally. You should
 B<never> set it on your own when calling the execute method.
 
@@ -456,9 +455,9 @@ B<never> set it on your own when calling the execute method.
 
 =cut
 sub execute {
-	my ($self, $tag, $actions, $execution_stage) = @_;
+	my ($self, $tag, $actions, $executionstage) = @_;
 	
-	if (defined $execution_stage) {
+	if (defined $executionstage) {
 		$Konstrukt::Debug->debug_message("---> RECURSION\n") if Konstrukt::Debug::DEBUG;
 		
 		#recursively iterate over all children and execute the tags of this stage
@@ -466,10 +465,10 @@ sub execute {
 		while (defined $node) {
 			if ($node->{type} eq 'tag') {
 				#handle preliminary tags
-				$self->execute($node->{content}, $actions, $execution_stage)
+				$self->execute($node->{content}, $actions, $executionstage)
 					if exists $node->{content}->{preliminary};
 				#execute tag
-				$self->execute($node, $actions, $execution_stage);
+				$self->execute($node, $actions, $executionstage);
 			}
 			$node = $node->{next};
 		}
@@ -484,7 +483,7 @@ sub execute {
 			#create final a tag of a preliminary tag, if the children
 			#already have been executed.
 			if (exists $tag->{content}->{preliminary}) {
-				if (($tag->{content}->{execution_stage} || 0) <= $execution_stage) {
+				if (($tag->{content}->{executionstage} || 0) <= $executionstage) {
 					#preliminary tag whose content has become static.
 					#parse and prepare the tag. it will be executed below.
 					$Konstrukt::Debug->debug_message("---> PARSE AND PREPARE $tag->{handler_type}\n") if Konstrukt::Debug::DEBUG;
@@ -507,8 +506,8 @@ sub execute {
 					#preliminary tag, whose children haven't been executed yet.
 					#the tag must inherit the execution stage of the tags which are
 					#inside this tag, so that it only gets (parsed and) executed after those tags.
-					$tag->{execution_stage} = $tag->{content}->{execution_stage}
-						if ($tag->{execution_stage} || 0) < $tag->{content}->{execution_stage};
+					$tag->{executionstage} = $tag->{content}->{executionstage}
+						if ($tag->{executionstage} || 0) < $tag->{content}->{executionstage};
 				}
 			}
 			
@@ -516,11 +515,11 @@ sub execute {
 			$Konstrukt::Debug->debug_message("---> PRE exec\n".$tag->tree_to_string()."\n") if Konstrukt::Debug::DEBUG;
 			if (defined($actions->{$tag->{handler_type}})) {
 				#determine execution stage of this tag. adjust the max execution stages.
-				my $tag_exec_stage = $tag->{tag}->{attributes}->{execution_stage} || $actions->{$tag->{handler_type}}->execution_stage($tag) || 1;
-				$tag->{execution_stage} = $tag_exec_stage
-					if ($tag->{execution_stage} || 0) < $tag_exec_stage;
+				my $tag_exec_stage = $tag->{tag}->{attributes}->{executionstage} || $actions->{$tag->{handler_type}}->executionstage($tag) || 1;
+				$tag->{executionstage} = $tag_exec_stage
+					if ($tag->{executionstage} || 0) < $tag_exec_stage;
 				#execute the tag if its stage has been reached
-				if ($tag->{execution_stage} <= $execution_stage) {
+				if ($tag->{executionstage} <= $executionstage) {
 					$Konstrukt::Debug->debug_message(">>>>> EXECUTING $tag->{handler_type} $tag->{tag}->{type}\n".$tag->tree_to_string()."\n") if Konstrukt::Debug::DEBUG;
 					my $result = $actions->{$tag->{handler_type}}->execute($tag);
 					#prepare and execute the result again if the plugin may generate new tags
@@ -530,20 +529,20 @@ sub execute {
 					}
 					if ($actions->{$tag->{handler_type}}->execute_again($tag)) {
 						$Konstrukt::Debug->debug_message(">>>> EXECUTE AGAIN! $tag->{handler_type}") if Konstrukt::Debug::DEBUG;
-						$result = $self->execute($result, $actions, $execution_stage);
+						$result = $self->execute($result, $actions, $executionstage);
 					}
 					#merge the result into the tree
 					$self->merge_plugin_results($tag, $result);
 				} else {
 					#must be executed later
-					$Konstrukt::Debug->debug_message("Execution stage $tag->{execution_stage} not yet reached for tag " . ($tag->{handler_type} || "(undefined handler type)") . " " . ($tag->{tag}->{type} || "(undefined tag type)") . "!") if Konstrukt::Debug::DEBUG;
+					$Konstrukt::Debug->debug_message("Execution stage $tag->{executionstage} not yet reached for tag " . ($tag->{handler_type} || "(undefined handler type)") . " " . ($tag->{tag}->{type} || "(undefined tag type)") . "!") if Konstrukt::Debug::DEBUG;
 					#parent must inherit this execution stage as it cannot be executed
 					#before the children have been executed!
-					$tag->{parent}->{execution_stage} = $tag->{execution_stage}
-						if ($tag->{parent}->{execution_stage} || 0) < $tag->{execution_stage};
+					$tag->{parent}->{executionstage} = $tag->{executionstage}
+						if ($tag->{parent}->{executionstage} || 0) < $tag->{executionstage};
 					#update the next stage counter to the least next stage
-					$self->{next_stage} = $tag->{execution_stage}
-						if ($self->{next_stage} || 999_999_999) > $tag->{execution_stage};
+					$self->{next_stage} = $tag->{executionstage}
+						if ($self->{next_stage} || 999_999_999) > $tag->{executionstage};
 				}
 			} else {
 				$Konstrukt::Debug->debug_message("No action specified for tag type '$tag->{handler_type}'!") if Konstrukt::Debug::DEBUG;
@@ -558,12 +557,12 @@ sub execute {
 		#the tags/plugins may define an execution stage for themselves to allow
 		#an execution order that differs from the order of the tags in the page.
 		#iterate over all execution stages and recursively execute all tags for each stage.
-		my $execution_stage = 1;
+		my $executionstage = 1;
 		do {
-			$Konstrukt::Debug->debug_message("=== EXECUTION STAGE: $execution_stage ========\n\nTree before execution of this stage:\n\n" . $tag->tree_to_string() . "\n===============================\n") if Konstrukt::Debug::DEBUG;
+			$Konstrukt::Debug->debug_message("=== EXECUTION STAGE: $executionstage ========\n\nTree before execution of this stage:\n\n" . $tag->tree_to_string() . "\n===============================\n") if Konstrukt::Debug::DEBUG;
 			$self->{next_stage} = undef; #reset next stage counter
-			$self->execute($tag, $actions, $execution_stage);
-			$execution_stage = $self->{next_stage};
+			$self->execute($tag, $actions, $executionstage);
+			$executionstage = $self->{next_stage};
 		} until (not defined $self->{next_stage});
 	}
 	
@@ -694,15 +693,15 @@ sub parse_tag {
 	$Konstrukt::Debug->debug_message(">>>> parse_tag: tagstring $tagstring\n") if Konstrukt::Debug::DEBUG;
 	
 	#cut off any leading and tailing whitespaces
-	$tagstring =~ s/\A\s+//go;
-	$tagstring =~ s/\s+\z//go;
+	$tagstring =~ s/^\s+//g;
+	$tagstring =~ s/\s+$//g;
 	
 	#check for closing tag
 	if (substr($tagstring,0,1) eq '/') {
 		$tag->{'closing'} = 1;
 		#cut leading "/" and whitespaces
 		$tagstring = substr($tagstring,1);
-		$tagstring =~ s/\A\s+//go;
+		$tagstring =~ s/^\s+//g;
 	}
 	
 	#check for single closing tag
@@ -710,48 +709,63 @@ sub parse_tag {
 		$tag->{'singleclosing'} = 1;
 		#cut tailing "/" and whitespaces
 		$tagstring = substr($tagstring,0,length($tagstring)-1);
-		$tagstring =~ s/\s+\z//go;
+		$tagstring =~ s/\s+$//g;
 	}
 	
 	#ensure that there are no whitespaces around the = symbols:
-	$tagstring =~ s/\s+=/=/go;
-	$tagstring =~ s/=\s+/=/go;
+	$tagstring =~ s/\s+=\s+/=/g;
 	
 	#is there any content left?
 	if (length($tagstring) > 0) {
 		#the first "word" must be the tag's type. it may be the only word.
-		$tagstring =~ /\A(\S*)/;
+		$tagstring =~ /^(\S*)/;
 		$tag->{type} = ($lc ? lc($1) : $1);
 		#strip it
 		$tagstring = substr($tagstring,length($1));
 		
-		#the rest of the string must consist of attributes that have to be parsed as such.
-		my @tokens;
-		my ($i, $found) = 0;
+		#the rest of the string must consist of attributes.
+		#allowed syntax:
+		# attribute=value
+		# attribute="value with spaces"
+		# "attr with spaces"="value"
+		# singleton_attr_without_value
+		my @tokens = split /([="']|\s+)/, $tagstring;
 		my $state = 0; #0: get attribute name, 1: get value
-		my ($param, $delimiter, $value);
-		while ($i < length($tagstring)) {
-			if ($state == 0) {
-				#name = everything up to the next =-sign
-				$found = index($tagstring, '=', $i);
-				if ($found < 0) {
-					$Konstrukt::Debug->error_message("Invalid tag '$tagstring'! Attribute without equal sign found.") and last;
-				}
-				$param = substr($tagstring, $i, $found - $i);
-				$param =~ s/\s+//go; #remove leading whitespaces
-				$delimiter = substr($tagstring, $found + 1, 1); #usually " or '
+		my $last_name; #the last attribute name
+		for (my $i = 0; $i < @tokens; $i++) {
+			next unless length $tokens[$i]; #skip empty tokens
+			if ($tokens[$i] eq "=") {
+				#now look for the attribute value.
 				$state = 1;
-				$i = $found + 2;
+			} elsif ($tokens[$i] =~ /\s+/) {
+				#whitespace separating the attributes. ignore.
 			} else {
-				#value = everything up to the next delimiter (' or ")
-				$found = index($tagstring, $delimiter, $i);
-				if ($found < 0) {
-					$Konstrukt::Debug->error_message("Invalid tag '$tagstring'! Attribute missing value delimiter.") and last;
+				my $string = ''; #the current string (attribute name or value)
+				if ($tokens[$i] eq '"' or $tokens[$i] eq "'") {
+					#get next quote delimited string
+					my $open_quote = $tokens[$i];
+					#eat up all tokens until the next matching quote
+					while (++$i < @tokens) {
+						last if $tokens[$i] eq $open_quote;
+						$string .= $tokens[$i];
+					}
+					$Konstrukt::Debug->error_message("Invalid tag '$tagstring'! Quote $open_quote not closed.")
+						if Konstrukt::Debug::ERROR and ($tokens[$i] || '') ne $open_quote;
+				} else {
+					#just a plain word.
+					$string = $tokens[$i];
 				}
-				$value = substr($tagstring, $i, $found - $i);
-				$tag->{attributes}->{($lc ? lc($param) : $param)} = $value;
-				$state = 0;
-				$i = $found + 2;
+				#the string is either an attribute name or a value
+				if ($state == 0) {
+					#name
+					next unless length $string; #skip empty names
+					$last_name = $string;
+					$tag->{attributes}->{$last_name} = undef;
+				} else {
+					#value
+					$tag->{attributes}->{$last_name} = $string;
+					$state = 0;
+				}
 			}
 		}
 	}

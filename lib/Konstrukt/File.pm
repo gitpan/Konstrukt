@@ -359,9 +359,8 @@ L</current_file> method.
 The root directory will be the one specified on construction of this object
 (usually your document root).
 
-This method won't allow reading files outside the specified root.
-So $Konstrukt::File->read_and_track('/test.txt') will read the file test.txt
-located in the specified root, not in the system root.
+C<$Konstrukt::File->read_and_track('/test.txt')> will read the file test.txt
+located in the document root, not in the system root.
 
 A file read with this method will be put on a stack of "open" files. So all files
 read will be tracked as "opened"/"currently used". If you're done with a file,
@@ -392,13 +391,7 @@ sub read_and_track {
 	my $result;
 	
 	my $abs_path = $self->absolute_path($filename);
-	if (substr($abs_path, 0, length($self->{root})) ne $self->{root}) {
-		#file outside doc_root
-		$Konstrukt::Debug->error_message("Trying to access file '$abs_path' outside of the specified root '$self->{root}'!") if Konstrukt::Debug::ERROR;
-		$result = undef;
-	} else {
-		$result = $self->raw_read($abs_path, $asref);
-	}
+	$result = $self->raw_read($abs_path, $asref);
 	$self->push($abs_path);
 	
 	#add cache condition
@@ -415,9 +408,8 @@ Will read a file relatively to the current directory.
 The root directory will be the one specified on construction of this object
 (usually your document root).
 
-This method won't allow reading files outside the specified root.
-So $Konstrukt::File->read('/test.txt') will read the file test.txt
-located in the specified root, not in the system root.
+C<$Konstrukt::File->read('/test.txt')> will read the file test.txt
+located in the document root, not in the system root.
 
 B<Parameters>:
 
@@ -434,18 +426,7 @@ to avoid copying of large data within the memory.
 sub read {
 	my ($self, $filename, $asref) = @_;
 	
-	my $result;
-	
-	my $abs_path = $self->absolute_path($filename);
-	if (substr($abs_path, 0, length($self->{root})) ne $self->{root}) {
-		#file outside doc_root
-		$Konstrukt::Debug->error_message("Trying to access file '$filename' outside the specified root '$self->{root}'!") if Konstrukt::Debug::ERROR;
-		$result = undef;
-	} else {
-		$result = $self->raw_read($abs_path, $asref);
-	}
-	
-	return $result;
+	return $self->raw_read($self->absolute_path($filename), $asref);
 }
 #= /read
 
@@ -456,9 +437,8 @@ Will write a file relatively to the current directory.
 The root directory will be the one specified on construction of this object
 (usually your document root).
 
-This method won't allow writing files outside the specified root.
-So $Konstrukt::File->write('/test.txt', 'some data') will (over)write the file test.txt
-located in the specified root, not in the system root.
+C<$Konstrukt::File->write('/test.txt', 'some data')> will (over)write the file test.txt
+located in the document root, not in the system root.
 
 B<Parameters>:
 
@@ -474,18 +454,7 @@ B<Parameters>:
 sub write {
 	my ($self, $filename) = (shift, shift);
 	
-	my $result;
-	
-	my $abs_path = $self->absolute_path($filename);
-	if (substr($abs_path, 0, length($self->{root})) ne $self->{root}) {
-		#file outside doc_root
-		$Konstrukt::Debug->error_message("Trying to write to file '$filename' outside the specified root '$self->{root}'!") if Konstrukt::Debug::ERROR;
-		$result = undef;
-	} else {
-		$result = $self->raw_write($abs_path, @_);
-	}
-	
-	return $result;
+	return $self->raw_write($self->absolute_path($filename), @_);
 }
 #= /write
 
@@ -508,7 +477,7 @@ sub clean_path {
 	my ($self, $path) = @_;
 	
 	$path =~ s/\\/\//go; #convert all \ to /
-	$path =~ s/.*\/\//\//go; #replace everything to a // with a /
+	$path =~ s/\/\/+/\//go; #replace multiple / with a single /
 	
 	if ($path =~ /^.*(\w\:.*?)$/o) { #microsoft: drive letter included. fully qualified path!
 		$path = $1;                   #strip everything up to the drive letter

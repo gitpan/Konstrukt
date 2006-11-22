@@ -11,7 +11,7 @@ sub init { return 1; }
 
 sub prepare_again   { return 23; }
 sub execute_again   { return 42; }
-sub execution_stage { return 1; }
+sub executionstage { return 1; }
 
 sub prepare {
 	my ($self, $tag) = @_;

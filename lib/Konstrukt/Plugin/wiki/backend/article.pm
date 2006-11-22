@@ -164,10 +164,7 @@ sub article_show {
 			$Konstrukt::File->push($cached_filename);
 			#retrieve markup
 			$article = $self->get($title, $revision);
-			#put markup into a field container
-			my $cont = Konstrukt::Parser::Node->new({ type => 'tag', handler_type => '$' });
-			$cont->add_child(Konstrukt::Parser::Node->new({ type => 'plaintext', content => $article->{content} }));
-			$article->{content} = $wiki->convert_markup($cont);
+			$article->{content}           = $wiki->convert_markup_string($article->{content});
 			$article->{title}             = $title_html_escaped;
 			$article->{title_uri_encoded} = $title_uri_encoded;
 			map { $article->{$_} = sprintf("%02d", $article->{$_}) } qw/month day hour minute/;
@@ -270,10 +267,7 @@ sub article_edit {
 				if ($form->get_value('preview')) {
 					#show preview only
 					my $wiki = use_plugin 'wiki';
-					#put markup into a field container
-					my $cont = Konstrukt::Parser::Node->new({ type => 'tag', handler_type => '$' });
-					$cont->add_child(Konstrukt::Parser::Node->new({ type => 'plaintext', content => $markup }));
-					my $article = { markup => $Konstrukt::Lib->html_escape($markup), content => $wiki->convert_markup($cont), title => $title_html_escaped, title_uri_encoded => $title_uri_encoded };
+					my $article = { markup => $Konstrukt::Lib->html_escape($markup), content => $wiki->convert_markup_string($markup), title => $title_html_escaped, title_uri_encoded => $title_uri_encoded };
 					$self->add_node($template->node("$self->{template_path}layout/article_preview.template", { fields => $article }));
 					$self->add_node($template->node("$self->{template_path}layout/article_edit_form.template", { fields => $article }));
 				} else {

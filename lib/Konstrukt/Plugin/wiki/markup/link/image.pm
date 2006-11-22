@@ -36,7 +36,7 @@ Internal images
 	center: centered alignment of the image
 	123px: width in pixels
 	thumb: alias for 100px width
-	text at the end: alternative text
+	text at the end: caption text (also alt-text)
 	
 	Default alignment: No special alignment, but may be overridden by the
 	template/stylesheet. 
@@ -295,7 +295,7 @@ __DATA__
 
 -- 8< -- textfile: markup/image_link_external.template -- >8 --
 
-<nowiki><a class="wiki image link external" target="_blank" href="<+$ title $+><+$ / $+>"><+$ text $+>(Kein Titel)<+$ / $+></a></nowiki>
+<nowiki><a class="wiki image link external" href="<+$ title $+><+$ / $+>"><+$ text $+>(Kein Titel)<+$ / $+></a></nowiki>
 
 -- 8< -- textfile: markup/image_link_external_embed.template -- >8 --
 

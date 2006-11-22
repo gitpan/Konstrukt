@@ -28,7 +28,7 @@ is($root_node->tree_to_string(),
 <<EOT
 * root
   children below this tag:
-  * tag: (final) - type: plugin upcase - dynamic: 0 - execution_stage: (not defined - no dynamic tag)
+  * tag: (final) - type: plugin upcase - dynamic: 0 - executionstage: (not defined - no dynamic tag)
     children below this tag:
     * plaintext: text
 EOT
@@ -40,7 +40,7 @@ is($root_node->tree_to_string(),
 <<EOT
 * root
   children below this tag:
-  * tag: (final) - type: plugin upcase - dynamic: 0 - execution_stage: (not defined - no dynamic tag)
+  * tag: (final) - type: plugin upcase - dynamic: 0 - executionstage: (not defined - no dynamic tag)
     children below this tag:
     * plaintext: text
     * plaintext: text2
@@ -53,7 +53,7 @@ is($root_node->tree_to_string(),
 <<EOT
 * root
   children below this tag:
-  * tag: (final) - type: plugin upcase - dynamic: 0 - execution_stage: (not defined - no dynamic tag)
+  * tag: (final) - type: plugin upcase - dynamic: 0 - executionstage: (not defined - no dynamic tag)
     children below this tag:
     * plaintext: text0
     * plaintext: text
@@ -73,8 +73,8 @@ is($root_node->tree_to_string(),
 <<EOT
 * root
   children below this tag:
-  * tag: (final) - type: plugin upcase - dynamic: 0 - execution_stage: (not defined - no dynamic tag)
-  * tag: (final) - type: plugin upcase - dynamic: 0 - execution_stage: (not defined - no dynamic tag)
+  * tag: (final) - type: plugin upcase - dynamic: 0 - executionstage: (not defined - no dynamic tag)
+  * tag: (final) - type: plugin upcase - dynamic: 0 - executionstage: (not defined - no dynamic tag)
     children below this tag:
     * plaintext: text0
     * plaintext: text
@@ -88,7 +88,7 @@ is($root_node->tree_to_string(),
 <<EOT
 * root
   children below this tag:
-  * tag: (final) - type: plugin upcase - dynamic: 0 - execution_stage: (not defined - no dynamic tag)
+  * tag: (final) - type: plugin upcase - dynamic: 0 - executionstage: (not defined - no dynamic tag)
     children below this tag:
     * plaintext: text0
     * plaintext: text

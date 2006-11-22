@@ -149,14 +149,14 @@ sub get_connection {
 	
 	#create new connection if not yet done
 	unless (exists($self->{pool}->{$key}) and defined($self->{pool}->{$key}) and $self->{pool}->{$key}->ping()) {
-		if ($self->{pool}->{$key} = DBI->connect($db_source, $db_user, $db_pass, { RaiseError => 1, PrintError => 0 })) {
+		if ($self->{pool}->{$key} = DBI->connect($db_source, $db_user, $db_pass, { PrintError => 0 })) {
 			#success. add error handler
+			$self->{pool}->{$key}->{RaiseError} = 1; 
 			$self->{pool}->{$key}->{HandleError} = sub { $self->error_handler(@_) };
 			$self->{pool}->{$key}->{ShowErrorStatement} = 1;
 		} else {
 			#connection error
 			$Konstrukt::Debug->error_message("SQL-Error: Could not connect to SQL-server! Error $DBI::err ($DBI::errstr)", 1);
-			$self->{pool}->{$key} = undef;
 		}
 	}
 	

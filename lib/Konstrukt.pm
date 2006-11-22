@@ -1,5 +1,3 @@
-#TODO: documentataion for CGI configuration
-
 =head1 NAME
 
 Konstrukt - Web application/design framework

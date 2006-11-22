@@ -98,11 +98,14 @@ Will be called on a critical error. Put out the error messages.
 sub emergency_exit {
 	my ($self) = @_;
 	
-	#print out debug- and error messages
-	print $Konstrukt::Debug->format_error_messages();
-	print $Konstrukt::Debug->format_debug_messages();
+	if ($Konstrukt::Settings->get('handler/show_error_messages') or $Konstrukt::Settings->get('handler/show_debug_messages')) {
+		#print out debug- and error messages
+		print "A critical error occurred while processing this request.\nThe request has been aborted.\n\n";
+		print $Konstrukt::Debug->format_error_messages();
+		print $Konstrukt::Debug->format_debug_messages();
+	}
 	
-	die;
+	exit;
 }
 #= /emergency_exit
 

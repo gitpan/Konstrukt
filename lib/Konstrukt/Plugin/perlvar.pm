@@ -7,12 +7,15 @@ Konstrukt::Plugin::perlvar - Access to Perl variables
 B<Usage:>
 
 	<!-- set value -->
-	<& perlvar var="$Foo::Bar" set="baz"/ &>
+	<& perlvar var="$Foo::Bar" set="baz" / &>
 	
 	<!-- print out value -->
 	<& perlvar var="$Foo::Bar" / &>
 	<& perlvar var="undef" &>this default will be used<& / &>
 
+	<!-- unset value -->
+	<& perlvar var="$Foo::Bar" unset="1" / &>
+	
 B<Result:>
 
 	<!-- set value -->
@@ -20,6 +23,8 @@ B<Result:>
 	<!-- print out value -->
 	baz
 	this default will be used
+	
+	<!-- unset value -->
 	
 =head1 DESCRIPTION
 
@@ -95,6 +100,12 @@ sub execute {
 			eval $tag->{tag}->{attributes}->{var}." = '".$tag->{tag}->{attributes}->{set}."';";#TODO: without eval?
 			if ($@) {
 				$Konstrukt::Debug->error_message("Error @ '" . $Konstrukt::Handler->{filename} . "'! Could not set perl variable $tag->{tag}->{attributes}->{var}") if Konstrukt::Debug::ERROR;
+			}
+		} elsif (exists $tag->{tag}->{attributes}->{unset} and $tag->{tag}->{attributes}->{unset}) {
+			#unset attribute is set. undef the var.
+			eval $tag->{tag}->{attributes}->{var} . " = undef";
+			if ($@) {
+				$Konstrukt::Debug->error_message("Error @ '" . $Konstrukt::Handler->{filename} . "'! Could not unset perl variable $tag->{tag}->{attributes}->{var}") if Konstrukt::Debug::ERROR;
 			}
 		} else {
 			#only var attribute. no set

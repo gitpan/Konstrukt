@@ -188,7 +188,7 @@ sub execute_again {
 }
 #= /execute_again
 
-=head2 execution_stage
+=head2 executionstage
 
 Returns the execution stage of the tag. Defaults to 1.
 
@@ -197,10 +197,10 @@ document.
 
 But sometimes you might want a tag to be executed last/later, although it's 
 located at the top of the document.
-The C<execution_stage>s allow you to specifiy an execution order that's different
+The C<executionstage>s allow you to specifiy an execution order that's different
 from the appearance order.
 
-	<& perl execution_stage="2" &>print `date +%H:%M:%S`<& / &>
+	<& perl executionstage="2" &>print `date +%H:%M:%S`<& / &>
 	<& perl &>print `date +%H:%M:%S`; sleep 2<& / &>
 
 Will actually be rendered to something like:
@@ -209,10 +209,10 @@ Will actually be rendered to something like:
 	10:50:52
 
 =cut
-sub execution_stage {
+sub executionstage {
 	return 1;
 }
-#= /execution_stage
+#= /executionstage
 
 =head2 prepare
 

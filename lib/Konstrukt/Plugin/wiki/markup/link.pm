@@ -1,4 +1,6 @@
-#FEATURE: images as links?
+#FEATURE: nested links
+#         [[image:foo|image of [[something else]].]]
+#         [[some article|[[image:http://foo.bar/baz.jpg]]]]
 #FEATURE: anchors
 
 =head1 NAME

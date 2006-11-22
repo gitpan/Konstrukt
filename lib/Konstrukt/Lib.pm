@@ -145,7 +145,7 @@ Escapes some critical HTML characters
 =cut
 sub html_escape {
 	my ($self, $text) = @_;
-
+	
 	return unless defined $text;
 	
 	my $replace = {
@@ -191,24 +191,6 @@ sub html_unescape {
 	return $text;
 }
 #= /html_unescape
-
-=head2 html_comment
-
-Simply escapes a given string and passes it as an HTML-comment
-
-=over
-
-=item * $string - Comment message
-
-=back
-
-=cut
-sub html_comment {
-	my ($self, $string) = @_;
-
-	return '<!-- ' . $self->html_escape($string || '(undef)') . ' -->';
-}
-#= /html_comment
 
 =head2 xml_escape
 
@@ -511,7 +493,7 @@ sub random_password {
 }
 #= /random_password
 
-=head2 w3c_date_time
+=head2 date_w3c
 
 Returns the specified local time in the w3c date/time format.
 Returns the diffence in the format as specified in http://www.w3.org/TR/NOTE-datetime
@@ -534,7 +516,7 @@ YYYY-MM-DDThh:mm:ssTZD
 =back
 
 =cut
-sub w3c_date_time {
+sub date_w3c {
 	my ($self, $year, $mon, $mday, $hour, $min, $sec) = @_;
 	
 	if (!$year or !$mon or !$mday) {
@@ -564,7 +546,69 @@ sub w3c_date_time {
 	
 	return $time;
 }
-#= /w3c_date_time
+#= /date_w3c
+
+
+=head2 date_rfc822
+
+Returns the specified local time in the date/time format specified in RFC 822:
+Day, DD Mon YYYY hh:mm:ss TZD"
+YYYY-MM-DDThh:mm:ssTZD
+
+=over
+
+=item * $year - Either the years since 1900 (e.g. 1996 = 96, 2004 = 104) or the absolute year (e.g. 1996)
+
+=item * $month - Jan = 1, Feb = 2, ...
+
+=item * $mday - 1,2,3,...
+
+=item * $hour
+
+=item * $minute
+
+=item * $second
+
+=back
+
+=cut
+sub date_rfc822 {
+	my ($self, $year, $mon, $mday, $hour, $min, $sec) = @_;
+	
+	if (!$year or !$mon or !$mday) {
+		$Konstrukt::Debug->error_message("Supplied date incomplete! " . sprintf('%04d-%02d-%02d', $year, $mon, $mday)) if Konstrukt::Debug::ERROR;
+		return undef;
+	}
+	
+	#adjust date to fit into timelocal/localtime
+	$year  -= ($year > 1900 ? 1900 : 0);
+	$mon   -= 1;
+	$hour ||= 0;
+	$min  ||= 0;
+	$sec  ||= 0;
+	
+	#calculate timezone difference
+   use Time::Local;
+	my $time = timelocal($sec, $min, $hour, $mday, $mon, $year);
+	use Time::Zone;
+	my $diff = tz_local_offset($time) / 3600;
+	
+	#readjust date to get it human readable
+	$year += 1900;
+	$mon  += 1;
+	
+	use DateTime;
+	use DateTime::Format::Mail;
+	my $dt = DateTime->new(
+		year => $year, month => $mon, day => $mday,
+		hour => $hour, minute => $min, second => $sec,
+		time_zone => sprintf("%+03d:00", $diff)
+	);
+	# "Mon, 16 Jul 1979 16:45:20 +1000"
+	return DateTime::Format::Mail->format_datetime($dt);
+}
+#= /date_rfc822
+
 
 =head2 plugin_dbi_install_helper
 

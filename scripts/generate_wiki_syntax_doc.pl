@@ -7,7 +7,7 @@ use warnings;
 #load this module to ensure it is installed.
 use Pod::Parser;
 
-my @blockplugins  = qw/code definition headline hr list paragraph quote/;
+my @blockplugins  = qw/definition headline hr list paragraph pre quote/;
 my @inlineplugins = qw/acronym basic htmlescape link link::article link::external link::file link::image link::nolink replace/;
 
 #load modules to get their full path from %INC later

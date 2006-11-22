@@ -273,13 +273,11 @@ sub text_link {
 Encrypts the specified text and returns a piece of HTML/JavaScript which will
 decrypt it at the client. 
 
-Usually only used internally.
-
 B<Parameters>:
 
 =over
 
-=item * $text - The text to be encrypted (usually the HTML link to the mail address)
+=item * $text - The text to be encrypted (usually an HTML link to an email address)
 
 =back
 
@@ -303,13 +301,11 @@ sub encrypt {
 Obfuscated the specified text: Encodes each character as HTML entities, inserts
 comments and invisible tags and replaces any @-character by an image.
 
-Usually only used internally.
-
 B<Parameters>:
 
 =over
 
-=item * $text - The text to be obfuscated (usually the text "link" to the mail address)
+=item * $text - The text to be obfuscated (e.g. a text "link" to the mail address)
 
 =back
 

@@ -324,6 +324,12 @@ B<Usage:>
 	<& if condition="2 > 1" &>
 		The condition is true!
 	<& / &>
+	
+	<!-- dynamic conditions -->
+	<!-- non-dynamic conditions will only be checked once and then get cached -->
+	<& if condition="int rand 2" dynamic="1" &>
+		The condition is true with a chance of 50%!
+	<& / &>
 
 B<Result:>
 
@@ -333,6 +339,10 @@ B<Result:>
 	<!-- shortcut, when only using "then" and no elsif or else -->
 	<!-- will put out "The condition is true!" -->
 		The condition is true!
+
+	<!-- dynamic conditions -->
+	<!-- non-dynamic conditions will only be checked once and then get cached -->
+		The condition is true with a chance of 50%!
 
 Complete documentation: L<Konstrukt::Plugin::if>.=head2 kill
 
@@ -422,12 +432,15 @@ Access to Perl variables
 B<Usage:>
 
 	<!-- set value -->
-	<& perlvar var="$Foo::Bar" set="baz"/ &>
+	<& perlvar var="$Foo::Bar" set="baz" / &>
 	
 	<!-- print out value -->
 	<& perlvar var="$Foo::Bar" / &>
 	<& perlvar var="undef" &>this default will be used<& / &>
 
+	<!-- unset value -->
+	<& perlvar var="$Foo::Bar" unset="1" / &>
+	
 B<Result:>
 
 	<!-- set value -->
@@ -435,6 +448,8 @@ B<Result:>
 	<!-- print out value -->
 	baz
 	this default will be used
+	
+	<!-- unset value -->
 	
 Complete documentation: L<Konstrukt::Plugin::perlvar>.=head2 sortlines
 
@@ -481,20 +496,26 @@ B<Usage:>
 
 	<!-- put query results into a template using the dbi default settings defined in your konstrukt.settings
 	     see the Konstrukt::DBI documentation for the configuration of the default settings -->
-	<& sql query="SELECT * FROM some_table" template="list_layout.template" / &>
+	<& sql template="list_layout.template" &>
+		SELECT * FROM some_table
+	<& / &>
 	<!-- you must have a list <+@ sql @+> in your template file to which the results are passed.
 	     the fields inside the list should be named like the columns in your query. -->
 
 or
 
 	<!-- but you may also define the listname yourself -->
-	<& sql query="SELECT * FROM some_table" template="list_layout.template" list="some_list_name" / &>
+	<& sql template="list_layout.template" list="some_list_name" &>
+		SELECT * FROM some_table
+	<& / &>
 	<!-- then you should have a list <+@ some_list_name @+> in your template file. -->
 
 or
 
 	<!-- using custom connection settings -->
-	<& sql query="..." template="..." source="dbi_dsn" user="username" pass="password" / &>
+	<& sql template="..." source="dbi_dsn" user="username" pass="password" &>
+		...
+	<& / &>
 
 =begin doesntwork
 
@@ -502,8 +523,8 @@ or
 	     more flexible, but a bit slower.
 	     #TODO: actually this one doesn't work correctly at the moment due to a bug in the template plugin -->
 	<& template src="some.template" &>
-		<& sql query="SELECT some, columns FROM some_table" list="query_results" / &>
-		<& sql query="SELECT some, columns FROM some_other_table" list="other_query_results" / &>
+		<& sql list="query_results" &>SELECT some, columns FROM some_table<& / &>
+		<& sql list="other_query_results" &>SELECT some, columns FROM some_other_table<& / &>
 		<$ some $>other<$ / $>
 		<$ fields $>here<$ / $>
 	<& / &>
@@ -521,7 +542,7 @@ or
 =head3 Other queries
 
 	<!-- some query that won't return result data -->
-	<& sql query="DELETE FROM some_table WHERE id=23" / &>
+	<& sql &>DELETE FROM some_table WHERE id=23<& / &>
 
 Complete documentation: L<Konstrukt::Plugin::sql>.=head2 svar
 

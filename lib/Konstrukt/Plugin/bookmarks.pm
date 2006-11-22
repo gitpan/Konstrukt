@@ -1190,7 +1190,7 @@ $form_specification =
 		</colgroup>
 		<tr><td>Path:            </td><td><+@ categories @+>/<a href="?cat=<+$ id / $+>"><+$ title $+>(no title)<+$ / $+></a><+@ / @+></td></tr>
 		<tr><td>Title:           </td><td><+$ title $+>(no title)<+$ / $+></td></tr>
-		<tr><td>URL:             </td><td><a href="/links/visit/?id=<+$ id / $+>" target="_blank"><+$ url $+>(no URL)<+$ / $+></a></td></tr>
+		<tr><td>URL:             </td><td><a href="/links/visit/?id=<+$ id / $+>"><+$ url $+>(no URL)<+$ / $+></a></td></tr>
 		<tr><td>Private:         </td><td><& perl &>my $priv = '<+$ private / $+>'; print ($priv ? 'Yes' : 'No');<& / &></td></tr>
 		<tr><td>Author:          </td><td><a href="/intern/personal/show/?id=<+$ author_id / $+>"><+$ author $+>(no name)<+$ / $+></a></td></tr>
 		<tr><td>Number of visits:</td><td><+$ visits $+>0<+$ / $+></td></tr>
@@ -1255,7 +1255,7 @@ $form_specification =
 	<+@ bookmarks @+>
 		<div class="bookmark_entry_tree<+$ tree $+>0<+$ / $+>">
 			<span class="title">
-			<a href="/links/visit/?id=<+$ id / $+>" target="_blank">* <+$ title $+>(no title)<+$ / $+></a>
+			<a href="/links/visit/?id=<+$ id / $+>">* <+$ title $+>(no title)<+$ / $+></a>
 			</span>
 			
 			<span class="actions">

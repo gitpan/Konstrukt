@@ -13,20 +13,26 @@ B<Usage:>
 
 	<!-- put query results into a template using the dbi default settings defined in your konstrukt.settings
 	     see the Konstrukt::DBI documentation for the configuration of the default settings -->
-	<& sql query="SELECT * FROM some_table" template="list_layout.template" / &>
+	<& sql template="list_layout.template" &>
+		SELECT * FROM some_table
+	<& / &>
 	<!-- you must have a list <+@ sql @+> in your template file to which the results are passed.
 	     the fields inside the list should be named like the columns in your query. -->
 
 or
 
 	<!-- but you may also define the listname yourself -->
-	<& sql query="SELECT * FROM some_table" template="list_layout.template" list="some_list_name" / &>
+	<& sql template="list_layout.template" list="some_list_name" &>
+		SELECT * FROM some_table
+	<& / &>
 	<!-- then you should have a list <+@ some_list_name @+> in your template file. -->
 
 or
 
 	<!-- using custom connection settings -->
-	<& sql query="..." template="..." source="dbi_dsn" user="username" pass="password" / &>
+	<& sql template="..." source="dbi_dsn" user="username" pass="password" &>
+		...
+	<& / &>
 
 =begin doesntwork
 
@@ -34,8 +40,8 @@ or
 	     more flexible, but a bit slower.
 	     #TODO: actually this one doesn't work correctly at the moment due to a bug in the template plugin -->
 	<& template src="some.template" &>
-		<& sql query="SELECT some, columns FROM some_table" list="query_results" / &>
-		<& sql query="SELECT some, columns FROM some_other_table" list="other_query_results" / &>
+		<& sql list="query_results" &>SELECT some, columns FROM some_table<& / &>
+		<& sql list="other_query_results" &>SELECT some, columns FROM some_other_table<& / &>
 		<$ some $>other<$ / $>
 		<$ fields $>here<$ / $>
 	<& / &>
@@ -53,7 +59,7 @@ or
 =head2 Other queries
 
 	<!-- some query that won't return result data -->
-	<& sql query="DELETE FROM some_table WHERE id=23" / &>
+	<& sql &>DELETE FROM some_table WHERE id=23<& / &>
 
 =head1 DESCRIPTION
 
@@ -129,16 +135,25 @@ sub execute {
 	$self->reset_nodes();
 	
 	#settings
-	my $query     = $tag->{tag}->{attributes}->{query} || '';
 	my $file      = $tag->{tag}->{attributes}->{template};
 	my $list      = $tag->{tag}->{attributes}->{list} || 'sql';
 	my $db_source = $tag->{tag}->{attributes}->{source};
 	my $db_user   = $tag->{tag}->{attributes}->{user};
 	my $db_pass   = $tag->{tag}->{attributes}->{pass};
 	
+	#query
+	my $query = '';
+	my $node = $tag->{first_child};
+	while (defined $node) {
+		if ($node->{type} eq 'plaintext') {
+			$query .= $node->{content};
+		}
+		$node = $node->{next};
+	}
+	
 	my $dbh = $Konstrukt::DBI->get_connection($db_source, $db_user, $db_pass);
 	
-	$Konstrukt::Lib->trim($query);
+	$query =~ s/(^\s*|\s*$)//g;
 	if (lc(substr($query,0,6)) eq 'select') {
 		my $result = $dbh->selectall_arrayref($query, { Columns=>{} });
 		#escape values

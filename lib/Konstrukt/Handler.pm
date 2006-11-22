@@ -30,11 +30,28 @@ You should inherit from this class when building your own handler.
 
 You will find the handlers currently available in the Konstrukt::Handler directory.
 
+Plugins and other module may access some request-specific data:
+
+	#the absolute path to the processed file
+	$Konstrukt::Handler->{abs_filename}
+	
+	#the path to the processed file relative to the document root
+	$Konstrukt::Handler->{filename}
+	
+	#the environment variables of this process as an hashref
+	$Konstrukt::Handler->{ENV}
+	
+	#cookies as an hashref of cookie objects
+	$Konstrukt::Handler->{cookies}
+	#create new cookie:
+	$Konstrukt::Handler->{cookies}->{foo} = CGI::Cookie->new(-name => 'foo', -value => 'bar');
+
 =head1 CONFIGURATION
 
 Defaults:
 
-	#put the debug and error messages at the end of the output
+	#put the debug and error messages at the end of the output.
+	#also print these messages on a critical error.
 	handler/show_debug_messages 0
 	handler/show_error_messages 1
 	
@@ -60,7 +77,6 @@ use Konstrukt::Parser;
 use Konstrukt::Plugin;
 use Konstrukt::PrintRedirector;
 use Konstrukt::Settings;
-use Konstrukt::Session;
 use Konstrukt::TagHandler::Plugin;
 
 =head1 METHODS
@@ -113,8 +129,11 @@ sub new {
 	$Konstrukt::Parser->init();             #set default settings
 	$Konstrukt::PrintRedirector->init();    #deactivate
 	$Konstrukt::TagHandler::Plugin->init(); #clear list of initialized plugins
-	$Konstrukt::Session->init()
-		if $Konstrukt::Settings->get('session/use'); #init, load/set cookie, blah
+	#init, load/set cookie, blah
+	if ($Konstrukt::Settings->get('session/use')) {
+		require Konstrukt::Session;
+		$Konstrukt::Session->init();
+	}
 	
 	#add additional paths to @INC
 	my $lib = $Konstrukt::Settings->get('lib');
@@ -200,11 +219,10 @@ This method should be overwritten by the inheriting class.
 sub emergency_exit {
 	my ($self) = @_;
 	
-	#my $Konstrukt::Debug = $self->{debug};
 	#print $Konstrukt::Debug->format_error_messages();
 	#print $Konstrukt::Debug->format_debug_messages();
 	
-	die __PACKAGE__."->emergency_exit(): Critical error. Blame the programmer of the handler (" . __PACKAGE__ . ") that he doesn't provide error messages.";
+	die __PACKAGE__."->emergency_exit: Critical error.";
 }
 
 1;

@@ -69,8 +69,8 @@ sub handler {
 	my $result = $self->process();
 	#add debug- and error messages, if any
 	if ($Konstrukt::Response->header('Content-Type') =~ /^text/i) {
-		$result .= $Konstrukt::Debug->format_error_messages() if $Konstrukt::Settings->get('handler/show_error_messages');
-		$result .= $Konstrukt::Debug->format_debug_messages() if $Konstrukt::Settings->get('handler/show_debug_messages');
+		$result .= "<!--\n" . $Konstrukt::Debug->format_error_messages() . "\n-->\n" if $Konstrukt::Settings->get('handler/show_error_messages');
+		$result .= "<!--\n" . $Konstrukt::Debug->format_debug_messages() . "\n-->\n" if $Konstrukt::Settings->get('handler/show_debug_messages');
 	}
 	#determine content length
 	$Konstrukt::Response->header('Content-Length' => length($result));
@@ -104,11 +104,15 @@ Will be called on a critical error. Put out the error messages.
 sub emergency_exit {
 	my ($self) = @_;
 	
-	#print out debug- and error messages
-	print $Konstrukt::Debug->format_error_messages();
-	print $Konstrukt::Debug->format_debug_messages();
+	if ($Konstrukt::Settings->get('handler/show_error_messages') or $Konstrukt::Settings->get('handler/show_debug_messages')) {
+		#print out debug- and error messages
+		print "A critical error occurred while processing this request.\nThe request has been aborted.\n\n";
+		print $Konstrukt::Debug->format_error_messages();
+		print $Konstrukt::Debug->format_debug_messages();
+	}
 	
-	die;
+	warn "A critical error occurred while processing this request. The request has been aborted";
+	exit;
 }
 #= /emergency_exit
 

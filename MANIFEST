@@ -123,7 +123,6 @@ lib/Konstrukt/Plugin/wiki/markup/acronym.pm
 lib/Konstrukt/Plugin/wiki/markup/basic.pm
 lib/Konstrukt/Plugin/wiki/markup/basic_string.pm
 lib/Konstrukt/Plugin/wiki/markup/blockplugin.pm
-lib/Konstrukt/Plugin/wiki/markup/code.pm
 lib/Konstrukt/Plugin/wiki/markup/definition.pm
 lib/Konstrukt/Plugin/wiki/markup/headline.pm
 lib/Konstrukt/Plugin/wiki/markup/hr.pm
@@ -139,6 +138,7 @@ lib/Konstrukt/Plugin/wiki/markup/linkplugin.pm
 lib/Konstrukt/Plugin/wiki/markup/list.pm
 lib/Konstrukt/Plugin/wiki/markup/list_template.pm
 lib/Konstrukt/Plugin/wiki/markup/paragraph.pm
+lib/Konstrukt/Plugin/wiki/markup/pre.pm
 lib/Konstrukt/Plugin/wiki/markup/quote.pm
 lib/Konstrukt/Plugin/wiki/markup/replace.pm
 lib/Konstrukt/Plugin/wiki/syntax.pod
@@ -163,7 +163,8 @@ scripts/KonstruktStartup.pl
 scripts/pod2html.pl
 scripts/pod2html_readme.txt
 scripts/todo_list.pl
-t/001_load.t
+t/001_load_001_core.t
+t/001_load_002_plugins.t
 t/002_core_001_file.t
 t/002_core_002_settings.t
 t/002_core_003_debug.t

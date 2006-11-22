@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 10;
+use Test::More tests => 19;
 
 #=== Dependencies
 use Cwd;
@@ -33,7 +33,6 @@ is($Konstrukt::Parser->init(), 1, "init");
 my $opening_tag = "template src=\"blah.template\" foo=\"bar baz\"";
 my $closing_tag = "/foo";
 my $singleclosing_tag = "date /";
-
 is_deeply($Konstrukt::Parser->parse_tag($opening_tag),
 {
   attributes => { foo => "bar baz", src => "blah.template" },
@@ -41,25 +40,66 @@ is_deeply($Konstrukt::Parser->parse_tag($opening_tag),
 }
 , "parse_tag: opening");
 
-is_deeply($Konstrukt::Parser->parse_tag($closing_tag), { closing => 1, type => "foo" }, "parse_tag: closing");
-is_deeply($Konstrukt::Parser->parse_tag($singleclosing_tag), { singleclosing => 1, type => "date" }, "parse_tag: singleclosing");
+is_deeply(
+	$Konstrukt::Parser->parse_tag($closing_tag),
+	{ closing => 1, type => "foo" },
+	"parse_tag: closing"
+);
 
+is_deeply(
+	$Konstrukt::Parser->parse_tag($singleclosing_tag),
+	{ singleclosing => 1, type => "date" },
+	"parse_tag: singleclosing"
+);
 
-#is_deeply(
-#	$Konstrukt::Parser->parse_tag('foo $'),
-#	{ type => 'foo', attributes => { '$' => undef } },
-#	'parse_tag: attributes without value'
-#);
-#is_deeply(
-#	$Konstrukt::Parser->parse_tag('foo "1"'),
-#	{ type => 'foo', attributes => { '"1"' => undef } },
-#	'parse_tag: value without attribute name'
-#);
-#is_deeply(
-#	$Konstrukt::Parser->parse_tag('foo bar"'),
-#	{ type => 'foo', attributes => { 'bar"' => undef } },
-#	'parse_tag: wrong quoted value without attribute name'
-#);
+my $tagstring = 'foo"=bar';
+
+is_deeply(
+	$Konstrukt::Parser->parse_tag('foo bar=baz'),
+	{ type => 'foo', attributes => { 'bar' => 'baz' } },
+	'parse_tag: unquoted value'
+);
+is_deeply(
+	$Konstrukt::Parser->parse_tag('foo bar=\'baz bam\''),
+	{ type => 'foo', attributes => { 'bar' => 'baz bam' } },
+	'parse_tag: singlequoted value'
+);
+is_deeply(
+	$Konstrukt::Parser->parse_tag('foo bar="baz bam"'),
+	{ type => 'foo', attributes => { 'bar' => 'baz bam' } },
+	'parse_tag: doublequoted value'
+);
+is_deeply(
+	$Konstrukt::Parser->parse_tag("foo 'foo bar'='baz bam'"),
+	{ type => 'foo', attributes => { 'foo bar' => 'baz bam' } },
+	'parse_tag: singlequoted name and value'
+);
+is_deeply(
+	$Konstrukt::Parser->parse_tag('foo "foo bar"="baz bam"'),
+	{ type => 'foo', attributes => { 'foo bar' => 'baz bam' } },
+	'parse_tag: doublequoted name and value'
+);
+is_deeply(
+	$Konstrukt::Parser->parse_tag('foo bar="baz bam'),
+	{ type => 'foo', attributes => { 'bar' => 'baz bam' } },
+	'parse_tag: missing quote'
+);
+is_deeply(
+	$Konstrukt::Parser->parse_tag('foo bar   =
+		 "baz bam'),
+	{ type => 'foo', attributes => { 'bar' => 'baz bam' } },
+	'parse_tag: various spaces between name, = and value'
+);
+is_deeply(
+	$Konstrukt::Parser->parse_tag('foo bar'),
+	{ type => 'foo', attributes => { 'bar' => undef } },
+	'parse_tag: attributes without value'
+);
+is_deeply(
+	$Konstrukt::Parser->parse_tag('foo bar"'),
+	{ type => 'foo', attributes => { 'bar' => undef } },
+	'parse_tag: wrong quoted value without attribute name'
+);
 
 
 #prepare
@@ -75,7 +115,7 @@ is($prepared->tree_to_string(),
 * root
   children below this tag:
   * plaintext: foo
-  * tag: (final) - type: & test_dummy - dynamic: 1 - execution_stage: (not defined)
+  * tag: (final) - type: & test_dummy - dynamic: 1 - executionstage: (not defined)
     children below this tag:
     * plaintext: bar
   * plaintext: baz
@@ -111,9 +151,9 @@ is($executed->children_to_string(), "ab" , "execution levels: default order");
 #reverse order
 $text = 
 '<& perl &>$Konstrukt::test = "";<& / &>' .
-'<& perl execution_stage="2" &>$Konstrukt::test .= "a";<& / &>' .
+'<& perl executionstage="2" &>$Konstrukt::test .= "a";<& / &>' .
 '<& perl &>$Konstrukt::test .= "b";<& / &>' .
-'<& perl execution_stage="3" &>print $Konstrukt::test;<& / &>';
+'<& perl executionstage="3" &>print $Konstrukt::test;<& / &>';
 $prepared = $Konstrukt::Parser->prepare(\$text, $actions);
 $executed = $Konstrukt::Parser->execute($prepared, $actions);
 is($executed->children_to_string(), "ba" , "execution levels: reverse order");
@@ -121,9 +161,9 @@ is($executed->children_to_string(), "ba" , "execution levels: reverse order");
 #nested tags
 $text = 
 '<& perl &>$Konstrukt::test = "";<& / &>' .
-'<& perl &><& perl execution_stage="3" &>$Konstrukt::test .= "b";<& / &> $Konstrukt::test .= "a";<& / &>' .
+'<& perl &><& perl executionstage="3" &>$Konstrukt::test .= "b";<& / &> $Konstrukt::test .= "a";<& / &>' .
 '<& perl &>$Konstrukt::test .= "c";<& / &>' .
-'<& perl execution_stage="4" &>print $Konstrukt::test;<& / &>';
+'<& perl executionstage="4" &>print $Konstrukt::test;<& / &>';
 $prepared = $Konstrukt::Parser->prepare(\$text, $actions);
 $executed = $Konstrukt::Parser->execute($prepared, $actions);
 is($executed->children_to_string(), "cba" , "execution levels: nested tags");
@@ -131,9 +171,9 @@ is($executed->children_to_string(), "cba" , "execution levels: nested tags");
 #prelim tags
 $text = 
 '<& perl &>$Konstrukt::test = "";<& / &>' .
-'<& perl foo="<& perl execution_stage="2" &>$Konstrukt::test .= "b";<& / &>" &>$Konstrukt::test .= "a";<& / &>' .
+'<& perl foo="<& perl executionstage="2" &>$Konstrukt::test .= "b";<& / &>" &>$Konstrukt::test .= "a";<& / &>' .
 '<& perl &>$Konstrukt::test .= "c";<& / &>' .
-'<& perl execution_stage="3" &>print $Konstrukt::test;<& / &>';
+'<& perl executionstage="3" &>print $Konstrukt::test;<& / &>';
 $prepared = $Konstrukt::Parser->prepare(\$text, $actions);
 $executed = $Konstrukt::Parser->execute($prepared, $actions);
 is($executed->children_to_string(), "cba" , "execution levels: preliminary tags");

@@ -18,7 +18,7 @@ $Konstrukt::File->set_root($cwd);
 
 #=== File
 #clean path
-is($Konstrukt::File->clean_path("//foo/bar\\/\\foo/bar/baz/././../baz/"), "/foo/bar/baz/", "clean_path unix");
+is($Konstrukt::File->clean_path("//foo/bar\\/\\foo/bar/baz/././../baz/"), "/foo/bar/foo/bar/baz/", "clean_path unix");
 is($Konstrukt::File->clean_path("foo/bar/bazc:\\foo/bar/baz"), "c:/foo/bar/baz", "clean_path ms");
 
 #set root, get root, current dir

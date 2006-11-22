@@ -334,11 +334,11 @@ sub tree_to_string {
 		$result .= ("  " x $depth) . "* dummy\n";
 	} elsif ($self->{type} eq 'tag') {
 		if (exists $self->{content}->{preliminary}) {
-			$result .= ("  " x $depth) . "* " . $self->{type} . ": (preliminary) - type: " . (defined($self->{handler_type}) ? $self->{handler_type} : "(no handler type)") . " - execution_stage: " . ($self->{content}->{execution_stage} || $self->{content}->{tag}->{attributes}->{execution_stage} || "(not defined)") . "\n";
+			$result .= ("  " x $depth) . "* " . $self->{type} . ": (preliminary) - type: " . (defined($self->{handler_type}) ? $self->{handler_type} : "(no handler type)") . " - executionstage: " . ($self->{content}->{executionstage} || $self->{content}->{tag}->{attributes}->{executionstage} || "(not defined)") . "\n";
 			$result .= ("  " x $depth) . "  children inside this tag:\n";
 			$result .= $self->{content}->tree_to_string($depth + 1);
 		} else {
-			$result .= ("  " x $depth) . "* " . $self->{type} . ": (final) - type: " . (defined($self->{handler_type}) ? $self->{handler_type} : "(no handler type)") . " " . ($self->{tag}->{type} || "(none)") . " - dynamic: " . (defined($self->{dynamic}) ? 1 : 0) . " - execution_stage: " . (defined($self->{dynamic}) ? $self->{execution_stage} || $self->{tag}->{attributes}->{execution_stage} || "(not defined)": "(not defined - no dynamic tag)") . "\n";
+			$result .= ("  " x $depth) . "* " . $self->{type} . ": (final) - type: " . (defined($self->{handler_type}) ? $self->{handler_type} : "(no handler type)") . " " . ($self->{tag}->{type} || "(none)") . " - dynamic: " . (defined($self->{dynamic}) ? 1 : 0) . " - executionstage: " . (defined($self->{dynamic}) ? $self->{executionstage} || $self->{tag}->{attributes}->{executionstage} || "(not defined)": "(not defined - no dynamic tag)") . "\n";
 		}
 	}
 	

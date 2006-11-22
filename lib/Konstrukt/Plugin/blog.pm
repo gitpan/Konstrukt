@@ -1,11 +1,10 @@
 #TODO: can the <& tags / &> plugin set the tags itself so that the blog plugin
 #      doesn't have to call $tags->set()?!
+#FEATURE: ping blog search engines and aggregators (pingomatic.com, technorati, google, blah...)
+#FEATURE: rss/rdf-"export": tags => needs nested lists template feature
 #FEATURE: headline for each new day
-#FEATURE: small list of topics
-#FEATURE: count entry views
+#FEATURE: small list of topics (for a sidebar or so)
 #FEATURE: calendar
-#FEATURE: rss/rdf-"export": multiple categories
-#FEATURE: rss/rdf-"export": link to an overview filtered by a category
 #FEATURE: wiki markup also in comments?
 
 =head1 NAME
@@ -39,6 +38,12 @@ to put
 
 alone in a separate file.
 
+If you want to allow trackbacks to your blog entries, you have to to put
+
+	<& blog show="trackback" / &>
+
+alone in a separate file, which you should advertise as the trackback ping URL.
+
 The HTTP parameters "email" and "pass" will be used to log on the user before
 retrieving the entries. This will also return private entries.
 
@@ -69,7 +74,15 @@ plugin know where to get its data and which layout to use. Default:
 	
 	#use a captcha to prevent spam
 	blog/use_captcha              1 #you have to put <& captcha / &> inside your add-template
-
+	
+	#the content type of the entries.
+	#will be sent to trackback services.
+	blog/trackback/content_type   utf-8
+	#permalink URI to your blog entries.
+	#will be sent to the pinged sites. the parameter ?action=show;id=42 with the correct id of the entry will be appended.
+	#by default, this setting is undefined and the plugin tries to guess the right permalink, what may fail
+	blog/trackback/permalink      http://your.site/blog/
+	
 See the documentation of the backend modules
 (e.g. L<Konstrukt::Plugin::blog::DBI/CONFIGURATION>) for their configuration.
 
@@ -117,15 +130,16 @@ sub init {
 	$self->{user_personal} = use_plugin 'usermanagement::personal' or return undef;
 	
 	#set default settings
-	$Konstrukt::Settings->default("blog/backend"          => 'DBI');
-	$Konstrukt::Settings->default("blog/entries_per_page" => 5);
-	$Konstrukt::Settings->default("blog/template_path"    => '/templates/blog/');
-	$Konstrukt::Settings->default("blog/userlevel_write"  => 2);
-	$Konstrukt::Settings->default("blog/userlevel_admin"  => 3);
-	$Konstrukt::Settings->default("blog/rss2_entries"     => 20);
-	$Konstrukt::Settings->default("blog/rss2_template"    => $Konstrukt::Settings->get("blog/template_path") . "export/rss2.template");
-	$Konstrukt::Settings->default("blog/cache_prefix"     => '/blog_article_cache/');
-	$Konstrukt::Settings->default("blog/use_captcha"      => 1);
+	$Konstrukt::Settings->default("blog/backend"                => 'DBI');
+	$Konstrukt::Settings->default("blog/entries_per_page"       => 5);
+	$Konstrukt::Settings->default("blog/template_path"          => '/templates/blog/');
+	$Konstrukt::Settings->default("blog/userlevel_write"        => 2);
+	$Konstrukt::Settings->default("blog/userlevel_admin"        => 3);
+	$Konstrukt::Settings->default("blog/rss2_entries"           => 20);
+	$Konstrukt::Settings->default("blog/rss2_template"          => $Konstrukt::Settings->get("blog/template_path") . "export/rss2.template");
+	$Konstrukt::Settings->default("blog/cache_prefix"           => '/blog_article_cache/');
+	$Konstrukt::Settings->default("blog/use_captcha"            => 1);
+	$Konstrukt::Settings->default("blog/trackback/content_type" => 'utf-8');
 	
 	$self->{backend}       = use_plugin "blog::" . $Konstrukt::Settings->get('blog/backend') or return undef;
 	$self->{template_path} = $Konstrukt::Settings->get("blog/template_path");
@@ -196,6 +210,8 @@ sub execute {
 	
 	if ($show eq 'rss2') {
 		$self->export_rss();
+	} elsif ($show eq 'trackback') {
+		$self->trackback_process();
 	} elsif ($show eq 'filter') {
 		$self->filter_show();
 	} else {
@@ -222,6 +238,8 @@ sub execute {
 				$self->add_comment();
 			} elsif ($action eq 'deletecomment') {
 				$self->delete_comment();
+			} elsif ($action eq 'deletetrackback') {
+				$self->delete_trackback();
 			} elsif ($action eq 'filter') {
 				$self->show_entries();
 			} else {
@@ -280,26 +298,104 @@ sub add_entry {
 		my $wiki     = use_plugin 'wiki';
 		
 		#get data
-		my ($title, $description, $content, $private, $tagstring) = map { $form->get_value($_); } qw/title description content private tags/;
+		my ($title, $description, $content, $private, $tagstring, $trackback_discovery, $trackback_links) = map { $form->get_value($_); } qw/title description content private tags trackback_discovery trackback_links/;
 		my $author = $self->{user_basic}->id();
 		
-		#add entry
-		my $id = $self->{backend}->add_entry($title, $description, $content, $author, $private);
-		if (defined $id and $tags->set('blog', $id, $tagstring)) {
-			#success
-			my $author_name = $self->{user_basic}->email();
-			$log->put(__PACKAGE__ . '->add_entry', "$author_name added a new blog entry with the title '$title'.", $author_name, $id, $title);
-			$self->add_node($template->node("$self->{template_path}messages/entry_add_successful.template"));
+		if ($form->get_value('preview')) {
+			#show preview only
+
+			#render content
+			my $rendered = (use_plugin 'wiki')->convert_markup_string($content);
+			
+			#escape output
+			map { $_ = $Konstrukt::Lib->html_escape($_) } ($title, $description, $content, $private, $tagstring, $trackback_discovery, $trackback_links);
+			
+			#put entry and form templates
+			$self->add_node($template->node("$self->{template_path}layout/entry_preview.template", { title => $title, description => $description, content => $rendered }));
+			$self->add_node($template->node("$self->{template_path}layout/entry_add_form.template", { title => $title, description => $description, content => $content, private => $private, tags => $tagstring, trackback_discovery => $trackback_discovery, trackback_links => $trackback_links }));
 		} else {
-			#failed
-			$self->add_node($template->node("$self->{template_path}messages/entry_add_failed.template"));
+			#add entry
+			my $id = $self->{backend}->add_entry($title, $description, $content, $author, $private);
+			if (defined $id and $tags->set('blog', $id, $tagstring)) {
+				#success
+				my $author_name = $self->{user_basic}->email();
+				$log->put(__PACKAGE__ . '->add_entry', "$author_name added a new blog entry with the title '$title'.", $author_name, $id, $title);
+				$self->add_node($template->node("$self->{template_path}messages/entry_add_successful.template"));
+				
+				#ping trackbacks
+				$self->extract_and_ping_trackbacks($id, $title, $description, $content, $trackback_discovery, $trackback_links);
+			} else {
+				#failed
+				$self->add_node($template->node("$self->{template_path}messages/entry_add_failed.template"));
+			}
+			$self->show_entries();
 		}
-		$self->show_entries();
 	} else {
 		$self->add_node($form->errors());
 	}
 }
 #= /add_entry
+
+
+=head2 extract_and_ping_trackbacks
+
+Accepts the blog entry's content and trackback links, tries to discover
+trackbacklinks from the pages linked in the content and sends pings to all
+websites, that have been referenced.  
+
+B<Parameters>:
+
+=over
+
+=item * $id - The id of the blog entry.
+
+=item * $title - The title of the blog entry.
+
+=item * $excerpt - The description/excerpt of the blog entry.
+
+=item * $content - The content of the blog entry, that may contain links to
+websites, for which a trackback autodiscovery may be performed.
+
+=item * $trackback_discovery - True, if autodiscovery should be performed.
+
+=item * $trackback_links - The newline-separated trackback-links that have
+been explicitly specified by the user
+
+=back
+
+=cut
+sub extract_and_ping_trackbacks {
+	my ($self, $id, $title, $excerpt, $content, $trackback_discovery, $trackback_links) = @_;
+	
+	#add trackbacks:
+	my $trackbacks;
+	#autodiscover trackbacks for links in the content
+	if ($trackback_discovery) {
+		my @urls = $content =~ /(http:\/\/\S+)/is;
+		foreach my $url (@urls) {
+			#url may be in side a wiki link: [[http://foobar/|description]]
+			#cut everything including and after | or ]]
+			$url =~ s/(\||\]\]).*//;
+			my $trackback = $self->trackback_discover($url);
+			$trackbacks->{$trackback} = 1 if $trackback;
+		}
+	}
+	#add the manually entered trackbacks
+	my @urls = split /\s*\r?\n\s*/, ($trackback_links || '');
+	$trackbacks->{$_} = 1 for @urls;
+	#ping the collected trackbacks
+	my $permalink = $Konstrukt::Settings->get("blog/trackback/permalink");
+	unless ($permalink) {
+		#build URL
+		$permalink = "http://" . $Konstrukt::Handler->{ENV}->{HTTP_HOST} . $Konstrukt::Handler->{ENV}->{REQUEST_URI};
+		#remove CGI parameters
+		$permalink =~ s/\?.*//; 
+	}
+	#add action and id parameters
+	$permalink .= "?action=show;id=$id";
+	$self->trackback_ping($_, { url => $permalink, title => $title, excerpt => $excerpt }) for keys %{$trackbacks};
+}
+# /extract_and_ping_trackbacks
 
 
 =head2 edit_entry_show
@@ -324,7 +420,7 @@ sub edit_entry_show {
 		$entry->{title} = $Konstrukt::Lib->html_escape($entry->{title});
 		my $data = {
 			fields => $entry,
-			tags => [ map { { title => $Konstrukt::Lib->html_escape($_) } } @{$tags->get('blog', $id)} ]
+			tags => (join " ", map { $Konstrukt::Lib->html_escape($_); /\s/ ? "\"$_\"" : $_ } @{$tags->get('blog', $id)}) . " "
 		};
 		#put out the template node
 		$self->add_node($template->node("$self->{template_path}layout/entry_edit_form.template", $data));
@@ -354,25 +450,42 @@ sub edit_entry {
 		my $tags     = use_plugin 'tags';
 		
 		#get data
-		my ($id, $title, $description, $content, $private, $update, $tagstring) = map { $form->get_value($_) } qw/id title description content private update_date tags/;
+		my ($id, $title, $description, $content, $private, $update, $tagstring, $trackback_discovery, $trackback_links) = map { $form->get_value($_) } qw/id title description content private update_date tags trackback_discovery trackback_links/;
 		
-		#delete cache file for this article as the content may have changed
-		$self->delete_cache_content($id);
-		
-		my $entry = $self->{backend}->get_entry($id);
-		if ($entry->{author} == $self->{user_basic}->id()) {
-			if ($self->{backend}->update_entry($id, $title, $description, $content, $private, $update) and $tags->set('blog', $id, $tagstring)) {
-				#success
-				$self->add_node($template->node("$self->{template_path}messages/entry_edit_successful.template"));
-			} else {
-				#failed
-				$self->add_node($template->node("$self->{template_path}messages/entry_edit_failed.template"));
-			}
+		if ($form->get_value('preview')) {
+			#show preview only
+
+#			#render content
+#			my $rendered = (use_plugin 'wiki')->convert_markup_string($content);
+#			
+#			#escape output
+#			map { $_ = $Konstrukt::Lib->html_escape($_) } ($title, $description, $content, $private, $tagstring, $trackback_discovery, $trackback_links);
+#			
+#			#put entry and form templates
+#			$self->add_node($template->node("$self->{template_path}layout/entry_preview.template", { title => $title, description => $description, content => $rendered }));
+#			$self->add_node($template->node("$self->{template_path}layout/entry_edit_form.template", { id => $id, title => $title, description => $description, content => $content, private => $private, tags => $tagstring, trackback_discovery => $trackback_discovery, trackback_links => $trackback_links }));
 		} else {
-			#permission denied
-			$self->add_node($template->node("$self->{template_path}messages/entry_edit_failed_permission_denied.template"));
+			#delete cache file for this article as the content has changed
+			$self->delete_cache_content($id);
+			
+			my $entry = $self->{backend}->get_entry($id);
+			if ($entry->{author} == $self->{user_basic}->id()) {
+				if ($self->{backend}->update_entry($id, $title, $description, $content, $private, $update) and $tags->set('blog', $id, $tagstring)) {
+					#success
+					$self->add_node($template->node("$self->{template_path}messages/entry_edit_successful.template"));
+					
+					#ping trackbacks
+					$self->extract_and_ping_trackbacks($id, $title, $description, $content, $trackback_discovery, $trackback_links);
+				} else {
+					#failed
+					$self->add_node($template->node("$self->{template_path}messages/entry_edit_failed.template"));
+				}
+			} else {
+				#permission denied
+				$self->add_node($template->node("$self->{template_path}messages/entry_edit_failed_permission_denied.template"));
+			}
+			$self->show_entries();
 		}
-		$self->show_entries();
 	} else {
 		$self->add_node($form->errors());
 	}
@@ -480,42 +593,60 @@ sub show_entry {
 		my $template   = use_plugin 'template';
 		my $tags       = use_plugin 'tags';
 		my $entry      = $self->{backend}->get_entry($id);
-		my $may_edit   = ($entry->{author} == $self->{user_basic}->id() or $entry->{author} == 0);
-		my $may_delete = ($may_edit or $self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_admin'));
-		if (not $entry->{private} or $may_edit) {
-			#prepare data
-			$entry->{author_id}  = $entry->{author};
-			$entry->{author}     = $self->{user_personal}->data($entry->{author_id})->{nick} || undef;
-			$entry->{content}    = $self->format_and_cache_content($id, $entry->{content});
-			$entry->{may_edit}   = $may_edit;
-			$entry->{may_delete} = $may_delete;
-			map { $entry->{$_} = $Konstrukt::Lib->html_escape($entry->{$_}) } qw/title description/;
-			map { $entry->{$_} = sprintf("%02d", $entry->{$_}) } qw/month day hour minute/;
-			my @tags = map { $Konstrukt::Lib->html_escape($_) } @{$tags->get('blog', $id)};
-			my $data = { fields => $entry, tags => [ map { { title => $_ } } @tags ] };
-			
-			#put entry node
-			$self->add_node($template->node("$self->{template_path}layout/entry_full.template", $data));
-			
-			#put add comment form
-			$self->add_comment_show($id);
-			
-			#put comments
-			my $comments = $self->{backend}->get_comments($id);
-			if (@{$comments}) {
-				foreach my $comment (@{$comments}) {
-					#get username from db, if comment was written by a registered user
-					$comment->{author} ||= $self->{user_personal}->data($comment->{user})->{nick} if $comment->{user};
-					map { $comment->{$_} = $Konstrukt::Lib->html_escape($comment->{$_}) } qw/email author text/;
-					map { $comment->{$_} = sprintf("%02d", $comment->{$_}) } qw/month day hour minute/;
-					$comment->{author_id}   = $comment->{user};
-					$comment->{may_delete}  = $may_delete;
-					$comment->{lastcomment} = ($comment eq $comments->[-1]);
+		if (defined $entry) {
+			my $may_edit   = ($entry->{author} == $self->{user_basic}->id() or $entry->{author} == 0);
+			my $may_delete = ($may_edit or $self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_admin'));
+			if (not $entry->{private} or $may_edit) {
+				#prepare data
+				$entry->{author_id}  = $entry->{author};
+				$entry->{author}     = $self->{user_personal}->data($entry->{author_id})->{nick} || undef;
+				$entry->{content}    = $self->format_and_cache_content($id, $entry->{content});
+				$entry->{may_edit}   = $may_edit;
+				$entry->{may_delete} = $may_delete;
+				map { $entry->{$_} = $Konstrukt::Lib->html_escape($entry->{$_}) } qw/title description/;
+				map { $entry->{$_} = sprintf("%02d", $entry->{$_}) } qw/month day hour minute/;
+				my @tags = map { $Konstrukt::Lib->html_escape($_) } @{$tags->get('blog', $id)};
+				my $data = { fields => $entry, tags => [ map { { title => $_ } } @tags ] };
+				
+				#add entry
+				$self->add_node($template->node("$self->{template_path}layout/entry_full.template", $data));
+				
+				#add trackbacks
+				my $trackbacks = $self->{backend}->get_trackbacks($id);
+				if (@{$trackbacks}) {
+					foreach my $trackback (@{$trackbacks}) {
+						map { $trackback->{$_} = $Konstrukt::Lib->html_escape($trackback->{$_}) } qw/title excerpt blog_name/;
+						map { $trackback->{$_} = sprintf("%02d", $trackback->{$_}) } qw/month day hour minute/;
+						$trackback->{may_delete}  = $may_delete;
+						$trackback->{lasttrackback} = ($trackback eq $trackbacks->[-1]);
+					}
+					$self->add_node($template->node("$self->{template_path}layout/trackbacks.template", { trackbacks => [ map { { fields => $_ } } @{$trackbacks} ] }));
+				} else {
+					$self->add_node($template->node("$self->{template_path}layout/trackbacks_empty.template"));
 				}
-				$self->add_node($template->node("$self->{template_path}layout/comments.template", { comments => [ map { { fields => $_ } } @{$comments} ] }));
-			} else {
-				$self->add_node($template->node("$self->{template_path}layout/comments_empty.template"));
+				
+				#add comment form
+				$self->add_comment_show($id);
+				
+				#add comments
+				my $comments = $self->{backend}->get_comments($id);
+				if (@{$comments}) {
+					foreach my $comment (@{$comments}) {
+						#get username from db, if comment was written by a registered user
+						$comment->{author} ||= $self->{user_personal}->data($comment->{user})->{nick} if $comment->{user};
+						map { $comment->{$_} = $Konstrukt::Lib->html_escape($comment->{$_}) } qw/email author text/;
+						map { $comment->{$_} = sprintf("%02d", $comment->{$_}) } qw/month day hour minute/;
+						$comment->{author_id}   = $comment->{user};
+						$comment->{may_delete}  = $may_delete;
+						$comment->{lastcomment} = ($comment eq $comments->[-1]);
+					}
+					$self->add_node($template->node("$self->{template_path}layout/comments.template", { comments => [ map { { fields => $_ } } @{$comments} ] }));
+				} else {
+					$self->add_node($template->node("$self->{template_path}layout/comments_empty.template"));
+				}
 			}
+		} else {
+			$self->add_node($template->node("$self->{template_path}messages/entry_show_failed_not_exists.template"));
 		}
 	}
 }
@@ -622,11 +753,7 @@ sub format_and_cache_content {
 		$Konstrukt::File->pop();
 	} else {
 		#render article and cache it.
-		#put markup into a field container
-		my $cont = Konstrukt::Parser::Node->new({ type => 'tag', handler_type => '$' });
-		$cont->add_child(Konstrukt::Parser::Node->new({ type => 'plaintext', content => $content }));
-		#render content
-		$cached = (use_plugin 'wiki')->convert_markup($cont);
+		my $cached = (use_plugin 'wiki')->convert_markup_string($content);
 		#cache it
 		$Konstrukt::Cache->write_cache($cached_filename, $cached);
 	}
@@ -824,6 +951,7 @@ sub export_rss {
 	my ($self) = @_;
 	
 	my $template = use_plugin 'template';
+	my $tags     = use_plugin 'tags';
 
 	#try to log on user, if parameters specified
 	my ($email, $pass) = ($Konstrukt::CGI->param('email'), $Konstrukt::CGI->param('pass'));
@@ -835,14 +963,7 @@ sub export_rss {
 	my $limit = $Konstrukt::Settings->get('blog/rss2_entries') || 20;
 	my $entries = $self->{backend}->get_entries(undef, 0, $limit);
 	
-	#prepare data
-	my $data;
-	if (@{$entries}) {
-		$data->{fields}->{date} = $Konstrukt::Lib->w3c_date_time($entries->[0]->{year}, $entries->[0]->{month}, $entries->[0]->{day}, $entries->[0]->{hour}, $entries->[0]->{minute});
-	} else {
-		$data->{fields}->{date} = '0000-00-00';
-	}
-	#items
+	#prepare items
 	my @items;
 	foreach my $entry (@{$entries}) {
 		if (!$entry->{private}) {
@@ -859,21 +980,264 @@ sub export_rss {
 			if ($firstname and $lastname) {
 				$author .= ($author ? " ($firstname $lastname)" : "$firstname $lastname");
 			}
+			
+			#add item
 			push @items, {
 				id          => $entry->{id},
 				title       => $Konstrukt::Lib->xml_escape($entry->{title}),
 				description => $Konstrukt::Lib->xml_escape($entry->{description}),
-				content     => $Konstrukt::Lib->xml_escape($entry->{content}),
+				content     => $Konstrukt::Lib->xml_escape($self->format_and_cache_content($entry->{id}, $entry->{content})),
 				author      => $Konstrukt::Lib->xml_escape($author),
-				date        => $Konstrukt::Lib->w3c_date_time($entry->{year}, $entry->{month}, $entry->{day}, $entry->{hour}, $entry->{minute})
+				date_w3c    => $Konstrukt::Lib->date_w3c($entry->{year}, $entry->{month}, $entry->{day}, $entry->{hour}, $entry->{minute}),
+				date_rfc822 => $Konstrukt::Lib->date_rfc822($entry->{year}, $entry->{month}, $entry->{day}, $entry->{hour}, $entry->{minute}),
+#				tags        => [ map { { title => $Konstrukt::Lib->xml_escape($_) } } @{$tags->get('blog', $entry->{id})} ],
 			};
 		}
 	}
-	$self->add_node($template->node($Konstrukt::Settings->get('blog/rss2_template'), { items => \@items }));
+	
+	#date of the feed
+	my $date_w3c    = @items ? $items[0]->{date_w3c}    : '0000-00-00';
+	my $date_rfc822 = @items ? $items[0]->{date_rfc822} : '01 Jan 1970 00:00:00 +0000';
+	
+	#show
+	$self->add_node($template->node($Konstrukt::Settings->get('blog/rss2_template'), { date_w3c => $date_w3c, date_rfc822 => $date_rfc822, items => \@items }));
 
 	$Konstrukt::Response->header('Content-Type' => 'text/xml');
 }
 #= /export_rss
+
+
+=head2 trackback_ping
+
+Pings a specified trackback address with the specified information.
+
+Returns true on success, false otherwise.
+
+B<Parameters>:
+
+=over
+
+=item * $url - The URL of the trackback link 
+
+=item * $info - The information about the pinging article.
+A hashref containing this information:
+
+	{
+		url => 'URL of the entry (required)',
+		title => 'Title of the entry (optional)',
+		excerpt => 'Excerpt of the entry (optional)',
+		blog_name => 'Name of the blog (optional)',
+	}
+
+=back
+
+=cut
+sub trackback_ping {
+	my ($self, $url, $info) = @_;
+	
+	my $template = use_plugin 'template';
+	
+	require LWP::UserAgent;
+	my $ua = LWP::UserAgent->new(agent => "Konstrukt/$Konstrukt::VERSION - blog plugin", timeout => 15);
+	
+	my $response = $ua->post(
+		$url,
+		$info,
+		'Content-Type' => "application/x-www-form-urlencoded; charset=" . $Konstrukt::Settings->get('blog/trackback/content_type')
+	);
+	
+	unless ($response->is_success()) {
+		$self->add_node($template->node("$self->{template_path}messages/trackback_ping_failed.template", { url => $url }));
+		return;
+	}
+	
+	#was the ping successful?
+	my $content = $response->content();
+	if ($content =~ /<error>0<\/error>/) {
+		$self->add_node($template->node("$self->{template_path}messages/trackback_ping_successful.template", { url => $url, message => $response->status_line() }));
+		return 1;
+	} else {
+		$content =~ /<message>(.*?)<\/message>/;
+		my $message = $1 || 'Unknown error';
+		$self->add_node($template->node("$self->{template_path}messages/trackback_ping_failed.template", { url => $url, message => $message }));
+	}
+}
+#= /trackback_ping
+
+
+=head2 trackback_discover
+
+Downloads a blog entry and tries to discover the trackback link to this entry.
+
+Returns the URL of the trackback link on success, undef otherwise.
+
+B<Parameters>:
+
+=over
+
+=item * $url - The URL of the blog entry 
+
+=back
+
+=cut
+sub trackback_discover {
+	my ($self, $url) = @_;
+	
+	require LWP::UserAgent;
+	my $ua = LWP::UserAgent->new(agent => "Konstrukt/$Konstrukt::VERSION - blog plugin", timeout => 15);
+
+	my $response = $ua->get($url);
+	
+	unless ($response->is_success()) {
+		my $template = use_plugin 'template';
+		$self->add_node($template->node("$self->{template_path}messages/trackback_discover_failed.template", { url => $url, message => $response->status_line() }));
+		return;
+	}
+	
+	my $content = $response->content();
+	
+	#parse out all RDF sections, take the one with
+	#a dc:identifier == $url and extract the trackback:ping address
+	#warn $content =~ /(<rdf:RDF.*?<\/rdf:RDF>)/s;
+	my @rdf_sections = $content =~ /(<rdf:RDF.*?<\/rdf:RDF>)/s;
+	foreach my $rdf (@rdf_sections) {
+		my ($ident_url) = $rdf =~ /dc:identifier="([^"#]+)/;
+		if ($ident_url eq $url) {
+			$rdf =~ /trackback:ping="([^"#]+)/;
+			return $1;
+		}
+	}
+	
+	#try to find <a href="..." rel="trackback">
+	my ($trackback_link) = $content =~ /<(a [^>]*rel="trackback"[^>]*)>/s;
+	if ($trackback_link) {
+		my $tag = $Konstrukt::Parser->parse_tag($trackback_link);
+		my $href = $tag->{attributes}->{href};
+		if ($href) {
+			unless ($href =~ /^http:\/\//) {
+				#partial href. prepend the rest of the path
+				if ($href =~ /^\//) {
+					#href starts with a slash. absolute path
+					$url =~ /(^http:\/\/[^\/]+)\//;
+					$href = "$1$href";
+				} else {
+					#href is a relative path
+					$url =~ /(^http:\/\/.+\/)/;
+					$href = "$1$href";
+				}
+			}
+			return $href;
+		}
+	}
+}
+#= /trackback_discover
+
+
+=head2 trackback_process
+
+Processes an incoming trackback request. The ID of the blog entry must be
+specified as an URL parameter:
+
+	http://your.site/blog/trackback/id=42
+
+Returns the appropriate response to the client.
+
+B<Parameters>: none
+
+=cut
+sub trackback_process {
+	my ($self) = @_;
+	
+	my ($url, $title, $excerpt, $blog_name) = map { $Konstrukt::CGI->param($_) || undef } qw/url title excerpt blog_name/;
+	my $entry = $Konstrukt::CGI->url_param('id');
+	
+	my ($error, $error_message);
+	if (not defined $url) {
+		($error, $error_message) = (1, "No URL specified");
+	} elsif ($url !~ /^http\:\/\/\S+$/i) {
+		($error, $error_message) = (1, "Invalid URL: $url");
+	} elsif (not defined $entry) {
+		($error, $error_message) = (1, "No blog entry ID specified");
+	} else {
+		#antispam:
+		#- check, if the ping source is reachable
+		#- and if it contains a link to this website
+		
+		my $host = $Konstrukt::Handler->{ENV}->{HTTP_HOST};
+		require LWP::UserAgent;
+		my $ua = LWP::UserAgent->new(agent => "Konstrukt/$Konstrukt::VERSION - blog plugin", timeout => 15);
+		my $response = $ua->get($url);
+		if (not $response->is_success()) {
+			#source url cannot be downloaded
+			($error, $error_message) = (1, "Ping source $url cannot be reached.");
+		} elsif ($response->content() !~ /href=["']http:\/\/(www\.)?$host\/.+/) {
+			#not href to this website found
+			($error, $error_message) = (1, "Ping source doesn't contain a link to '$host'");
+		} elsif (not defined $self->{backend}->get_entry($entry)) {
+			#entry does not exist
+			($error, $error_message) = (1, "The entry with the ID $entry does not exist");
+		} elsif (not $self->{backend}->add_trackback($entry, $url, $title, $excerpt, $blog_name)) {
+			#error on addition
+			($error, $error_message) = (1, "An internal error occurred while adding the trackback");
+		} else {
+			#addition successful
+			my $log = use_plugin 'log';
+			my $entry_title = $self->{backend}->get_entry($entry)->{title};
+			$log->put(__PACKAGE__ . '->trackback_process', "New trackback from $url for blog entry with the title '$entry_title'.", $url, $entry);
+			$error = 0;
+		}
+	}
+	
+	$Konstrukt::Response->header('Content-Type' => 'text/xml');
+	$self->add_node(
+		"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<response>\n" .
+		"<error>$error</error>\n" .
+		($error ? "<message>$error_message</message>\n" : "") .
+		"</response>"
+	);
+}
+#= /trackback_process
+
+
+=head2 delete_trackback
+
+Takes the HTTP form input and removes an existing trackback.
+
+Displays a confirmation of the successful removal or error messages otherwise.
+
+=cut
+sub delete_trackback {
+	my ($self) = @_;
+	
+	my $template = use_plugin 'template';
+	
+	if ($self->{user_level}->level() >= $Konstrukt::Settings->get('blog/userlevel_admin')) {
+		
+		my $form = use_plugin 'formvalidator';
+		$form->load("$self->{template_path}layout/trackback_delete_form.form");
+		$form->retrieve_values('cgi');
+		
+		if ($form->validate()) {
+			my $id = $form->get_value('id');
+			my $trackback = $self->{backend}->get_trackback($id);
+			if ($self->{backend}->delete_trackback($id)) {
+				#success
+				$self->add_node($template->node("$self->{template_path}messages/trackback_delete_successful.template"));
+			} else {
+				#failed
+				$self->add_node($template->node("$self->{template_path}messages/trackback_delete_failed.template"));
+			}
+			$self->show_entry($trackback->{entry});
+		} else {
+			$self->add_node($form->errors());
+			return $form->errors();
+		}
+	} else {
+		$self->add_node($template->node("$self->{template_path}messages/trackback_delete_failed_permission_denied.template"));
+	}
+}
+#= /delete_trackback
+
 
 1;
 
@@ -913,7 +1277,7 @@ __DATA__
 		<dc:language>en</dc:language>
 		<dc:creator>mail@some.host</dc:creator>
 		<dc:rights>Copyright 2000-2050</dc:rights>
-		<dc:date><+$ date / $+></dc:date>
+		<dc:date><+$ date_w3c / $+></dc:date>
 		<sy:updatePeriod>hourly</sy:updatePeriod>
 		<sy:updateFrequency>1</sy:updateFrequency>
 		<sy:updateBase>2000-01-01T12:00+00:00</sy:updateBase>
@@ -931,7 +1295,8 @@ __DATA__
 			<!--  <category domain="<+$ category_id / $+>"><+$ category_name / $+></category> -->
 			<guid isPermaLink="true">http://your.website/blog/?action=show;id=<+$ id / $+></guid>
 			<comments>http://your.website/blog/?action=show;id=<+$ id / $+></comments>
-			<dc:date><+$ date / $+></dc:date>
+			<pubDate><+$ date_rfc822 / $+></pubDate>
+			<dc:date><+$ date_w3c / $+></dc:date>
 			<dc:creator><+$ author / $+></dc:creator>
 			<!-- <dc:subject><+$ category_name / $+></dc:subject> -->
 			<content:encoded><![CDATA[ <+$ content / $+> ]]></content:encoded>
@@ -1118,11 +1483,14 @@ $form_specification =
 $form_name = 'add';
 $form_specification =
 {
-	title       => { name => 'Title (not empty)'  , minlength => 1, maxlength => 256,   match => '' },
-	description => { name => 'Summary (not empty)', minlength => 1, maxlength => 4096,  match => '' },
-	content     => { name => 'Content (not empty)', minlength => 1, maxlength => 65536, match => '' },
-	tags        => { name => 'Tags'               , minlength => 0, maxlength => 512,   match => '' },
-	private     => { name => 'Private'            , minlength => 0, maxlength => 1,     match => '' },
+	title               => { name => 'Title (not empty)'  , minlength => 1, maxlength => 256,   match => '' },
+	description         => { name => 'Summary (not empty)', minlength => 1, maxlength => 4096,  match => '' },
+	content             => { name => 'Content (not empty)', minlength => 1, maxlength => 65536, match => '' },
+	tags                => { name => 'Tags'               , minlength => 0, maxlength => 512,   match => '' },
+	private             => { name => 'Private'            , minlength => 0, maxlength => 1,     match => '' },
+	preview             => { name => 'Preview'            , minlength => 0, maxlength => 1,     match => '' },
+	trackback_discovery => { name => 'Trackback discovery', minlength => 0, maxlength => 1,     match => '' },
+	trackback_links     => { name => 'Trackback links'    , minlength => 0, maxlength => 65536, match => '^(\s*[hH][tT][tT][pP]\:\/\/\S+\s*)*$' },
 };
 
 -- 8< -- textfile: layout/entry_add_form.template -- >8 --
@@ -1134,20 +1502,20 @@ $form_specification =
 		<input type="hidden" name="action" value="add" />
 		
 		<label>Title: (plain text)</label>
-		<input name="title" maxlength="255" />
+		<input name="title" maxlength="255" value="<+$ title / $+>" />
 		<br />
 		
 		<label>Summary:<br />(plain text)</label>
-		<textarea name="description"></textarea>
+		<textarea name="description"><+$ description / $+></textarea>
 		<br />
 		
 		<label>Text:<br />(Wiki syntax)</label>
-		<textarea name="content"></textarea>
+		<textarea name="content"><+$ content / $+></textarea>
 		<br />
 		
 		<label>Tags:</label>
 		<div>
-	    	<input name="tags" id="tags" maxlength="512" />
+	    	<input name="tags" id="tags" maxlength="512" value="<+$ tags / $+>" />
 	    	<br />
 	    	<p>Tags used so far:</p>
 	    	<br />
@@ -1157,10 +1525,25 @@ $form_specification =
     	
 		<label>Private:</label>
 		<div>
-		<input id="private" name="private" type="checkbox" class="checkbox" value="1" />
-		<label for="private" class="checkbox">This entry is only visible for me.</label>
-		<p>(Useful, if you want to revise the entry before you publish it.)</p>
+		<input id="private" name="private" type="checkbox" class="checkbox" value="1" <& if condition="'<+$ private / $+>'" &>checked="checked"<& / &> />
+		<label for="private" class="checkbox">This entry is only visible for me.<br />(Useful, if you want to revise the entry before you publish it.)</label>
 		</div>
+		<br />
+		
+		<label>Trackback autodiscovery:</label>
+		<div>
+		<input id="trackback_discovery" name="trackback_discovery" type="checkbox" class="checkbox" value="1" checked="checked" />
+		<label for="trackback_discovery" class="checkbox">Try to automatically discover trackback links in the websites, that have been linked in the article.</label>
+		</div>
+		<br />
+
+		<label>Trackback links:<br />(newline separated)</label>
+		<textarea name="trackback_links"><+$ trackback_links / $+></textarea>
+		<br />
+		
+		<label>Preview:</label>
+		<input id="preview" name="preview" type="checkbox" class="checkbox" checked="checked" value="1" />
+		<label for="preview" class="checkbox">Preview (don't save).</label>
 		<br />
 		
 		<label>&nbsp;</label>
@@ -1207,13 +1590,16 @@ $form_specification =
 $form_name = 'edit';
 $form_specification =
 {
-	id          => { name => 'ID (not empty)'     , minlength => 1, maxlength => 256,   match => '^\d+$' },
-	title       => { name => 'Title (not empty)'  , minlength => 1, maxlength => 256,   match => '' },
-	description => { name => 'Summary (not empty)', minlength => 1, maxlength => 4096,  match => '' },
-	content     => { name => 'Content (not empty)', minlength => 1, maxlength => 65536, match => '' },
-	update_date => { name => 'Update date'        , minlength => 0, maxlength => 1,     match => '' },
-	tags        => { name => 'Tags'               , minlength => 0, maxlength => 512,   match => '' },
-	private     => { name => 'Private'            , minlength => 0, maxlength => 1,     match => '' },
+	id                  => { name => 'ID (not empty)'     , minlength => 1, maxlength => 256,   match => '^\d+$' },
+	title               => { name => 'Title (not empty)'  , minlength => 1, maxlength => 256,   match => '' },
+	description         => { name => 'Summary (not empty)', minlength => 1, maxlength => 4096,  match => '' },
+	content             => { name => 'Content (not empty)', minlength => 1, maxlength => 65536, match => '' },
+	update_date         => { name => 'Update date'        , minlength => 0, maxlength => 1,     match => '' },
+	tags                => { name => 'Tags'               , minlength => 0, maxlength => 512,   match => '' },
+	private             => { name => 'Private'            , minlength => 0, maxlength => 1,     match => '' },
+	preview             => { name => 'Preview'            , minlength => 0, maxlength => 1,     match => '' },
+	trackback_discovery => { name => 'Trackback discovery', minlength => 0, maxlength => 1,     match => '' },
+	trackback_links     => { name => 'Trackback links'    , minlength => 0, maxlength => 65536, match => '^(\s*[hH][tT][tT][pP]\:\/\/\S+\s*)*$' },
 };
 
 -- 8< -- textfile: layout/entry_edit_form.template -- >8 --
@@ -1239,7 +1625,7 @@ $form_specification =
 		
 		<label>Tags:</label>
 		<div>
-	    	<input name="tags" id="tags" maxlength="512" value="<+@ tags @+><+$ title $+>(Kein Titel)<+$ / $+> <+@ / @+>" />
+	    	<input name="tags" id="tags" maxlength="512" value="<+$ tags / $+>" />
 	    	<br />
 	    	<p>Tags used so far:</p>
 	    	<br />
@@ -1250,14 +1636,29 @@ $form_specification =
 		<label>Private:</label>
 		<div style="width: 500px">
 		<input id="private" name="private" type="checkbox" class="checkbox" value="1" <& if condition="<+$ private $+>0<+$ / $+>" &>checked="checked"<& / &> />
-		<label for="private" class="checkbox">This entry is only visible for me.</label>
-		<p>(Useful, if you want to revise the entry before you publish it.)</p>
+		<label for="private" class="checkbox">This entry is only visible for me.<br />(Useful, if you want to revise the entry before you publish it.)</label>
 		</div>
 		<br />
 		
 		<label>Update publication date:</label>
 		<input id="update_date" name="update_date" type="checkbox" class="checkbox" value="1" />
 		<label for="update_date" class="checkbox">Set the publication date of this entry to now.</label>
+		<br />
+
+		<label>Trackback autodiscovery:</label>
+		<div>
+		<input id="trackback_discovery" name="trackback_discovery" type="checkbox" class="checkbox" value="1" checked="checked" />
+		<label for="trackback_discovery" class="checkbox">Try to automatically discover trackback links in the websites, that have been linked in the article.</label>
+		</div>
+		<br />
+		
+		<label>Trackback links:<br />(newline separated)</label>
+		<textarea name="trackback_links"><+$ trackback_links / $+></textarea>
+		<br />
+		
+		<label>Preview:</label>
+		<input id="preview" name="preview" type="checkbox" class="checkbox" value="1" />
+		<label for="preview" class="checkbox">Preview (don't save).</label>
 		<br />
 		
 		<label>&nbsp;</label>
@@ -1269,8 +1670,21 @@ $form_specification =
 -- 8< -- textfile: layout/entry_full.template -- >8 --
 
 <div class="blog entry">
+	<!--
+	<rdf:RDF
+		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+		xmlns:dc="http://purl.org/dc/elements/1.1/"
+		xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+	<rdf:Description
+		rdf:about="http://<& env var="HTTP_HOST" / &>/blog/?action=show;id=<+$ id $+>0<+$ / $+>"
+		dc:identifier="http://<& env var="HTTP_HOST" / &>/blog/?action=show;id=<+$ id $+>0<+$ / $+>"
+		dc:title="<+$ title $+>(No title)<+$ / $+>"
+		trackback:ping="http://<& env var="HTTP_HOST" / &>/blog/trackback/?id=<+$ id $+>0<+$ / $+>" />
+	</rdf:RDF>
+	-->
+	
 	<h1>
-		<a href="/blog/?action=show;id=<+$ id $+>0<+$ / $+>"><+$ title $+>(Kein Titel)<+$ / $+></a>
+		<a href="/blog/?action=show;id=<+$ id $+>0<+$ / $+>"><+$ title $+>(No title)<+$ / $+></a>
 		<& if condition="<+$ private $+>0<+$ / $+>" &>(private)<& / &>
 		<& if condition="<+$ may_edit $+>0<+$ / $+>" &><a href="?action=showedit;id=<+$ id $+>0<+$ / $+>">[ edit ]</a><& / &>
 		<& if condition="<+$ may_delete $+>0<+$ / $+>" &><a href="?action=showdelete;id=<+$ id $+>0<+$ / $+>">[ delete ]</a><& / &>
@@ -1278,24 +1692,39 @@ $form_specification =
 	<div class="description"><p><+$ description $+>(No summary)<+$ / $+></p></div>
 	<div class="content"><+$ content $+>(No content)<+$ / $+></div>
 	<div class="foot">
-		Written on <+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+> by <+$ author $+>(unknown author)<+$ / $+> (author id: <+$ author_id $+>0<+$ / $+>)</a>.
+		Written on <+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+> by <+$ author $+>(unknown author)<+$ / $+> (author id: <+$ author_id $+>0<+$ / $+>)</a>.<br />
 		<& perl &>
 			my @tags = @{$template_values->{lists}->{tags}};
 			if (@tags) {
 				print "Tag" . (@tags > 1 ? 's' : '') . ": ";
-				print join ", ", (map { "<a href=\"?action=filter;tags=" . $Konstrukt::Lib->uri_encode($_->{fields}->{title}) . "\">$_->{fields}->{title}</a>" } @tags);
-				print "."
+				print join ", ", (map { "<a href=\"?action=filter;tags=" . $Konstrukt::Lib->uri_encode($_->{fields}->{title}) . "\" rel=\"tag\">$_->{fields}->{title}</a>" } @tags);
+				print ".<br />"
 			};
 		<& / &>
-		<a href="?action=show;id=<+$ id $+>0<+$ / $+>">Comments: <+$ comment_count $+>(none yet)<+$ / $+></a>
+		<a href="?action=show;id=<+$ id $+>0<+$ / $+>#comments">Comments: <+$ comment_count $+>(none yet)<+$ / $+></a> -
+		<a href="?action=show;id=<+$ id $+>0<+$ / $+>#trackbacks">Trackbacks: <+$ trackback_count $+>(none yet)<+$ / $+></a> -
+		<a href="http://<& env var="HTTP_HOST" / &>/blog/trackback/?id=<+$ id $+>0<+$ / $+>" rel="trackback">Trackback link</a>.
 	</div>
 </div> 
 
 -- 8< -- textfile: layout/entry_short.template -- >8 --
 
 <div class="blog entry">
+	<!--
+	<rdf:RDF
+		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+		xmlns:dc="http://purl.org/dc/elements/1.1/"
+		xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+	<rdf:Description
+		rdf:about="http://<& env var="HTTP_HOST" / &>/blog/?action=show;id=<+$ id $+>0<+$ / $+>"
+		dc:identifier="http://<& env var="HTTP_HOST" / &>/blog/?action=show;id=<+$ id $+>0<+$ / $+>"
+		dc:title="<+$ title $+>(No title)<+$ / $+>"
+		trackback:ping="http://<& env var="HTTP_HOST" / &>/blog/trackback/?id=<+$ id $+>0<+$ / $+>" />
+	</rdf:RDF>
+	-->
+	
 	<h1>
-		<a href="/blog/?action=show;id=<+$ id $+>0<+$ / $+>"><+$ title $+>(Kein Titel)<+$ / $+></a>
+		<a href="/blog/?action=show;id=<+$ id $+>0<+$ / $+>"><+$ title $+>(No title)<+$ / $+></a>
 		<& if condition="<+$ private $+>0<+$ / $+>" &>(private)<& / &>
 		<& if condition="<+$ may_edit $+>0<+$ / $+>" &><a href="?action=showedit;id=<+$ id $+>0<+$ / $+>">[ edit ]</a><& / &>
 		<& if condition="<+$ may_delete $+>0<+$ / $+>" &><a href="?action=showdelete;id=<+$ id $+>0<+$ / $+>">[ delete ]</a><& / &>
@@ -1303,17 +1732,27 @@ $form_specification =
 	<div class="description"><p><+$ description $+>(No summary)<+$ / $+></p></div>
 	<div class="content"><+$ content $+>(No content)<+$ / $+></div>
 	<div class="foot">
-		Written on <+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+> by <+$ author $+>(unknown author)<+$ / $+> (author id: <+$ author_id $+>0<+$ / $+>)</a>.
+		Written on <+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+> by <+$ author $+>(unknown author)<+$ / $+> (author id: <+$ author_id $+>0<+$ / $+>)</a>.<br />
 		<& perl &>
 			my @tags = @{$template_values->{lists}->{tags}};
 			if (@tags) {
 				print "Tag" . (@tags > 1 ? 's' : '') . ": ";
-				print join ", ", (map { "<a href=\"?action=filter;tags=" . $Konstrukt::Lib->uri_encode($_->{fields}->{title}) . "\">$_->{fields}->{title}</a>" } @tags);
-				print "."
+				print join ", ", (map { "<a href=\"?action=filter;tags=" . $Konstrukt::Lib->uri_encode($_->{fields}->{title}) . "\" rel=\"tag\">$_->{fields}->{title}</a>" } @tags);
+				print ".<br />"
 			};
 		<& / &>
-		<a href="?action=show;id=<+$ id $+>0<+$ / $+>">Comments: <+$ comment_count $+>(none yet)<+$ / $+></a>
+		<a href="?action=show;id=<+$ id $+>0<+$ / $+>#comments">Comments: <+$ comment_count $+>(none yet)<+$ / $+></a> -
+		<a href="?action=show;id=<+$ id $+>0<+$ / $+>#trackbacks">Trackbacks: <+$ trackback_count $+>(none yet)<+$ / $+></a> -
+		<a href="http://<& env var="HTTP_HOST" / &>/blog/trackback/?id=<+$ id $+>0<+$ / $+>" rel="trackback">Trackback link</a>.
 	</div>
+</div>
+
+-- 8< -- textfile: layout/entry_preview.template -- >8 --
+
+<div class="blog entry">
+	<h1><+$ title $+>(No title)<+$ / $+> (Preview)</h1>
+	<div class="description"><p><+$ description $+>(No summary)<+$ / $+></p></div>
+	<div class="content"><+$ content $+>(No content)<+$ / $+></div>
 </div> 
 
 -- 8< -- textfile: layout/entry_show.form -- >8 --
@@ -1375,7 +1814,7 @@ function hideFilter () {
 				<& perl &>
 					foreach my $item (@{$template_values->{lists}->{authors}}) {
 						my $id   = defined $item->{fields}->{id}   ? $item->{fields}->{id}   : 0;
-						my $name = defined $item->{fields}->{name} ? $item->{fields}->{name} : '(Kein Name)';
+						my $name = defined $item->{fields}->{name} ? $item->{fields}->{name} : '(No name)';
 						my $author = $Konstrukt::CGI->param('author');
 						print "\t\t<option value=\"$id\"" . (defined $author and $id == $author ? " selected=\"selected\"" : "") . ">$name</option>\n";
 					}
@@ -1420,6 +1859,52 @@ function hideFilter () {
 </div>
 
 <p style="text-align: right; margin-bottom: 5px;"><a href="#" id="filterlink" onclick="showFilter();">[ Find entry ]</a></p>
+
+-- 8< -- textfile: layout/trackback_delete_form.form -- >8 --
+
+$form_name = 'deltrackback';
+$form_specification =
+{
+	id => { name => 'ID' , minlength => 1, maxlength => 8, match => '^\d+$' },
+};
+
+-- 8< -- textfile: layout/trackbacks.template -- >8 --
+
+<div class="blog trackbacks">
+	<h1>Trackbacks</h1>
+	
+	<+@ trackbacks @+>
+	<table>
+		<colgroup>
+			<col width="100" />
+			<col width="*"   />
+		</colgroup>
+		<tr>
+			<th>Source:</th>
+			<td><a href="<+$ url / $+>"><+$ title $+><+$ url / $+><+$ / $+></a></td>
+		</tr>
+		<tr>
+			<th>Date:</th>
+			<td><+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+>.</td>
+		</tr>
+		<tr>
+			<th>Summary:</th>
+			<td><+$ excerpt $+>(No text)<+$ / $+></td>
+		</tr>
+		<& if condition="<+$ may_delete / $+>" &>
+		<tr>
+			<th>&nbsp;</th>
+			<td><a href="?action=deletetrackback;id=<+$ id $+>0<+$ / $+>">Delete trackback</a></td>
+		</tr>
+		<& / &>
+	</table>
+	<+@ / @+>
+
+</div>
+
+-- 8< -- textfile: layout/trackbacks_empty.template -- >8 --
+
+<p>Currently no trackbacks.</p>
 
 -- 8< -- textfile: messages/comment_add_failed.template -- >8 --
 
@@ -1519,9 +2004,64 @@ function hideFilter () {
 	<p>The entry has been updated successfully</p>
 </div>
 
+-- 8< -- textfile: messages/entry_show_failed_not_exists.template -- >8 --
+
+<div class="blog message failure">
+	<h1>Entry does not exist</h1>
+	<p>The requested entry does not exist!</p>
+</div>
+
+-- 8< -- textfile: messages/trackback_ping_failed.template -- >8 --
+
+<div class="blog message failure">
+	<h1>Trackback ping failed</h1>
+	<p>The ping of the URL <+$ url $+>(no url)<+$ / $+> failed.</p>
+	<p>Reason: <+$ message $+>(unknown)<+$ / $+>.</p>
+</div>
+
+-- 8< -- textfile: messages/trackback_ping_successful.template -- >8 --
+
+<div class="blog message success">
+	<h1>Trackback ping successful</h1>
+	<p>The trackback URL <+$ url $+>(no url)<+$ / $+> has been pinged successfully.</p>
+</div>
+
+-- 8< -- textfile: messages/trackback_discover_failed.template -- >8 --
+
+<div class="blog message failure">
+	<h1>Trackback discovery failed</h1>
+	<p>The trackback discovery for the URL <+$ url $+>(no url)<+$ / $+> failed.</p>
+	<p>Reason: <+$ message $+>(unknown)<+$ / $+>.</p>
+</div>
+
+-- 8< -- textfile: messages/trackback_delete_failed.template -- >8 --
+
+<div class="blog message failure">
+	<h1>Trackback not deleted</h1>
+	<p>An internal error occurred while deleting the trackback.</p>
+</div>
+
+-- 8< -- textfile: messages/trackback_delete_failed_permission_denied.template -- >8 --
+
+<div class="blog message failure">
+	<h1>Trackback not deleted</h1>
+	<p>The trackback hasn't been deleted, because it can only be deleted by an administator</p>
+</div>
+
+-- 8< -- textfile: messages/trackback_delete_successful.template -- >8 --
+
+<div class="blog message success">
+	<h1>Trackback deleted</h1>
+	<p>The trackback has been deleted successfully!</p>
+</div>
+
 -- 8< -- textfile: /blog/rss2/index.html -- >8 --
 
 <& blog show="rss2" / &>
+
+-- 8< -- textfile: /blog/trackback/index.html -- >8 --
+
+<& blog show="trackback" / &>
 
 -- 8< -- binaryfile: /img/blog/rss2.gif -- >8 --
 
@@ -1538,7 +2078,7 @@ div.blog h1 {
 	margin-top: 0;
 }
 
-div.blog.entry, div.blog.comments {
+div.blog.entry {
 	background-color: #eef0f2;
 	padding: 15px;
 	border: 1px solid #3b8bc8;

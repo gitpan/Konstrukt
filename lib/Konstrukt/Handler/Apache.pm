@@ -8,88 +8,21 @@ Handle an apache request
 
 	Konstrukt::Handler::Apache::handler($request);
 
-Plugins and other module may access some request-specific data:
+Plugins and other module may access the apache request like this:
 
-	#the absolute path to the processed file
-	$Konstrukt::Handler->{abs_filename}
-	
-	#the path to the processed file relative to the document root
-	$Konstrukt::Handler->{filename}
-	
 	#the apache request object. shouldn't be used for compatibility reasons.
-	$Konstrukt::Handler->{apache_request}
+	$Konstrukt::Handler::APACHE_REQUEST
 	
-	#the environment variables of this process as an hashref
-	$Konstrukt::Handler->{ENV}
-	
-	#cookies as an hashref of cookie objects
-	$Konstrukt::Handler->{cookies}
-	#create new cookie:
-	$Konstrukt::Handler->{foo} = CGI::Cookie->new(-name => 'foo', -value => 'bar');
-
 =head1 DESCRIPTION
 
 Parses the requested file against special (e.g. <&...&>) tags.
 
 =head1 CONFIGURATION
 
-Tell Apache to apply the PerlHandler on the requested files.
+You need to tell Apache to apply the PerlHandler on the requested files.
 
-	#You may load a startup script that loads all the modules at startup
-	#PerlRequire  perl-scripts/script_to_load_at_startup.pl
-	
-	#mod_perl 1
-	<IfDefine !MODPERL2>
-		PerlWarn On
-		PerlFreshRestart On
-	</IfDefine>
-	
-	#mod_perl 2
-	<IfDefine MODPERL2>
-		#Some useful options
-		PerlSwitches -w #mod_perl 2
-		
-		#Monitor and reload all modules in %INC:
-		#httpd.conf:
-		PerlModule Apache2::Reload
-		PerlInitHandler Apache2::Reload
-		
-		#Alternatively: Reload a specific set of modules only
-		PerlModule Apache2::Reload
-		PerlInitHandler Apache2::Reload
-		PerlSetVar ReloadAll Off
-		#Then any modules with the line:
-		# use Apache2::Reload;
-		#Will be reloaded when they change.
-		#You can also sepcify the modules to be reloaded manually
-		PerlSetVar ReloadModules "My::Foo My::Bar Foo::Bar::Test"
-		PerlSetVar ReloadDirectories "/tmp/project1 /tmp/project2"
-		#Note that ReloadModules and ReloadDirectories will narrow down the set
-		#of modules to reload.
-		#To monitor the reloading of modules use:
-		PerlSetVar ReloadDebug On
-	</IfDefine>
-	
-	#Preload Module
-	PerlModule Konstrukt
-	PerlModule Konstrukt::Handler::Apache
-	
-	#You may also assign the handler to *.html
-	<Files *.ihtml>
-		<IfDefine !MODPERL2>
-			SetHandler  perl-script
-		</IfDefine>
-		<IfDefine MODPERL2>
-			SetHandler  modperl
-		</IfDefine>
-		PerlHandler Konstrukt::Handler::Apache
-	</Files>
-
-	#Do not allow access to *.template, *.form and konstrukt.settings files
-	#as they contain sensitive information
-	<FilesMatch "(\.template|\.form|konstrukt\.settings)$">
-		Deny from All
-	</FilesMatch>
+Take a look at L<Konstrukt::Doc::Installation/Apache configuration> for more information about
+the Apache configuration.
 
 =cut
 
@@ -154,7 +87,7 @@ sub handler {
 	Apache2::RequestUtil->request($request) if MODPERL == 2;
 	
 	#apache specific initialization
-	$Konstrukt::Handler->{apache_request} = $request;
+	$Konstrukt::Handler::APACHE_REQUEST = $request;
 	$Konstrukt::Handler->{ENV} = $request->subprocess_env(); #environment
 	
 	#load environment
@@ -165,8 +98,10 @@ sub handler {
 	my $self = Konstrukt::Handler::Apache->new(
 		$request->document_root(),
 		#the apache request returns an absolute filename, but we need the path
-		#relatively to the doc root. so we cut off the leading doc root.
-		substr($request->filename(), length($request->document_root()) - 1)
+		#relatively to the doc root. so we cut off the leading doc root without the trailing slash.
+		substr(
+			$request->filename(),
+			length($request->document_root()) - (substr($request->document_root(), -1, 1) eq '/' ?  1 : 0))
 	);
 	#the apache request returns the absolute path to the requested file,
 	$Konstrukt::Handler->{abs_filename} = $request->filename();
@@ -194,8 +129,8 @@ sub handler {
 	my $result = $self->process();
 	#add debug- and error messages, if any
 	if ($Konstrukt::Response->header('Content-Type') =~ /^text/i) {
-		$result .= $Konstrukt::Debug->format_error_messages() if $Konstrukt::Settings->get('handler/show_error_messages');
-		$result .= $Konstrukt::Debug->format_debug_messages() if $Konstrukt::Settings->get('handler/show_debug_messages');
+		$result .= "<!--\n" . $Konstrukt::Debug->format_error_messages() . "\n-->\n" if $Konstrukt::Settings->get('handler/show_error_messages');
+		$result .= "<!--\n" . $Konstrukt::Debug->format_debug_messages() . "\n-->\n" if $Konstrukt::Settings->get('handler/show_debug_messages');
 	}
 	#determine content length
 	$Konstrukt::Response->header('Content-Length' => length($result));
@@ -242,8 +177,6 @@ sub handler {
 	#clean up
 	#$self->{dbi}->disconnect();
 	
-	#set status
-	$request->status($Konstrukt::Response->status());
 	#get status
 	my $status = $request->status();
 	#must return 0 for status code 200. don't ask me why...
@@ -253,13 +186,23 @@ sub handler {
 sub emergency_exit {
 	my $self = (@_);
 	
-	#print out debug- and error messages
-	print $Konstrukt::Debug->format_error_messages();
-	print $Konstrukt::Debug->format_debug_messages();
+	my $request = $Konstrukt::Handler::APACHE_REQUEST;
 	
-	#don't keep dbh-zombies...
-	#$Konstrukt::DBI->disconnect();
+	$request->content_type('text/plain');
+	$request->no_cache(1);
+	if ($Konstrukt::Settings->get('handler/show_error_messages') or $Konstrukt::Settings->get('handler/show_debug_messages')) {
+		#print out debug- and error messages
+		$request->status(200);
+		$request->send_http_header() if MODPERL == 1;
+		
+		$request->print("A critical error occurred while processing this request.\nThe request has been aborted.\n\n");
+		$request->print($Konstrukt::Debug->format_error_messages()) if $Konstrukt::Settings->get('handler/show_error_messages');
+		$request->print($Konstrukt::Debug->format_debug_messages()) if $Konstrukt::Settings->get('handler/show_debug_messages');
+	} else {
+		$request->status(500);
+	}
 	
+	warn "A critical error occurred while processing this request. The request has been aborted";
 	exit;
 }
 

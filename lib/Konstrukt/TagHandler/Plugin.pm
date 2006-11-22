@@ -97,19 +97,19 @@ sub execute_again {
 }
 #= /execute_again
 
-=head2 execution_stage
+=head2 executionstage
 
-Implementation of L<Konstrukt::TagHandler/execution_stage>.
+Implementation of L<Konstrukt::TagHandler/executionstage>.
 
 =cut
-sub execution_stage {
+sub executionstage {
 	my ($self, $tag) = @_;
 	
 	my $plugin = $tag->{tag}->{type} || '';
 	$self->load_plugin($plugin) unless exists $self->{plugins}->{$plugin};
-	return exists $self->{plugins}->{$plugin} ? $self->{plugins}->{$plugin}->execution_stage() : undef;
+	return exists $self->{plugins}->{$plugin} ? $self->{plugins}->{$plugin}->executionstage() : undef;
 }
-#= /execution_stage
+#= /executionstage
 
 =head2 load_plugin
 

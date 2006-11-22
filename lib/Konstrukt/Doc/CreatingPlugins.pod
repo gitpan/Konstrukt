@@ -26,7 +26,7 @@ already be done for you.
 You are encouraged to use the existing core modules and plugins to do the
 basic work and focus on your application.
 
-=head2 MOSTLY INTERESTING FOR PLUGIN DEVELOPMENT
+=head2 Mostly interesting for plugin development
 
 Here's a list of the core modules, which are immediately interesting for plugin
 development.
@@ -59,7 +59,7 @@ development.
 
 =back
 
-=head2 MOSTLY INTERESTING FOR CORE DEVELOPMENT
+=head2 Mostly interesting for core development
 
 This are the remaining core modules, which you probably won't need to develop
 your own plugins. These are rather used internally.

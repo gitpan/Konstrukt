@@ -149,7 +149,7 @@ sub update_entry {
 	$update = ($update ? ", date = NOW()" : "");
 	
 	#update blog entry
-	my $query = "UPDATE blog_entry SET title = $title, description = $description, content = $content, private = $private $update WHERE id = $id";
+	my $query = "UPDATE blog_entry SET title = $title, description = $description, content = $content, private = $private $update WHERE id = " . int($id);
 	return $dbh->do($query);
 }
 #= /update_entry
@@ -157,7 +157,10 @@ sub update_entry {
 =head2 get_entry
 
 Returns the requested blog entry as an hash reference with the keys id, title,
-description, content, author, year, month, day, hour, minute.
+description, content, author, year, month, day, hour, minute, private,
+comment_count and trackback_count.
+
+Returns C<undef> if the entry does not exist.
 
 B<Parameters>:
 
@@ -173,7 +176,7 @@ sub get_entry {
 	
 	my $rv = $self->get_entries({id => $id});
 	
-	return (@{$rv} ? $rv->[0] : {});
+	return (@{$rv} ? $rv->[0] : undef);
 }
 #= /get_entry
 
@@ -195,7 +198,7 @@ sub get_entries_count {
 Returns the blog entries as an array reference of hash references:
 	{ id => .., title => .., description => .., content => .., author => ..,
 	  year => .., month => .., day => .., hour => .., minute => ..,
-	  private => .., comment_count => .. }
+	  private => .., comment_count => .., trackback_count => .. }
 
 B<Parameters>:
 
@@ -256,6 +259,9 @@ sub get_entries {
 			#get comment count
 			my $rv2 = $dbh->selectall_arrayref("SELECT COUNT(id) AS count FROM blog_comment WHERE entry = $entry->{id}", { Columns=>{} });
 			$entry->{comment_count} = $rv2->[0]->{count} || 0;
+			#get trackback count
+			$rv2 = $dbh->selectall_arrayref("SELECT COUNT(id) AS count FROM blog_trackback WHERE entry = $entry->{id}", { Columns=>{} });
+			$entry->{trackback_count} = $rv2->[0]->{count} || 0;
 		}
 	}
 	
@@ -280,6 +286,7 @@ sub delete_entry {
 	my ($self, $id) = @_;
 	
 	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
+	$id = int($id);
 	
 	#remove blog entry
 	$dbh->do("DELETE FROM blog_entry WHERE id = $id") or return;
@@ -328,7 +335,7 @@ sub get_comment {
 	
 	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
 	
-	my $query = "SELECT id, entry, user, author, email, text, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_comment WHERE id = $id";
+	my $query = "SELECT id, entry, user, author, email, text, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_comment WHERE id = " . int($id);
 	my $rv = $dbh->selectall_arrayref($query, { Columns=>{} });
 	
 	return (@{$rv} ? $rv->[0] : {});
@@ -357,7 +364,7 @@ sub get_comments {
 	
 	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
 	
-	my $query = "SELECT id, entry, user, author, email, text, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_comment WHERE entry = $id ORDER BY timestamp ASC";
+	my $query = "SELECT id, entry, user, author, email, text, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_comment WHERE entry = " . int($id) . " ORDER BY timestamp ASC";
 	my $rv = $dbh->selectall_arrayref($query, { Columns=>{} });
 	
 	return $rv;
@@ -418,9 +425,134 @@ sub delete_comment {
 	my ($self, $id) = @_;
 	
 	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
-	return $dbh->do("DELETE FROM blog_comment WHERE id = $id");
+	return $dbh->do("DELETE FROM blog_comment WHERE id = " . int($id));
 }
 #= /delete_comment
+
+
+=head2 get_trackback
+
+Returns the trackback with the specified id as an hash reference:
+{ id => .., entry => .., url => .., title => .., excerpt => .., blog_name => ..,
+  year => .., month => .., day => .., hour => .., minute => .. }
+
+B<Parameters>:
+
+=over
+
+=item * $id - The trackback's id
+
+=back
+
+=cut
+sub get_trackback {
+	my ($self, $id) = @_;
+	
+	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
+	
+	my $query = "SELECT id, entry, url, title, excerpt, blog_name, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_trackback WHERE id = " . int($id);
+	my $rv = $dbh->selectall_arrayref($query, { Columns=>{} });
+	
+	return (@{$rv} ? $rv->[0] : {});
+}
+#= /get_trackback
+
+
+=head2 get_trackbacks
+
+Returns the trackbacks of a specified blog entry as an array reference of hash references:
+{ id => .., entry => .., url => .., title => .., excerpt => .., blog_name =>..,
+  year => .., month => .., day => .., hour => .., minute => .. }
+
+The entries should be ordered by ascending date (earliest post first).
+
+B<Parameters>:
+
+=over
+
+=item * $id - The entry's id
+
+=back
+
+=cut
+sub get_trackbacks {
+	my ($self, $id) = @_;
+	
+	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
+	
+	my $query = "SELECT id, url, title, excerpt, blog_name, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_trackback WHERE entry = $id ORDER BY timestamp ASC";
+	my $rv = $dbh->selectall_arrayref($query, { Columns=>{} });
+	
+	return $rv;
+}
+#= /get_trackbacks
+
+
+=head2 add_trackback
+
+Adds a new trackback. Or replace it, if a trackback with that url already exists.
+
+B<Parameters>:
+
+=over
+
+=item * $article - The ID of the article where this trackback belongs to.
+
+=item * $url - The URL of the pinging article (required).
+
+=item * $title - The title of the pinging article (optional). 
+
+=item * $excerpt - An excerpt of the pinging article (optional).
+ 
+=item * $blog_name - The name of the pinging blog (optional). 
+
+=back
+
+=cut
+sub add_trackback {
+	my ($self, $article, $url, $title, $excerpt, $blog_name) = @_;
+	
+	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
+	
+	#quoting
+	map { $_ = $dbh->quote($_) } ($article, $url, $title, $excerpt, $blog_name);
+	
+	#check if an entry with that url already exists
+	my $query = "SELECT id FROM blog_trackback WHERE entry = $article AND url = $url";
+	my $id = ($dbh->selectrow_array($query))[0]; 
+	if ($id) {
+		#entry exists! update.
+		$query = "UPDATE blog_trackback SET title = $title, excerpt = $excerpt, blog_name = $blog_name WHERE id = $id";
+	} else {
+		#add trackback
+		$query = "INSERT INTO blog_trackback (entry, url, title, excerpt, blog_name) VALUES ($article, $url, $title, $excerpt, $blog_name)";
+	}
+	
+	return $dbh->do($query);
+}
+#= /add_trackback
+
+
+=head2 delete_trackback
+
+Deletes an existing trackback.
+
+B<Parameters>:
+
+=over
+
+=item * $id - The id of the trackback entry, which should be removed
+
+=back
+
+=cut
+sub delete_trackback {
+	my ($self, $id) = @_;
+	
+	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
+	return $dbh->do("DELETE FROM blog_trackback WHERE id = " . int($id));
+}
+#= /delete_trackback
 
 1;
 
@@ -462,9 +594,11 @@ CREATE TABLE IF NOT EXISTS blog_comment
 (
   id        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
 	
+  #blog entry
+  entry     INT UNSIGNED  NOT NULL,
+  
   #comment
   text      TEXT          NOT NULL,
-  entry     INT UNSIGNED  NOT NULL,
   user      INT UNSIGNED  NOT NULL,
   author    VARCHAR(64)   NOT NULL,
   email     VARCHAR(255)  NOT NULL,
@@ -472,4 +606,22 @@ CREATE TABLE IF NOT EXISTS blog_comment
 	
   PRIMARY KEY(id),
   INDEX(entry), INDEX(user), INDEX(timestamp)
+);
+
+CREATE TABLE IF NOT EXISTS blog_trackback
+(
+  id        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+	
+  #blog entry
+  entry     INT UNSIGNED  NOT NULL,
+  
+  #tackback
+  url       VARCHAR(255)  NOT NULL,
+  title     VARCHAR(255)  ,
+  excerpt   TEXT          ,
+  blog_name VARCHAR(255)  ,
+  timestamp TIMESTAMP(14) NOT NULL,
+	
+  PRIMARY KEY(id),
+  INDEX(entry), UNIQUE(url), INDEX(timestamp)
 );

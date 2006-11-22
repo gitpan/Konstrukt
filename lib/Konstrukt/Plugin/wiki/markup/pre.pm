@@ -1,18 +1,18 @@
 =head1 NAME
 
-Konstrukt::Plugin::wiki::markup::code - Block plugin to handle code/preformatted sections
+Konstrukt::Plugin::wiki::markup::pre - Block plugin to handle code/preformatted sections
 
 =head1 SYNOPSIS
 	
-	my $code = use_plugin 'wiki::markup::code';
-	my $rv = $code->process($block);
+	my $pre = use_plugin 'wiki::markup::pre';
+	my $rv = $pre->process($block);
 
 =head1 DESCRIPTION
 
 This one will match if the first character of the first line of the block is a
 whitespace or a tab.
 
-The block will then be enclosed by <code> and </code>. All child nodes will be
+The block will then be enclosed by <pre> and </pre>. All child nodes will be
 tagged as finished to prevent further wiki parsing on them.
 
 =head1 EXAMPLE
@@ -22,7 +22,7 @@ tagged as finished to prevent further wiki parsing on them.
 
 =cut
 
-package Konstrukt::Plugin::wiki::markup::code;
+package Konstrukt::Plugin::wiki::markup::pre;
 
 use strict;
 use warnings;
@@ -68,26 +68,30 @@ B<Parameters>:
 sub process {
 	my ($self, $block) = @_;
 	
-	if (not $block->{first_child}->{wiki_finished} and $block->{first_child}->{type} eq 'plaintext' and $block->{first_child}->{content} =~ /^[ \t]/) {
-		#check for every line if it starts with a tab or space and remove it.
+	if (not $block->{first_child}->{wiki_finished} and $block->{first_child}->{type} eq 'plaintext' and $block->{first_child}->{content} =~ /^([ \t])/) {
+		my $indent_space = $1;
+		#check for every line if it starts with the indentation spaces of the
+		#first line and remove it.
 		#mark every node as wiki_finished to prevent further processing.
+		#additionally escape all HTML-entities
 		my $node = $block->{first_child};
 		while (defined $node) {
 			if (not $node->{wiki_finished} and $node->{type} eq 'plaintext') {
-				$node->{content} =~ s/^[ \t]//gm;
+				$node->{content} =~ s/^$indent_space//gm;
+				$node->{content} = $Konstrukt::Lib->html_escape($node->{content});
 				$node->{wiki_finished} = 1;
 			}
 			$node = $node->{next};
 		}
 		
-		#put the code into the code template
+		#put the text into the pre template
 		my $template = use_plugin 'template';
 		my $template_path = $Konstrukt::Settings->get("wiki/template_path");
 		#create field node and put the block content into it
 		my $container = Konstrukt::Parser::Node->new({ type => 'tag', handler_type => '$' });
 		$block->move_children($container);
 		#create the template node and add it to the block
-		my $template_node = $template->node("${template_path}markup/code.template", { content => $container });
+		my $template_node = $template->node("${template_path}markup/pre.template", { content => $container });
 		$block->add_child($template_node);
 
 		return 1;
@@ -115,7 +119,7 @@ L<Konstrukt::Plugin::wiki>
 
 __DATA__
 
--- 8< -- textfile: markup/code.template -- >8 --
+-- 8< -- textfile: markup/pre.template -- >8 --
 
 <nowiki><pre class="wiki"></nowiki><+$ content $+><+$ / $+><nowiki></pre></nowiki>
 
