@@ -150,7 +150,7 @@ Defaults to the Settings C<tags/default_order>. Doesn't apply, when only retriev
 the tags of a specified plugin and entry where the list will always be sorted
 alphabetically.
 
-=item * $limit  - Optional: Only return a specified number of tags.
+=item * $limit  - Optional: Only return a specified number of the most popular tags.
 
 =back
 

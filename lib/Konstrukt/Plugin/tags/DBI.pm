@@ -166,10 +166,15 @@ sub get {
 			$where .= " AND entry = " . $dbh->quote($entry) if defined $entry;
 			$where .= " ";
 		}
-		$query .= $where . "GROUP BY title" .
-			($order eq 'alpha' ? " ORDER BY title ASC" : ($order eq 'count' ? " ORDER BY count DESC, title ASC": "")) .
+		#the results will _always_ be ordered by count to allow getting the N most popular tags
+		#the results will then be optionally sorted by name
+		$query .= $where . "GROUP BY title ORDER BY count DESC, title ASC" .
 			($limit > 0 ? " LIMIT $limit" : "");
 		$rv = $dbh->selectall_arrayref($query, { Columns=>{} }) || [];
+		#optionally order by name
+		if ($order eq 'alpha') {
+			$rv = [ sort { $a->{title} cmp $b->{title} } @{$rv} ];
+		}
 	}
 	
 	return $rv;

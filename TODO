@@ -25,7 +25,7 @@ lib/Konstrukt/Doc/PluginList.pod:
 
 lib/Konstrukt/Handler/Apache.pm:
 
- TODO: needed? (line 94)
+ TODO: needed? (line 95)
 
 lib/Konstrukt/Handler/CGI.pm:
 
@@ -73,10 +73,10 @@ lib/Konstrukt/Plugin/calendar.pm:
 
 lib/Konstrukt/Plugin/calendar/DBI.pm:
 
- TODO: Synopsis (line 1)
- TODO: Configuration doc (line 2)
- TODO: DATE field with 0-fields also allowed in other databases than mysql? (line 3)
- TODO:  (line 11)
+ TODO: Use extra columns to store the recurrence of the entries instead of using (line 1)
+ TODO: Synopsis (line 3)
+ TODO: Configuration doc (line 4)
+ TODO:  (line 12)
 
 lib/Konstrukt/Plugin/captcha.pm:
 
@@ -138,8 +138,8 @@ lib/Konstrukt/Plugin/tags/DBI.pm:
  TODO: remove tag_string code (line 1)
  TODO: expand string length of plugin and entry to 255. MySQL complains that (line 2)
  TODO:  (line 11)
- TODO: throw error? (line 248)
- TODO: throw error? (line 308)
+ TODO: throw error? (line 253)
+ TODO: throw error? (line 313)
 
 lib/Konstrukt/Plugin/template.pm:
 

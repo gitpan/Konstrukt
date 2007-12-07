@@ -4,6 +4,7 @@ Konstrukt::Doc::PluginList - Complete list of the plugins that are shipped with 
 
 =head1 PLUGINS
 
+
 =head2 blog
 
 
@@ -14,7 +15,8 @@ Konstrukt blogging engine
 	
 	<& blog / &>
 	
-Complete documentation: L<Konstrukt::Plugin::blog>.=head2 bookmarks
+Complete documentation: L<Konstrukt::Plugin::blog>.
+=head2 bookmarks
 
 
 
@@ -28,7 +30,8 @@ You may simply integrate it by putting
 		
 somewhere in your website.
 	
-Complete documentation: L<Konstrukt::Plugin::bookmarks>.=head2 browserstats
+Complete documentation: L<Konstrukt::Plugin::bookmarks>.
+=head2 browserstats
 
 
 
@@ -57,7 +60,8 @@ B<Result:>
 
 A table displaying the statistics, if the attribute C<show> is set. Nothing otherwise.
 	
-Complete documentation: L<Konstrukt::Plugin::browserstats>.=head2 calendar
+Complete documentation: L<Konstrukt::Plugin::browserstats>.
+=head2 calendar
 
 
 
@@ -71,7 +75,8 @@ Management of private and public calendar items
 		
 	somewhere in your website.
 	
-Complete documentation: L<Konstrukt::Plugin::calendar>.=head2 captcha
+Complete documentation: L<Konstrukt::Plugin::calendar>.
+=head2 captcha
 
 
 
@@ -135,7 +140,8 @@ It's very easy to add a captcha-check to your plugins:
 		$self->add_node($template->node('template_with_input_form_and_captcha_tag.template'));
 	}
 
-Complete documentation: L<Konstrukt::Plugin::captcha>.=head2 date
+Complete documentation: L<Konstrukt::Plugin::captcha>.
+=head2 date
 
 
 
@@ -151,7 +157,8 @@ B<Result:>
 
 	April 23, 2006 - 10:45:16
 
-Complete documentation: L<Konstrukt::Plugin::date>.=head2 diff
+Complete documentation: L<Konstrukt::Plugin::date>.
+=head2 diff
 
 
 
@@ -191,7 +198,8 @@ B<Result:>
 
 A table showing the difference between the two texts.
 
-Complete documentation: L<Konstrukt::Plugin::diff>.=head2 env
+Complete documentation: L<Konstrukt::Plugin::diff>.
+=head2 env
 
 
 
@@ -214,7 +222,8 @@ B<Result:>
 	<!-- print out value -->
 	value
 
-Complete documentation: L<Konstrukt::Plugin::env>.=head2 errors
+Complete documentation: L<Konstrukt::Plugin::env>.
+=head2 errors
 
 
 
@@ -230,7 +239,8 @@ B<Result:>
 
 A list of the errors, that occurred during the processing of the file, if any.
 
-Complete documentation: L<Konstrukt::Plugin::errors>.=head2 formvalidator
+Complete documentation: L<Konstrukt::Plugin::errors>.
+=head2 formvalidator
 
 
 
@@ -261,7 +271,8 @@ B<Result:>
 		<!-- JS definitions of your form ... -->
 	</script>
 
-Complete documentation: L<Konstrukt::Plugin::formvalidator>.=head2 guestbook
+Complete documentation: L<Konstrukt::Plugin::formvalidator>.
+=head2 guestbook
 
 
 
@@ -271,7 +282,8 @@ Konstrukt guestbook
 	
 	<& guestbook / &>
 	
-Complete documentation: L<Konstrukt::Plugin::guestbook>.=head2 hitstats
+Complete documentation: L<Konstrukt::Plugin::guestbook>.
+=head2 hitstats
 
 
 
@@ -296,12 +308,13 @@ Hit statistics plugin
 	<!-- only display the top 20 sites -->
 	<& hitstats show="all" limit="20" / &>
 	
-	<!-- display a counter for the current site -->
-	<& hitstats show="counter" / &>
 	<!-- with optional title attribute  -->
 	<& hitstats show="counter" title="some page" / &>
+	<!-- display a counter and use the filename of the current page as the title -->
+	<& hitstats show="counter" / &>
 
-Complete documentation: L<Konstrukt::Plugin::hitstats>.=head2 if
+Complete documentation: L<Konstrukt::Plugin::hitstats>.
+=head2 if
 
 
 
@@ -344,7 +357,8 @@ B<Result:>
 	<!-- non-dynamic conditions will only be checked once and then get cached -->
 		The condition is true with a chance of 50%!
 
-Complete documentation: L<Konstrukt::Plugin::if>.=head2 kill
+Complete documentation: L<Konstrukt::Plugin::if>.
+=head2 kill
 
 
 
@@ -360,7 +374,8 @@ B<Result:>
 
 	We will never do censoring!
 
-Complete documentation: L<Konstrukt::Plugin::kill>.=head2 log
+Complete documentation: L<Konstrukt::Plugin::kill>.
+=head2 log
 
 
 
@@ -389,7 +404,8 @@ Konstrukt logging facilities.
 	   limit="42"
 	/ &>
 
-Complete documentation: L<Konstrukt::Plugin::log>.=head2 param
+Complete documentation: L<Konstrukt::Plugin::log>.
+=head2 param
 
 
 
@@ -405,7 +421,8 @@ B<Result:> (when invoked like: /page.html?param_name=foo)
 
 	foo
 
-Complete documentation: L<Konstrukt::Plugin::param>.=head2 perl
+Complete documentation: L<Konstrukt::Plugin::param>.
+=head2 perl
 
 
 
@@ -421,7 +438,8 @@ B<Result:>
 
 	foo
 	
-Complete documentation: L<Konstrukt::Plugin::perl>.=head2 perlvar
+Complete documentation: L<Konstrukt::Plugin::perl>.
+=head2 perlvar
 
 
 
@@ -451,7 +469,8 @@ B<Result:>
 	
 	<!-- unset value -->
 	
-Complete documentation: L<Konstrukt::Plugin::perlvar>.=head2 sortlines
+Complete documentation: L<Konstrukt::Plugin::perlvar>.
+=head2 sortlines
 
 
 
@@ -481,7 +500,8 @@ B<Result:>
 	some
 	unsorted
 
-Complete documentation: L<Konstrukt::Plugin::sortlines>.=head2 sql
+Complete documentation: L<Konstrukt::Plugin::sortlines>.
+=head2 sql
 
 
 
@@ -544,7 +564,8 @@ or
 	<!-- some query that won't return result data -->
 	<& sql &>DELETE FROM some_table WHERE id=23<& / &>
 
-Complete documentation: L<Konstrukt::Plugin::sql>.=head2 svar
+Complete documentation: L<Konstrukt::Plugin::sql>.
+=head2 svar
 
 
 
@@ -567,7 +588,8 @@ B<Result:>
 	<!-- print out value -->
 	value
 
-Complete documentation: L<Konstrukt::Plugin::svar>.=head2 tags
+Complete documentation: L<Konstrukt::Plugin::svar>.
+=head2 tags
 
 
 
@@ -623,7 +645,8 @@ B<Result:>
 	#delete all tags for a specified entry
 	$tags->delete('blog', 42);
 
-Complete documentation: L<Konstrukt::Plugin::tags>.=head2 template
+Complete documentation: L<Konstrukt::Plugin::tags>.
+=head2 template
 
 
 
@@ -649,7 +672,8 @@ Konstrukt templating engine
 		]
 	}));
 
-Complete documentation: L<Konstrukt::Plugin::template>.=head2 upcase
+Complete documentation: L<Konstrukt::Plugin::template>.
+=head2 upcase
 
 
 
@@ -665,7 +689,8 @@ B<Result:>
 
 	UPPER CASE
 
-Complete documentation: L<Konstrukt::Plugin::upcase>.=head2 uriencode
+Complete documentation: L<Konstrukt::Plugin::upcase>.
+=head2 uriencode
 
 
 
@@ -683,7 +708,8 @@ B<Result:>
 	Some%20Text
 	%53%6F%6D%65%20%54%65%78%74
 
-Complete documentation: L<Konstrukt::Plugin::uriencode>.=head2 usermanagement
+Complete documentation: L<Konstrukt::Plugin::uriencode>.
+=head2 usermanagement
 
 
 
@@ -718,7 +744,8 @@ User management. Extensible with plugins.
 		my $uid = $self->{user_basic}->id();
 	}
 
-Complete documentation: L<Konstrukt::Plugin::usermanagement>.=head2 wiki
+Complete documentation: L<Konstrukt::Plugin::usermanagement>.
+=head2 wiki
 
 
 

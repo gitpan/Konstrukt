@@ -68,7 +68,7 @@ sub handler {
 	#generate result
 	my $result = $self->process();
 	#add debug- and error messages, if any
-	if ($Konstrukt::Response->header('Content-Type') =~ /^text/i) {
+	if ($Konstrukt::Response->header('Content-Type') eq 'text/html') {
 		$result .= "<!--\n" . $Konstrukt::Debug->format_error_messages() . "\n-->\n" if $Konstrukt::Settings->get('handler/show_error_messages');
 		$result .= "<!--\n" . $Konstrukt::Debug->format_debug_messages() . "\n-->\n" if $Konstrukt::Settings->get('handler/show_debug_messages');
 	}

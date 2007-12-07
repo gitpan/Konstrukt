@@ -86,8 +86,11 @@ sub process {
 		#create field node and put the block content into it
 		my $container = Konstrukt::Parser::Node->new({ type => 'tag', handler_type => '$' });
 		$block->move_children($container);
+		#get a normalized version of the content string that may be used in a id=".." attribute
+		my $backend = use_plugin 'wiki::backend';
+		my $normalized_content = $backend->normalize_link($container->children_to_string());
 		#create the template node and add it to the block
-		my $template_node = $template->node("${template_path}markup/headline.template", { level => $level, content => $container });
+		my $template_node = $template->node("${template_path}markup/headline.template", { level => $level, content => $container, normalized_content => $normalized_content });
 		$block->add_child($template_node);
 		
 		return 1;
@@ -117,5 +120,5 @@ __DATA__
 
 -- 8< -- textfile: markup/headline.template -- >8 --
 
-<nowiki><h<+$ level $+>1<+$ / $+> class="wiki"></nowiki><+$ content $+>(no title)<+$ / $+><nowiki></h<+$ level $+>1<+$ / $+>></nowiki>
+<nowiki><h<+$ level $+>1<+$ / $+> class="wiki" id="<+$ normalized_content $+>no_title<+$ / $+>"></nowiki><+$ content $+>(no title)<+$ / $+><nowiki></h<+$ level $+>1<+$ / $+>></nowiki>
 

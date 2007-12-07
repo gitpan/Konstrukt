@@ -318,7 +318,8 @@ sub get_authors {
 =head2 get_comment
 
 Returns the comments with the specified id as an hash reference:
-{ id => .., entry => .., user => .., author => .., email => .., text =>..,
+{ id => .., entry => .., user => .., author => .., text => ..,
+  email => .., email_public => .., email_notify => ..,
   year => .., month => .., day => .., hour => .., minute => .. }
 
 B<Parameters>:
@@ -335,7 +336,7 @@ sub get_comment {
 	
 	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
 	
-	my $query = "SELECT id, entry, user, author, email, text, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_comment WHERE id = " . int($id);
+	my $query = "SELECT id, entry, user, author, email, email_public, email_notify, text, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_comment WHERE id = " . int($id);
 	my $rv = $dbh->selectall_arrayref($query, { Columns=>{} });
 	
 	return (@{$rv} ? $rv->[0] : {});
@@ -345,7 +346,8 @@ sub get_comment {
 =head2 get_comments
 
 Returns the comments of a specified blog entry as an array reference of hash references:
-{ id => .., entry => .., user => .., author => .., email => .., text =>..,
+{ id => .., entry => .., user => .., author => .., text => ..,
+  email => .., email_public => .., email_notify => ..,
   year => .., month => .., day => .., hour => .., minute => .. }
 
 The entries should be ordered by ascending date (earliest post first).
@@ -364,7 +366,7 @@ sub get_comments {
 	
 	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
 	
-	my $query = "SELECT id, entry, user, author, email, text, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_comment WHERE entry = " . int($id) . " ORDER BY timestamp ASC";
+	my $query = "SELECT id, entry, user, author, email, email_public, email_notify, text, YEAR(timestamp) AS year, MONTH(timestamp) AS month, DAYOFMONTH(timestamp) AS day, HOUR(timestamp) AS hour, MINUTE(timestamp) AS minute FROM blog_comment WHERE entry = " . int($id) . " ORDER BY timestamp ASC";
 	my $rv = $dbh->selectall_arrayref($query, { Columns=>{} });
 	
 	return $rv;
@@ -387,23 +389,27 @@ B<Parameters>:
 
 =item * $email  - Author's email address.
 
+=item * $email_public  - Shall the email address be published?
+
+=item * $email_notify  - Shall the comment's author's get a notification on new comments?
+
 =item * $text   - The comment itself.
 
 =back
 
 =cut
 sub add_comment {
-	my ($self, $id, $userid, $author, $email, $text) = @_;
+	my ($self, $id, $userid, $author, $email, $email_public, $email_notify, $text) = @_;
 	
 	my $dbh = $Konstrukt::DBI->get_connection(@{$self->{db_settings}}) or return undef;
 	
 	#quoting
-	$author = $dbh->quote($author || '');
-	$email  = $dbh->quote($email  || '');
-	$text   = $dbh->quote($text   || '');
+	map { $_ = '' unless $_ } ($author, $email, $text);
+	map { $_ = 0  unless $_ } ($email_public, $email_notify);
+	map { $_ = $dbh->quote($_) } ($author, $email, $email_public, $email_notify, $text);
 	
 	#add comment
-	my $query = "INSERT INTO blog_comment (entry, user, author, email, text) VALUES ($id, $userid, $author, $email, $text)";
+	my $query = "INSERT INTO blog_comment (entry, user, author, email, email_public, email_notify, text) VALUES ($id, $userid, $author, $email, $email_public, $email_notify, $text)";
 	return $dbh->do($query);
 }
 #= /add_comment
@@ -592,17 +598,19 @@ CREATE TABLE IF NOT EXISTS blog_entry
 
 CREATE TABLE IF NOT EXISTS blog_comment
 (
-  id        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  id           INT UNSIGNED     NOT NULL AUTO_INCREMENT,
 	
   #blog entry
-  entry     INT UNSIGNED  NOT NULL,
+  entry        INT UNSIGNED     NOT NULL,
   
   #comment
-  text      TEXT          NOT NULL,
-  user      INT UNSIGNED  NOT NULL,
-  author    VARCHAR(64)   NOT NULL,
-  email     VARCHAR(255)  NOT NULL,
-  timestamp TIMESTAMP(14) NOT NULL,
+  text         TEXT             NOT NULL,
+  user         INT UNSIGNED     NOT NULL,
+  author       VARCHAR(64)      NOT NULL,
+  email        VARCHAR(255)     NOT NULL,
+  email_public TINYINT UNSIGNED ,
+  email_notify TINYINT UNSIGNED ,
+  timestamp    TIMESTAMP(14)    NOT NULL,
 	
   PRIMARY KEY(id),
   INDEX(entry), INDEX(user), INDEX(timestamp)
@@ -615,7 +623,7 @@ CREATE TABLE IF NOT EXISTS blog_trackback
   #blog entry
   entry     INT UNSIGNED  NOT NULL,
   
-  #tackback
+  #trackback
   url       VARCHAR(255)  NOT NULL,
   title     VARCHAR(255)  ,
   excerpt   TEXT          ,
@@ -623,5 +631,5 @@ CREATE TABLE IF NOT EXISTS blog_trackback
   timestamp TIMESTAMP(14) NOT NULL,
 	
   PRIMARY KEY(id),
-  INDEX(entry), UNIQUE(url), INDEX(timestamp)
+  INDEX(entry), UNIQUE(entry, url), INDEX(timestamp)
 );

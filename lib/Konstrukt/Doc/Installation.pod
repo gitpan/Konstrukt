@@ -376,6 +376,9 @@ So when using any plugin for the first time, you may want to define:
 in your konstrukt.settings and load the page containing the plugin.
 Then the plugins will create the database tables and templates themselves.
 
+Note that your web server needs write-access for your document root. At least as
+long as the C<autoinstall> option is enabled.
+
 For performance reasons you should turn it off after everything has been
 installed.
 
@@ -395,6 +398,14 @@ You have to use absolute paths - not relative to your document root.
 Multiple paths may be separated by semicolons.
 
 Defaults to "undefined".
+
+=head2 Mailserver Configuration
+
+If your plugins send out emails (usermanagement does, the logging facilities\
+eventually do, ...), you may have to adjust your email settings.
+
+As the L<Konstrukt::Lib> core module is used to send emails, you will find 
+a L<description of the configuration|Konstrukt::Lib/CONFIGURATION> there.
 
 =head1 AUTHOR 
 

@@ -42,7 +42,7 @@ and put out on the website, if you use the L<error plugin|Konstrukt::Plugin::err
 on your website.
 
 Note:	A further performance advantage may be achieved by using the module
-L<Apache::DBI>, which not only chaches the handles within a single request but
+L<Apache::DBI>, which not only caches the handles within a single request but
 also over multiple requests.
 
 =head1 CONFIGURATION

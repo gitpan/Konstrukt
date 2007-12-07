@@ -42,6 +42,7 @@ BEGIN {
 	if (MODPERL == 1) {
 		require Apache::Constants;
 		Apache::Constants->import(qw(:common));
+#		use Apache::Table ();
 	} elsif (MODPERL == 2) {
 		require Apache2::RequestRec; # for $r->content_type, $r->uri, $r->method, $r->headers_in
 		require Apache2::RequestIO;  # for $r->print
@@ -128,7 +129,7 @@ sub handler {
 	#generate result
 	my $result = $self->process();
 	#add debug- and error messages, if any
-	if ($Konstrukt::Response->header('Content-Type') =~ /^text/i) {
+	if ($Konstrukt::Response->header('Content-Type') eq 'text/html') {
 		$result .= "<!--\n" . $Konstrukt::Debug->format_error_messages() . "\n-->\n" if $Konstrukt::Settings->get('handler/show_error_messages');
 		$result .= "<!--\n" . $Konstrukt::Debug->format_debug_messages() . "\n-->\n" if $Konstrukt::Settings->get('handler/show_debug_messages');
 	}
@@ -137,14 +138,10 @@ sub handler {
 	
 	#set cookies
 	foreach my $cookie (keys %{$Konstrukt::Handler->{cookies}}) {
-		if (MODPERL == 1) { #weird...
-			$request->header_out('Set-Cookie', $Konstrukt::Handler->{cookies}->{$cookie}->as_string());
-		} else {
-			$request->headers_out->add('Set-Cookie', $Konstrukt::Handler->{cookies}->{$cookie}->as_string());
-		}
+		$request->headers_out->add('Set-Cookie', $Konstrukt::Handler->{cookies}->{$cookie}->as_string());
 	}
 	
-	#set headers
+	#set custom headers
 	my $headers = $Konstrukt::Response->headers();
 	foreach my $field (keys %{$headers}) {
 		if (MODPERL == 1) { #weird...

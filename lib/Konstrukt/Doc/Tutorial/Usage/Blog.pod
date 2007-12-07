@@ -45,6 +45,7 @@ the L<installation documentation|Konstrukt::Doc::Installation/Apache configurati
 this settings:
 
 	#the plugins should create the database tables and templates automatically
+	#the web server will need write-access to your document root
 	autoinstall 1
 	
 	#activate the session management

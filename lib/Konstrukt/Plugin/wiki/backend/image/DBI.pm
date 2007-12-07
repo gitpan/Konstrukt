@@ -321,7 +321,7 @@ sub store {
 			if (defined $description) {
 				#get current entry and check if the new entry differs
 				my $current = $self->get_info($title);
-				if ($current->{description} ne $description) {
+				if (not defined $current->{description} or $current->{description} ne $description) {
 					#create entry
 					my $query = "INSERT INTO wiki_image_description(title, description) values (?, ?);";	
 					my $sth = $dbh->prepare($query);
@@ -348,7 +348,7 @@ sub store {
 			if (defined $content) {
 				#get current entry and check if the new entry differs
 				my $current = $self->get_content($title);
-				if ($current->{content} ne $content) {
+				if (not defined $current->{content} or $current->{content} ne $content) {
 					#load image
 					my $im = Image::Magick->new();
 					$im->BlobToImage($content);

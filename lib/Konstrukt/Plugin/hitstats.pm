@@ -24,10 +24,10 @@ Konstrukt::Plugin::hitstats - Hit statistics plugin
 	<!-- only display the top 20 sites -->
 	<& hitstats show="all" limit="20" / &>
 	
-	<!-- display a counter for the current site -->
-	<& hitstats show="counter" / &>
 	<!-- with optional title attribute  -->
 	<& hitstats show="counter" title="some page" / &>
+	<!-- display a counter and use the filename of the current page as the title -->
+	<& hitstats show="counter" / &>
 
 =head1 DESCRIPTION
 
@@ -51,7 +51,7 @@ See the documentation of the backend modules
 	hitstats/aggregate            all #specifies the granularity of the logs. may be all, year, month, day
 	#layout
 	hitstats/template_path        /templates/hitstats/
-	#only count unique visitors (determined by session)
+	#only count unique visitors per page (determined by session)
 	hitstats/unique               0
 	#don't count hits by robots
 	hitstats/ignore_robots        1
@@ -217,12 +217,12 @@ sub hit {
 	#only log unique visitors?
 	if ($Konstrukt::Settings->get('hitstats/unique')) {
 		return unless $Konstrukt::Session->activated();
-		if ($Konstrukt::Session->get('hitstats/visited')) {
+		if ($Konstrukt::Session->get('hitstats/visited/' . $title)) {
 			#don't log again
 			return;
 		} else {
-			#set visited flag
-			$Konstrukt::Session->set('hitstats/visited', 1);
+			#set visited flag for this page
+			$Konstrukt::Session->set('hitstats/visited/' . $title, 1);
 		}
 	}
 	
@@ -294,8 +294,7 @@ sub show_stats {
 
 =head2 show_counter
 
-Displays a simple counter for the specified page. Won't show if the user doesn't
-have the needed user level.
+Displays a simple counter for the specified page.
 
 B<Parameters>:
 
@@ -310,16 +309,10 @@ sub show_counter {
 	my ($self, $title) = @_;
 	
 	my $template = use_plugin 'template';
-	my $level_view = $Konstrukt::Settings->get('hitstats/userlevel_view');
 	$title = $Konstrukt::Handler->{filename} unless $title;
 	
-	if ($level_view > 0 and $self->{user_level}->level() >= $level_view) {
-		if (defined (my $count = $self->{backend}->get_count($title))) {
-			$self->add_node($template->node("$self->{template_path}layout/counter.template", { count => $count }));
-		} else {
-			$self->add_node($template->node("$self->{template_path}messages/counter_failed.template"));
-		}
-	}
+	my $count = $self->{backend}->get_count($title) || 0;
+	$self->add_node($template->node("$self->{template_path}layout/counter.template", { count => $count }));
 }
 #= /show_counter
 
@@ -385,13 +378,6 @@ __DATA__
 	</table>
 </div>
 <& if condition="not '<+$ last_one $+>0<+$ / $+>'" &><hr /><& / &>
-
--- 8< -- textfile: messages/counter_failed.template -- >8 --
-
-<div class="hitstats message failure">
-	<h1>Counter cannot be shown</h1>
-	<p>An internal error occurred!</p>
-</div>
 
 -- 8< -- textfile: messages/view_failed.template -- >8 --
 

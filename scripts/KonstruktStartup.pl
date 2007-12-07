@@ -4,9 +4,10 @@
 use lib '/path/to/your/private/modules';
 
 #preload commonly used modules to share them across the processes to save memory
+#all this preloading is optional
 use CGI ();
 CGI->compile(':all');
-use Apache::DBI; #Apache::DBI must be loaded before any DBI::* oder DBD::* module
+use Apache::DBI; Apache::DBI must be loaded before any DBI::* oder DBD::* module
 use DBI;
 use DBD::mysql;
 use Session;

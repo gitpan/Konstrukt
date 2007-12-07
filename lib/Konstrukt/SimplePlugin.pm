@@ -143,7 +143,7 @@ sub execute {
 	
 	#collect CGI parameters
 	my @param_names = $Konstrukt::CGI->param();
-	my %params = map { $_ => $Konstrukt::CGI->param($_) } @param_names;
+	my %params = map { $_ => $Konstrukt::CGI->param($_) || undef } @param_names; #|| undef to prevent warning "Odd number of elements in hash assignment"
 	
 	#get plugin name and action
 	my $plugin_name = $tag->{tag}->{type};

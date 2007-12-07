@@ -354,8 +354,8 @@ sub prepare {
 	my ($self, $tag) = @_;
 	
 	#only prepare content that will not change over several requests.
-	#this is only then the case, when the markup is passed in the child nodes.
-	if (defined $tag->{first_child}) {
+	#this is only then the case, when the markup is passed as plaintext child nodes.
+	if (defined $tag->{first_child} and not $tag->{dynamic}) {
 		$self->convert_markup($tag);
 		#return the passed result. replace this tag by the converted child nodes
 		return $tag;
@@ -626,8 +626,8 @@ sub split_into_blocks {
 	if (defined $tag->{first_child}) {
 		#prepare first and last node as they may have leading/trailing newlines
 		#that won't be handled properly by the splitting regexp
-		$tag->{first_child}->{content} =~ s/^\s*(\r?\n|\r)//s if not $tag->{first_child}->{wiki_finished} and $tag->{first_child}->{type} eq 'plaintext';
-		$tag->{last_child}->{content}  =~ s/\s*(\r?\n|\r)$//s if not $tag->{last_child}->{wiki_finished}  and $tag->{last_child}->{type}  eq 'plaintext';
+		$tag->{first_child}->{content} =~ s/^(\r?\n|\r)+//s if not $tag->{first_child}->{wiki_finished} and $tag->{first_child}->{type} eq 'plaintext';
+		$tag->{last_child}->{content}  =~ s/(\r?\n|\r)+$//s if not $tag->{last_child}->{wiki_finished}  and $tag->{last_child}->{type}  eq 'plaintext';
 		
 		#node which holds all blocks
 		my $container = Konstrukt::Parser::Node->new({ type => 'wikiblockcontainer' });
@@ -642,12 +642,12 @@ sub split_into_blocks {
 			#when moving this node around in the tree
 			my $next_node = $node->{next};
 			#at least one empty line?
-			if ($node->{type} eq 'plaintext' and $node->{content} =~ /(\r?\n|\r)\s*\1/s) {
+			if ($node->{type} eq 'plaintext' and $node->{content} =~ /(\r?\n|\r)\1/s) {
 				my $linefeed = $1;
-				my @tokens = split /($linefeed\s*$linefeed)/, $node->{content};
+				my @tokens = split /((?:$linefeed){2,})/, $node->{content};
 				for (my $i = 0; $i < @tokens; $i++) {
 					my $token = $tokens[$i];
-					if ($token =~ /$linefeed\s*$linefeed/s) {
+					if ($token =~ /(?:$linefeed){2,}/s) {
 						#empty line(s). new block!
 						#create new block if there are tokens or nodes left
 						if ($i < @tokens - 1 or defined $next_node) {

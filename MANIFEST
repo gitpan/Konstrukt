@@ -213,5 +213,5 @@ t/data/Parser/lib/Konstrukt/Plugin/test_dummy.pm
 t/data/Settings/test.settings
 t/data/TagHandler/Plugin/lib/Konstrukt/Plugin/test_dummy.pm
 TODO
-META.yml
 README
+META.yml

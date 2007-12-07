@@ -37,7 +37,7 @@ sub extract_sections_from_plugins {
 	foreach my $plugin (@_) {
 		my $module = "Konstrukt::Plugin::$plugin.pm";
 		$module =~ s/::/\//g;
-		$text .= "=head2 $plugin\n\n";
+		$text .= "\n=head2 $plugin\n\n";
 		#select description and example
 		my $selection = `podselect -section 'NAME|SYNOPSIS' $INC{$module}`;
 		#remove/replace headings

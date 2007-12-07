@@ -86,7 +86,7 @@ Note that fields, which names start with an underline ("_") will be ignored by
 the validation progress.
 
 Server-side validation is be done like this:
-	
+
 	#get the plugin object
 	my $form = use_plugin 'formvalidator';
 	
@@ -112,12 +112,12 @@ included into the HTML-file.
 The Konstrukt-Plugin "formvalidator" will put the additional code into the
 HTML-source, which is needed to validate the form using JavaScript.
 
-	<& formvalidator action="print_js_code" form="/path/to/form.form" script="/path/to/formvalidator.js" strings="/path/to/formvalidator_strings.js" / &>
+	<& formvalidator form="/path/to/form.form" script="/path/to/formvalidator.js" strings="/path/to/formvalidator_strings.js" / &>
 
 The form will be validated by the JavaScript upon submission (you must do this
 in your template that contains the form):
 
-	<form name="fooform" onsubmit="return validateForm(document.fooform)">...</form>
+	<form id="fooform" onsubmit="return validateForm(document.getElementById('fooform'))">...</form>
 
 =head1 CONFIGURATION
 
@@ -485,7 +485,7 @@ __DATA__
  *  A JavaScript to check forms for consitency with a common interface
  *
  * Usage:
- *  addFormElement("internal name of the form", "internal name of element", "element description", minimum_length, maximum_length, /regexp_to_check/);
+ *  addFormElement("name or id of the form", "internal name of element", "element description", minimum_length, maximum_length, /regexp_to_check/);
  *  Example: addFormElement("someform", "input", "Some Input", 1, 10, /^\d*$/); // the element "input" must have at least 1 char, but not more than 10. All chars must be digits
  *  var form_ok = validateForm(document.someform);
  *  Note that the regexp may be "" to avoid value checking.
@@ -516,9 +516,13 @@ function addFormElement(form, name, descr, min, max, match) {
 
 function validateForm(form) {
 	var retval = true;
+	var formname = form.getAttribute("name");
+	if (!formname) {
+		formname = form.getAttribute("id");
+	}
 	//debug
 	/*
-	alert("form name: " + form.name);
+	alert("form name: " + formname);
 	for(i=0; i<=form.elements.length-1; i++) {
 		alert("form element (nama/type/value): " + form.elements[i].name + " - " + form.elements[i].type + " - " + form.elements[i].value);
 			if ((form.elements[i].type == "checkbox")) {
@@ -527,24 +531,24 @@ function validateForm(form) {
 	}
 	*/
 	for(i=0; i<=form.elements.length-1; i++) {
-		if ((retval == true) && (form.elements[i].name != "") && form_data[form.name][form.elements[i].name] && ((form.elements[i].type == "text") || (form.elements[i].type == "textarea") || (form.elements[i].type == "password") || (form.elements[i].type == "checkbox"))) {
+		if ((retval == true) && (form.elements[i].name != "") && form_data[formname][form.elements[i].name] && ((form.elements[i].type == "text") || (form.elements[i].type == "textarea") || (form.elements[i].type == "password") || (form.elements[i].type == "checkbox"))) {
 			// Remove leading and trailing whitespaces and cut to maximum length
 			if ((form.elements[i].type == "text") || (form.elements[i].type == "textarea") || (form.elements[i].type == "password")) {
 				// Trim
 				form.elements[i].value = form.elements[i].value.replace(/^\s*/,"");
 				form.elements[i].value = form.elements[i].value.replace(/\s*$/,"");
 				// Cut
-				form.elements[i].value = form.elements[i].value.substr(0,form_data[form.name][form.elements[i].name]["maxlength"]);
+				form.elements[i].value = form.elements[i].value.substr(0,form_data[formname][form.elements[i].name]["maxlength"]);
 			}
 			if ((form.elements[i].type == "radio") && (form.elements[i].checked == false)) {
 				continue;
 			}
 			// Checkbox element must be checked, when "match" is "true" or "1"
 			if (form.elements[i].type == "checkbox") {
-				if (form_data[form.name][form.elements[i].name]["match"] == "1" || form_data[form.name][form.elements[i].name]["match"] == "true") {
+				if (form_data[formname][form.elements[i].name]["match"] == "1" || form_data[formname][form.elements[i].name]["match"] == "true") {
 					if (!form.elements[i].checked) {
 						var msg = formvalidator_not_checked;
-						msg = msg.replace(/\$name\$/, form_data[form.name][form.elements[i].name]["description"]);
+						msg = msg.replace(/\$name\$/, form_data[formname][form.elements[i].name]["description"]);
 						alert(msg);
 						form.elements[i].focus();
 						retval = false;
@@ -554,19 +558,19 @@ function validateForm(form) {
 				continue;
 			}
 			// Check for minimum length
-			if (form.elements[i].value.length < form_data[form.name][form.elements[i].name]["minlength"]) {
+			if (form.elements[i].value.length < form_data[formname][form.elements[i].name]["minlength"]) {
 				// Too short
 				var msg = formvalidator_too_short;
-				msg = msg.replace(/\$name\$/, form_data[form.name][form.elements[i].name]["description"]);
+				msg = msg.replace(/\$name\$/, form_data[formname][form.elements[i].name]["description"]);
 				alert(msg);
 				form.elements[i].focus();
 				retval = false;
 				break;
 			} else {
-				if (form.elements[i].value.length != 0 && form_data[form.name][form.elements[i].name]["match"] && !form.elements[i].value.match(form_data[form.name][form.elements[i].name]["match"])) {
+				if (form.elements[i].value.length != 0 && form_data[formname][form.elements[i].name]["match"] && !form.elements[i].value.match(form_data[formname][form.elements[i].name]["match"])) {
 					// Doesn't match!
 					var msg = formvalidator_invalid;
-					msg = msg.replace(/\$name\$/, form_data[form.name][form.elements[i].name]["description"]);
+					msg = msg.replace(/\$name\$/, form_data[formname][form.elements[i].name]["description"]);
 					alert(msg);
 					form.elements[i].focus();
 					retval = false;

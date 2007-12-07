@@ -5,6 +5,8 @@ author:
   - 'Thomas Wittek <mail@gedankenkonstrukt.de>'
 abstract: Web application/design framework
 license: perl
+resources:
+  license: http://dev.perl.org/licenses/
 requires:
   Bundle::LWP: 1
   CGI: 3
@@ -23,6 +25,13 @@ requires:
   Time::Local: 1
   Time::Zone: 2
   perl: 5.6.1
+build_requires:
+  Cwd: 0
+  Module::Build: 0.26
+  Test::More: 0
+  Test::Pod: 0
+  Test::Pod::Coverage: 0
+  Test::Strict: 0
 recommends:
   Clone::Fast: 0.9
   Data::Dump: 1
@@ -33,13 +42,6 @@ recommends:
   Scalar::Util::Clone: 0.04
   Session: 0.01
   Text::Diff: 0.35
-build_requires:
-  Cwd: 0
-  Module::Build: 0.26
-  Test::More: 0
-  Test::Pod: 0
-  Test::Pod::Coverage: 0
-  Test::Strict: 0
 provides:
   Konstrukt:
     file: lib/Konstrukt.pm
@@ -232,4 +234,7 @@ provides:
     file: lib/Konstrukt/TagHandler.pm
   Konstrukt::TagHandler::Plugin:
     file: lib/Konstrukt/TagHandler/Plugin.pm
-generated_by: Module::Build version 0.2612
+generated_by: Module::Build version 0.2808
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

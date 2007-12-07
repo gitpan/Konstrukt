@@ -25,6 +25,7 @@ If no database settings are set the defaults from L<Konstrukt::DBI/CONFIGURATION
 You have to create the database table C<user_basic> to use this plugin.
 As this plugin depends on the log-plugin, you also have to create a table C<log>
 (See L<Konstrukt::Plugin::log/CONFIGURATION>).
+
 You may turn on the C<autoinstall> setting (see L<Konstrukt::Handler/CONFIGURATION>)
 or use the C<KonstruktBackendInitialization.pl> script to accomplish this task.
 

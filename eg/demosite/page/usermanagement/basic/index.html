@@ -27,6 +27,12 @@
 				print "</ul>\n</div>";
 			}
 		<& / &>
+		<& perl &>
+			#preload plugins, which will react on events (register, deregister)
+			#that may be fired by the basic user management
+			use_plugin 'usermanagement::level';
+			use_plugin 'usermanagement::personal';
+		<& / &>
 		<& usermanagement::basic / &>
 	<$ / $>
 <& / &>

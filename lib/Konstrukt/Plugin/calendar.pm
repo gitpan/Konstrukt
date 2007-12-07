@@ -490,12 +490,6 @@ sub show_month {
 	#save current date for use in other pages
 	$Konstrukt::Session->set('calendar/current_year',  $year);
 	$Konstrukt::Session->set('calendar/current_month', $month);
-	my $sweek = $Konstrukt::Session->get('calendar/current_week') || 1;
-	my ($week1, $week1_year) = Week_of_Year($year, $month, 1);
-	my ($week2, $week2_year) = Week_of_Year($year, $month, Days_in_Month($year, $month));
-	$sweek = $week1 if $sweek < $week1;
-	$sweek = $week2 if $sweek > $week2;
-	$Konstrukt::Session->set('calendar/current_week', $sweek);
 		
 	#cache some user info
 	my $user_id = $self->{user_basic}->id();
@@ -1677,7 +1671,7 @@ $week_template =
 	</body>
 </html>
 
--- 8< -- binaryfile: /img/calendar/rss2.gif -- >8 --
+-- 8< -- binaryfile: /images/calendar/rss2.gif -- >8 --
 
 R0lGODlhMgAPALMAAGZmZv9mAP///4mOeQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAACwAAAAAMgAPAAAEexDISau9OFvBu/9gKI6dJARoqq4sKgxwLM/0IJhtnr91T9+Ak26Y4vmO

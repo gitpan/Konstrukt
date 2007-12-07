@@ -109,6 +109,7 @@ sub new {
 	
 	$Konstrukt::Handler->{filename}     = $filename;
 	$Konstrukt::Handler->{abs_filename} = $Konstrukt::File->absolute_path($filename);
+	#warn "HTTP_COOKIE: " $Konstrukt::Handler->{ENV}->{HTTP_COOKIE}
 	$Konstrukt::Handler->{cookies}      = CGI::Cookie->fetch(); #fetch cookies (hashref)
 	
 	#init some generally needed modules

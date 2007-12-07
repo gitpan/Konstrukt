@@ -57,6 +57,8 @@ use warnings;
 
 use Konstrukt::Debug;
 
+use URI::Escape;
+
 =head1 METHODS
 
 =head2 new
@@ -152,12 +154,13 @@ sub html_escape {
 		'<' => '&lt;',
 		'>' => '&gt;',
 		'"' => '&quot;',
+		"'" => '&apos;',
 	};
 	
 	#replace ampersands separately
 	$text =~ s/&/&amp;/go;
 	#replace brackets and quotes
-	$text =~ s/([<>"])/$replace->{$1}/go;
+	$text =~ s/([<>'"])/$replace->{$1}/go;
 	
 	return $text;
 }
@@ -184,13 +187,40 @@ sub html_unescape {
 		'&gt;' => '>',
 		'&amp;' => '&',
 		'&quot;' => '"',
+		'&apos;' => "'"		
 	};
 	
-	$text =~ s/(&(?:lt|gt|amp|quot);)/$replace->{$1}/go;
+	$text =~ s/(&(?:lt|gt|amp|quot|apos);)/$replace->{$1}/go;
 
 	return $text;
 }
 #= /html_unescape
+
+
+=head2 uri_encode
+
+Encode a string into a sequence of hex-values as done in HTTP URIs.
+
+Encodes every character but [0-9A-Za-z-_.!~*'()]. If the $enc_all parameter
+is true, B<all> characters will be encoded.
+
+=over
+
+=item * $string - String to encode
+
+=item * $enc_all - Encode all characters
+
+=back
+
+=cut
+sub uri_encode {
+	my ($self, $string, $enc_all) = @_;
+	
+	return unless defined $string;
+	return uri_escape($string, $enc_all ? "\x00-\xff" : undef);
+}
+# /uri_encode
+
 
 =head2 xml_escape
 
@@ -495,7 +525,7 @@ sub random_password {
 
 =head2 date_w3c
 
-Returns the specified local time in the w3c date/time format.
+Returns the specified local time in the w3c date/time format. Actually, it's ISO 8601.
 Returns the diffence in the format as specified in http://www.w3.org/TR/NOTE-datetime
 YYYY-MM-DDThh:mm:ssTZD
 
@@ -552,8 +582,7 @@ sub date_w3c {
 =head2 date_rfc822
 
 Returns the specified local time in the date/time format specified in RFC 822:
-Day, DD Mon YYYY hh:mm:ss TZD"
-YYYY-MM-DDThh:mm:ssTZD
+Day, DD Mon YYYY hh:mm:ss TZD
 
 =over
 
@@ -891,36 +920,6 @@ sub xor_encrypt {
 	return $result;
 }
 # /xor_encrypt 
-
-
-=head2 uri_encode
-
-Encode a string into a sequence of hex-values as done in HTTP URIs.
-
-Encodes every character but [0-9A-Za-z-_.!~*'()]. If the $enc_all parameter
-is true, B<all> characters will be encoded.
-
-=over
-
-=item * $string - String to encode
-
-=item * $enc_all - Encode all characters
-
-=back
-
-=cut
-sub uri_encode {
-	my ($self, $string, $enc_all) = @_;
-	
-	return unless defined $string;
-	
-	if ($enc_all) {
-		return sprintf("%%%02X" x length($string), map { ord $_ } split('', $string));
-	} else {
-		return join '', map { /^[0-9A-Za-z-_.!~*'()]$/ ? $_ : sprintf("%%%02X", ord $_ ) } split('', $string);
-	}
-}
-# /uri_encode
 
 
 =head2 quoted_string_to_word

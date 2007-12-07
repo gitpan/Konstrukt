@@ -737,7 +737,7 @@ $form_specification =
 <div class="wiki message failure">
 	<h1>Article '<+$ title $+>(no title)<+$ / $+>' cannot be edited</h1>
 	<p>You don't have the appropriate permissions!</p>
-</h1>
+</div>
 
 -- 8< -- textfile: messages/article_edit_no_change.template -- >8 --
 

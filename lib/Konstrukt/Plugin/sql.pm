@@ -68,6 +68,8 @@ templates to display the results.
 
 The usage is explained in the L</SYNOPSIS>.
 
+Warning: The result will not be HTML escaped automatically.
+
 =cut
 
 package Konstrukt::Plugin::sql;
@@ -156,11 +158,6 @@ sub execute {
 	$query =~ s/(^\s*|\s*$)//g;
 	if (lc(substr($query,0,6)) eq 'select') {
 		my $result = $dbh->selectall_arrayref($query, { Columns=>{} });
-		#escape values
-		foreach my $row (@{$result}) {
-			map { $row->{$_} = $Konstrukt::Lib->html_escape($row->{$_}) } keys %{$row}
-		}
-		#warn $file;
 		if (defined $file) {
 			my $template = use_plugin 'template';
 			#put out result

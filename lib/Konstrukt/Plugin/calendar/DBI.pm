@@ -1,6 +1,7 @@
+#TODO: Use extra columns to store the recurrence of the entries instead of using
+#      0-fields in the date
 #TODO: Synopsis
 #TODO: Configuration doc
-#TODO: DATE field with 0-fields also allowed in other databases than mysql?
 
 =head1 NAME
 
@@ -326,6 +327,7 @@ sub update_entry {
 	
 	#update event
 	my $query = "UPDATE calendar_event SET date = '$year-$month-$day', start = '$start_hour:$start_minute', end = '$end_hour:$end_minute', description = $description, private = $private WHERE id = $id";
+	warn $query;
 	return $dbh->do($query);
 }
 #= /update_entry

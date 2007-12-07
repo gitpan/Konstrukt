@@ -10,7 +10,7 @@ Konstrukt::Plugin::mail::obfuscator - Hide email addresses from SPAM harvesters.
 
 B<Usage:>
 
-	<& mail::obfucator name="John Doe" mail="john@doe.com" / &>
+	<& mail::obfuscator name="John Doe" mail="john@doe.com" / &>
 
 B<Result:>
 
@@ -38,7 +38,7 @@ B<Result:>
 You can also optionally specifiy the complete HTML-link and "text link" if you
 don't like the simple one that the plugin generates:
 
-	<& mail::obfucator
+	<& mail::obfuscator
 		html="<a href='mailto:john@doe.com' class='some_css_class'>John Doe</a>"
 		text="Blabla John Doe: john@doe.com" 
 	/ &>
@@ -185,7 +185,7 @@ sub link {
 	 
 	#encrypt/obfuscate
 	$html = $self->encrypt($html);
-	$text = "<noscript>\n" . $self->obfuscate($text) . "\n</noscript>\n";
+	$text = "<noscript>\n" . $self->obfuscate($text) . "\n</noscript>";
 	
 	return $js . $html . $text;
 }
@@ -237,9 +237,11 @@ sub html_link {
 	my ($self, $mail, $name) = @_;
 	
 	#use address as name if not specified
-	$name = $mail unless defined $name;
-	
-	return "<a href=\"mailto:$mail\">$name</a>";
+	if (defined $name and length $name) {
+		return (defined $mail and length $mail) ? "<a href=\"mailto:$mail\">$name</a>" : $name;
+	} else {
+		return (defined $mail and length $mail) ? "<a href=\"mailto:$mail\">$mail</a>" : "";
+	}
 }
 #= /html_link
 
@@ -264,7 +266,11 @@ sub text_link {
 	my ($self, $mail, $name) = @_;
 	
 	#generate "link"
-	return defined $name ? "$name: $mail" : $mail;
+	if (defined $name and length $name) {
+		return (defined $mail and length $mail) ? "$name: $mail" : $name;
+	} else {
+		return (defined $mail and length $mail) ? $mail : "";
+	}
 }
 #= /text_link
 
@@ -288,11 +294,11 @@ sub encrypt {
 	#generate encryption key
 	my $key = $Konstrukt::Lib->random_password(8);
 	
-	#encrypt the text
+	#encrypt and escape the text
 	$text = $Konstrukt::Lib->uri_encode($Konstrukt::Lib->xor_encrypt($text, $key), 1);
 	
 	#return JavaScript to decrypt this link
-	return "<script type=\"text/javascript\">\n<!--\ndocument.write(xor_enc(unescape('$text'), '$key'))\n-->\n</script>\n";
+	return "<script type=\"text/javascript\">\n<!--\ndocument.write(xor_enc(unescape('$text'), '$key'))\n-->\n</script>";
 }
 #= /encrypt
 

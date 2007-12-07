@@ -83,7 +83,7 @@ sub process {
 		#when moving this node around in the tree.
 		my $next_node = $node->{next};
 		if (not $node->{wiki_finished} and $node->{type} eq 'plaintext') {
-			my @tokens = split /([^\s\(\)\\\/]+\(|\))/o, $node->{content};
+			my @tokens = split /([^\s\(\)\\\/:;=]{2,}\(|\))/o, $node->{content};
 			foreach my $token (@tokens) {
 				if (not defined $acronym and $token =~ /^[^\s\(\)\\\/]+\(/) {
 					#opening acronym description

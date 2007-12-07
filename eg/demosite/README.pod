@@ -30,18 +30,18 @@ See the doc/html/Konstrukt/Doc/Installation.html#CONFIGURATION):
 		<Directory "/path/to/the/demosite/page">
 			Order allow,deny
 			Allow from all
+			
+			# do not allow access to *.template, *.form and konstrukt.setting files
+			<FilesMatch "(\.template|\.form|konstrukt\.settings)$">
+				Deny from All
+			</FilesMatch>
+			
+			# serve html files with the Konstrukt Framework
+			<FilesMatch "\.html$">
+				SetHandler modperl
+				PerlResponseHandler Konstrukt::Handler::Apache
+			</FilesMatch>
 		</Directory>
-		
-		# do not allow access to *.template, *.form and konstrukt.setting files
-		<FilesMatch "(\.template|\.form|konstrukt\.settings)$">
-			Deny from All
-		</FilesMatch>
-		
-		# serve html files with the Konstrukt Framework
-		<FilesMatch "\.html$">
-			SetHandler modperl
-			PerlResponseHandler Konstrukt::Handler::Apache
-		</FilesMatch>
 	</VirtualHost>
 
 =item 3. Create a MySQL database according to the settings in the
@@ -57,9 +57,11 @@ That's a database called "test" for the user "test" with the password "tset":
 
 =head1 AUTOINSTALLATION
 
-As the setting 'autoinstall' is enabled in the supplied konstrukt.settings,
+As the setting C<autoinstall> is enabled in the supplied konstrukt.settings,
 the plugins will create the templates, stylesheets and database tables automatically.
 So as you use the page, your database and the /templates directory will get filled.
+Note that your web server needs write-access for your document root. At least as
+long as the C<autoinstall> option is enabled.
 
 Of course, this will affect the performance negatively. So after every plugin/
 page has been used once, you can turn it off (set it to 0 or remove the setting).

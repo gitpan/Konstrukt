@@ -184,6 +184,8 @@ sub get_count {
 
 	my $query = "SELECT SUM(count) as count FROM hitstats WHERE title = " . $dbh->quote($title);
 	my ($count) = $dbh->selectrow_array($query);
+	$count = 0 unless defined $count; #no hits for this page if no row exists
+	
 	return $count;
 }
 #= /get_count

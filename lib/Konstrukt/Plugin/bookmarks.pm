@@ -1222,7 +1222,7 @@ $form_specification =
 
 <div class="bookmark_category_tree<+$ tree $+>0<+$ / $+>">
 	<& if condition="'<+$ tree $+>0<+$ / $+>'" &>
-		<img src="/img/bookmarks/tree<+$ tree $+>0<+$ / $+>.gif" alt="L" style="float: left; margin-left: -26px;" />
+		<img src="/images/bookmarks/tree<+$ tree $+>0<+$ / $+>.gif" alt="L" style="float: left; margin-left: -26px;" />
 	<& / &>
 	
 	<span class="title">
@@ -1403,7 +1403,7 @@ $form_specification =
 /* CSS definitions for the Konstrukt bookmarks plugin */
 
 div.bookmark_category_tree2 {
-	background: url(/img/bookmarks/tree1bg.gif) repeat-y;
+	background: url(/images/bookmarks/tree1bg.gif) repeat-y;
 	padding: 0 0 5px 26px;
 }
 div.bookmark_category_tree3 {
@@ -1411,11 +1411,11 @@ div.bookmark_category_tree3 {
 }
 
 div.bookmark_entry_tree2 {
-	background: url(/img/bookmarks/tree2bg.gif) no-repeat center left;
+	background: url(/images/bookmarks/tree2bg.gif) no-repeat center left;
 	padding-left: 26px;
 }
 div.bookmark_entry_tree3 {
-	background: url(/img/bookmarks/tree3bg.gif) no-repeat center left;
+	background: url(/images/bookmarks/tree3bg.gif) no-repeat center left;
 	padding-left: 26px;
 }
 
@@ -1435,32 +1435,32 @@ div.bookmark_category_tree2 span.actions, div.bookmark_category_tree3 span.actio
 	font-size: 1.2em;
 } 
 
--- 8< -- binaryfile: /img/bookmarks/tree1.gif -- >8 --
+-- 8< -- binaryfile: /images/bookmarks/tree1.gif -- >8 --
 
 R0lGODlhFAAUAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUABQAAAIjlC+By6gNz4twUmav
 0y3z9C0eN2rldVJptFbh9hptF8s1eBUAOw==
 
--- 8< -- binaryfile: /img/bookmarks/tree2.gif -- >8 --
+-- 8< -- binaryfile: /images/bookmarks/tree2.gif -- >8 --
 
 R0lGODlhFAAUAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUABQAAAImlC+By6gNz4twUmav
 0y3z9C3BSJZkF26p4XGt9l4xNUd1tbI5eBUAOw==
 
--- 8< -- binaryfile: /img/bookmarks/tree3.gif -- >8 --
+-- 8< -- binaryfile: /images/bookmarks/tree3.gif -- >8 --
 
 R0lGODlhFAAUAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUABQAAAIelC+By6gNz4twUmav
 0y3z9C3BSJZkiKbqyrbuC8cFADs=
 
--- 8< -- binaryfile: /img/bookmarks/tree1bg.gif -- >8 --
+-- 8< -- binaryfile: /images/bookmarks/tree1bg.gif -- >8 --
 
 R0lGODlhFAAUAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUABQAAAIjlC+By6gNz4twUmav
 0y3z9C0eN2rldVJptFbh9hptF8s1eBUAOw==
 
--- 8< -- binaryfile: /img/bookmarks/tree2bg.gif -- >8 --
+-- 8< -- binaryfile: /images/bookmarks/tree2bg.gif -- >8 --
 
 R0lGODlhFAAoAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUACgAAAI9lC+By6gNz4twUmav
 0y3z9C0eN2rldVJptFbh9hptF8t1EuT6ntP1jLkBRcLizxgbwpLIl1LSDD1txyqlAAA7
 
--- 8< -- binaryfile: /img/bookmarks/tree3bg.gif -- >8 --
+-- 8< -- binaryfile: /images/bookmarks/tree3bg.gif -- >8 --
 
 R0lGODlhFAAoAJEAAP///wAAAAAAAP///yH5BAEAAAIALAAAAAAUACgAAAIzlC+By6gNz4twUmav
 0y3z9C0eN2rldVJptFbh9hptF8vBjed3zff+DwwKh8Si8YhMKjUFADs=

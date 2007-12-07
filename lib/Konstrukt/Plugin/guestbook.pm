@@ -211,9 +211,10 @@ sub add_entry {
 			my $homepage = ($form->get_value('homepage') || '');
 			my $text     = ($form->get_value('text')     || '');
 			my $host     = $Konstrukt::Handler->{ENV}->{REMOTE_ADDR};
+			$homepage = "http://$homepage" unless substr(lc $homepage, 0, 7) eq "http://";
 			if ($self->{backend}->add_entry($name, $email, $icq, $aim, $yahoo, $jabber, $msn, $homepage, $text, $host)) {
 				#success 
-				my $author_name = join '/', ($name, $email);
+				my $author_name = join ' / ', ($name, $email);
 				$log->put(__PACKAGE__ . '->add_entry', "$author_name added a new guestbook entry.", $author_name);
 			} else {
 				#failed

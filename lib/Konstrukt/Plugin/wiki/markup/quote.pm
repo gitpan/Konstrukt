@@ -117,10 +117,10 @@ __DATA__
 
 -- 8< -- textfile: markup/quote.template -- >8 --
 
-<nowiki><blockquote class="wiki"></nowiki>
+<nowiki><blockquote class="wiki"><p></nowiki>
 <+$ content $+><+$ / $+>
+<nowiki></p>
 <& if condition="'<+$ cite $+><+$ / $+>'" &>
-<nowiki><cite class="wiki"><+$ cite $+><+$ / $+></cite></nowiki>
+<p><cite class="wiki"><+$ cite $+><+$ / $+></cite></p>
 <& / &>
-<nowiki></blockquote></nowiki>
-
+</blockquote></nowiki>

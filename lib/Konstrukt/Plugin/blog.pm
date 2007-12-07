@@ -371,11 +371,8 @@ sub extract_and_ping_trackbacks {
 	my $trackbacks;
 	#autodiscover trackbacks for links in the content
 	if ($trackback_discovery) {
-		my @urls = $content =~ /(http:\/\/\S+)/is;
+		my @urls = ($content =~ /(http:\/\/[^\s"'\]\|]+)/gi);
 		foreach my $url (@urls) {
-			#url may be in side a wiki link: [[http://foobar/|description]]
-			#cut everything including and after | or ]]
-			$url =~ s/(\||\]\]).*//;
 			my $trackback = $self->trackback_discover($url);
 			$trackbacks->{$trackback} = 1 if $trackback;
 		}
@@ -384,18 +381,41 @@ sub extract_and_ping_trackbacks {
 	my @urls = split /\s*\r?\n\s*/, ($trackback_links || '');
 	$trackbacks->{$_} = 1 for @urls;
 	#ping the collected trackbacks
+	my $permalink = $self->generate_permalink($id);
+	$self->trackback_ping($_, { url => $permalink, title => $title, excerpt => $excerpt }) for keys %{$trackbacks};
+}
+# /extract_and_ping_trackbacks
+
+
+=head2 generate_permalink
+
+Generates a permalink to a blog entry using the settings or guessing it.  
+
+B<Parameters>:
+
+=over
+
+=item * $id - The id of the blog entry.
+
+=back
+
+=cut
+sub generate_permalink {
+	my ($self, $id) = @_;
+	
 	my $permalink = $Konstrukt::Settings->get("blog/trackback/permalink");
 	unless ($permalink) {
 		#build URL
 		$permalink = "http://" . $Konstrukt::Handler->{ENV}->{HTTP_HOST} . $Konstrukt::Handler->{ENV}->{REQUEST_URI};
 		#remove CGI parameters
-		$permalink =~ s/\?.*//; 
+		$permalink =~ s/\?.*//;
 	}
 	#add action and id parameters
 	$permalink .= "?action=show;id=$id";
-	$self->trackback_ping($_, { url => $permalink, title => $title, excerpt => $excerpt }) for keys %{$trackbacks};
+	
+	return $permalink;
 }
-# /extract_and_ping_trackbacks
+# /generate_permalink
 
 
 =head2 edit_entry_show
@@ -417,7 +437,7 @@ sub edit_entry_show {
 		#get entry
 		my $entry = $self->{backend}->get_entry($id);
 		#prepare data
-		$entry->{title} = $Konstrukt::Lib->html_escape($entry->{title});
+		map { $entry->{$_} = $Konstrukt::Lib->html_escape($entry->{$_}) } qw/title description content/;
 		my $data = {
 			fields => $entry,
 			tags => (join " ", map { $Konstrukt::Lib->html_escape($_); /\s/ ? "\"$_\"" : $_ } @{$tags->get('blog', $id)}) . " "
@@ -455,15 +475,15 @@ sub edit_entry {
 		if ($form->get_value('preview')) {
 			#show preview only
 
-#			#render content
-#			my $rendered = (use_plugin 'wiki')->convert_markup_string($content);
-#			
-#			#escape output
-#			map { $_ = $Konstrukt::Lib->html_escape($_) } ($title, $description, $content, $private, $tagstring, $trackback_discovery, $trackback_links);
-#			
-#			#put entry and form templates
-#			$self->add_node($template->node("$self->{template_path}layout/entry_preview.template", { title => $title, description => $description, content => $rendered }));
-#			$self->add_node($template->node("$self->{template_path}layout/entry_edit_form.template", { id => $id, title => $title, description => $description, content => $content, private => $private, tags => $tagstring, trackback_discovery => $trackback_discovery, trackback_links => $trackback_links }));
+			#render content
+			my $rendered = (use_plugin 'wiki')->convert_markup_string($content);
+			
+			#escape output
+			map { $_ = $Konstrukt::Lib->html_escape($_) } ($id, $title, $description, $content, $private, $tagstring, $trackback_discovery, $trackback_links);
+			
+			#put entry and form templates
+			$self->add_node($template->node("$self->{template_path}layout/entry_preview.template", { title => $title, description => $description, content => $rendered }));
+			$self->add_node($template->node("$self->{template_path}layout/entry_edit_form.template", { id => $id, title => $title, description => $description, content => $content, private => $private, tags => $tagstring, trackback_discovery => $trackback_discovery, trackback_links => $trackback_links }));
 		} else {
 			#delete cache file for this article as the content has changed
 			$self->delete_cache_content($id);
@@ -636,6 +656,8 @@ sub show_entry {
 						$comment->{author} ||= $self->{user_personal}->data($comment->{user})->{nick} if $comment->{user};
 						map { $comment->{$_} = $Konstrukt::Lib->html_escape($comment->{$_}) } qw/email author text/;
 						map { $comment->{$_} = sprintf("%02d", $comment->{$_}) } qw/month day hour minute/;
+						$comment->{email}       = undef unless $comment->{email_public}; 
+						$comment->{text}        = $Konstrukt::Lib->html_paragraphify($comment->{text});
 						$comment->{author_id}   = $comment->{user};
 						$comment->{may_delete}  = $may_delete;
 						$comment->{lastcomment} = ($comment eq $comments->[-1]);
@@ -669,7 +691,14 @@ sub show_entries {
 	#filters?
 	my $select;
 	if (($Konstrukt::CGI->param('action') || '') eq 'filter') {
+		#get search parameters
 		my ($tagstring, $author, $year, $month, $text) = map { $Konstrukt::CGI->param($_) } qw/tags author year month text/;
+		#force numeric values to prevent warning "'SPAM' isn't numeric in numeric gt (>)"
+		{
+			no warnings;
+			map { $_ += 0 if defined $_ } ($author, $year, $month);
+		}
+		#build "query"
 		$select->{tags}   = $tagstring if defined $tagstring and length($tagstring);
 		$select->{author} = $author    if defined $author    and $author   > 0;
 		$select->{year}   = $year      if defined $year      and $year     > 0;
@@ -753,7 +782,7 @@ sub format_and_cache_content {
 		$Konstrukt::File->pop();
 	} else {
 		#render article and cache it.
-		my $cached = (use_plugin 'wiki')->convert_markup_string($content);
+		$cached = (use_plugin 'wiki')->convert_markup_string($content);
 		#cache it
 		$Konstrukt::Cache->write_cache($cached_filename, $cached);
 	}
@@ -849,16 +878,47 @@ sub add_comment {
 	if ($form->validate()) {
 		my $template = use_plugin 'template';
 		my $userid   = $self->{user_basic}->id();
-		my $id       = $form->get_value('id');
-		my $author   = $form->get_value('author');
-		my $email    = $form->get_value('email');
-		my $text     = $form->get_value('text');
+		my ($id, $author, $email, $email_public, $email_notify, $text)
+			= map { $form->get_value($_) } qw/id author email email_public email_notify text/;
 		if (not $Konstrukt::Settings->get('blog/use_captcha') or (use_plugin 'captcha')->check()) {
-			if ($self->{backend}->add_comment($id, $userid, $author, $email, $text)) {
+			#save the authors who want to be notified for a new comment
+			my %authors = map { ($_->{email_notify} and $_->{email}) ? ($_->{email} => 1) : ()  } @{$self->{backend}->get_comments($id)};
+			$authors{$self->{user_basic}->email($self->{backend}->get_entry($id)->{author})} = 1;
+			my @authors = keys %authors;
+			#add comment
+			if ($self->{backend}->add_comment($id, $userid, $author, $email, $email_public, $email_notify, $text)) {
 				#success
-				my $author_name = join '/', ($author, (($userid ? $self->{user_basic}->email() : undef) || $email) || ());
+				my $author_name = join ' / ', ($author, (($userid ? $self->{user_basic}->email() : undef) || $email) || ());
 				my $entry_title = $self->{backend}->get_entry($id)->{title} || '';
+				
+				#log
 				$log->put(__PACKAGE__ . '->add_comment', "$author_name added a new comment to blog entry '$entry_title'.", $id, $entry_title, $author_name);
+				
+				#send mail to all authors who want notifications
+				my $mailfile = $Konstrukt::File->read("$self->{template_path}messages/comment_email_notification.email");
+				if (defined($mailfile)) {
+					my $mail;
+					eval($mailfile);
+					#Check for errors
+					if ($@) {
+						#Errors in eval
+						chomp($@);
+						$Konstrukt::Debug->error_message("Error while loading mail template '$self->{template_path}messages/comment_email_notification.email'! $@") if Konstrukt::Debug::ERROR;
+					} else {
+						my $entry = $self->{backend}->get_entry($id);
+						my $permalink = $self->generate_permalink($id);
+						$mail->{subject} =~ s/\$topic\$/$entry->{title}/gi;
+						$mail->{body} =~ s/\$topic\$/$entry->{title}/gi;
+						$mail->{body} =~ s/\$author\$/$author/gi;
+						$mail->{body} =~ s/\$url\$/$permalink/gi;
+						foreach my $notify_author (@authors) {
+							$Konstrukt::Lib->mail($mail->{subject}, $mail->{body}, $notify_author)
+								if length($notify_author);
+						}
+					}
+				}
+				
+				#put success message
 				$self->add_node($template->node("$self->{template_path}messages/comment_add_successful.template"));
 			} else {
 				#failed
@@ -1309,10 +1369,12 @@ __DATA__
 $form_name = 'addcomment';
 $form_specification =
 {
-	author      => { name => 'Author (not empty)', minlength => 1, maxlength => 64,    match => '' },
-	email       => { name => 'Email address'     , minlength => 0, maxlength => 256,   match => '' },
-	text        => { name => 'Text (not empty)'  , minlength => 1, maxlength => 65536, match => '' },
-	id          => { name => 'ID (number)'       , minlength => 1, maxlength => 8,     match => '^\d+$' },
+	author       => { name => 'Author (not empty)', minlength => 1, maxlength => 64,    match => '' },
+	email        => { name => 'Email address'     , minlength => 0, maxlength => 256,   match => '' },
+	email_public => { name => 'Publish email'     , minlength => 0, maxlength => 1,     match => '' },
+	email_notify => { name => 'Email notification', minlength => 0, maxlength => 1,     match => '' },
+	text         => { name => 'Text (not empty)'  , minlength => 1, maxlength => 65536, match => '' },
+	id           => { name => 'ID (number)'       , minlength => 1, maxlength => 8,     match => '^\d+$' },
 };
 
 -- 8< -- textfile: layout/comment_add_form.template -- >8 --
@@ -1331,6 +1393,16 @@ $form_specification =
 		
 		<label>Email:</label>
 		<input name="email" maxlength="255" />
+		<br />
+		
+		<label>Publish Email:</label>
+		<input name="email_public" id="email_public" type="checkbox" class="checkbox" value="1" />
+		<label for="email_public" style="width: 250px; height: 35px">Yes, publish my email-address (it will be obfuscated)</label>
+		<br />
+		
+		<label>Notify on new comments:</label>
+		<input name="email_notify" id="email_notify" type="checkbox" class="checkbox" value="1" checked="checked" />
+		<label for="email_notify" style="width: 250px; height: 35px">Send me an email when someone writes a new comment.</label>
 		<br />
 		
 		<label>Text:</label>
@@ -1402,6 +1474,16 @@ $form_specification =
 		<input name="email" maxlength="255" value="<+$ email $+><+$ / $+>" />
 		<br />
 		
+		<label>Publish Email:</label>
+		<input name="email_public" id="email_public" type="checkbox" class="checkbox" value="1" />
+		<label for="email_public" style="width: 250px; height: 35px">Yes, publish my email-address (it will be obfuscated)</label>
+		<br />
+		
+		<label>Notify on new comments:</label>
+		<input name="email_notify" id="email_notify" type="checkbox" class="checkbox" value="1" checked="checked" />
+		<label for="email_notify" style="width: 250px; height: 35px">Send me an email when someone writes a new comment.</label>
+		<br />
+		
 		<label>Text:</label>
 		<textarea name="text"></textarea>
 		<br />
@@ -1433,7 +1515,7 @@ $form_specification =
 		</colgroup>
 		<tr>
 			<th>Author:</th>
-			<td><a href="mailto:<+$ email / $+>"><+$ author $+>(No author)<+$ / $+></a></td>
+			<td><& mail::obfuscator name="<+$ author $+>(Kein Autor)<+$ / $+>" mail="<+$ email / $+>" / &></td>
 		</tr>
 		<tr>
 			<th>Date:</th>
@@ -1554,7 +1636,9 @@ $form_specification =
 
 -- 8< -- textfile: layout/entry_add_link.template -- >8 --
 
-<p style="text-align: right;"><a href="?action=showadd">[ Create new entry ]</a></p>
+<p id="addlink">
+<a href="?action=showadd">[ Create new entry ]</a>
+</p>
 
 -- 8< -- textfile: layout/entry_delete_form.form -- >8 --
 
@@ -1692,7 +1776,7 @@ $form_specification =
 	<div class="description"><p><+$ description $+>(No summary)<+$ / $+></p></div>
 	<div class="content"><+$ content $+>(No content)<+$ / $+></div>
 	<div class="foot">
-		Written on <+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+> by <+$ author $+>(unknown author)<+$ / $+> (author id: <+$ author_id $+>0<+$ / $+>)</a>.<br />
+		Written on <+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+> by <+$ author $+>(unknown author)<+$ / $+> (author id: <+$ author_id $+>0<+$ / $+>).<br />
 		<& perl &>
 			my @tags = @{$template_values->{lists}->{tags}};
 			if (@tags) {
@@ -1732,7 +1816,7 @@ $form_specification =
 	<div class="description"><p><+$ description $+>(No summary)<+$ / $+></p></div>
 	<div class="content"><+$ content $+>(No content)<+$ / $+></div>
 	<div class="foot">
-		Written on <+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+> by <+$ author $+>(unknown author)<+$ / $+> (author id: <+$ author_id $+>0<+$ / $+>)</a>.<br />
+		Written on <+$ year / $+>-<+$ month / $+>-<+$ day / $+> at <+$ hour / $+>:<+$ minute / $+> by <+$ author $+>(unknown author)<+$ / $+> (author id: <+$ author_id $+>0<+$ / $+>).<br />
 		<& perl &>
 			my @tags = @{$template_values->{lists}->{tags}};
 			if (@tags) {
@@ -1784,7 +1868,7 @@ function hideFilter () {
 -->
 </script>
 <div id="filterbox" style="display: none;">
-	<div class="blog form" id="filterbox">
+	<div class="blog form">
 		<h1>Find entry</h1>
 		<form name="filter" action="" method="post" onsubmit="return submitFilter()">
 			<input type="hidden" name="action" value="filter" />
@@ -1813,9 +1897,13 @@ function hideFilter () {
 				<option value="-1">Autor:</option>
 				<& perl &>
 					foreach my $item (@{$template_values->{lists}->{authors}}) {
-						my $id   = defined $item->{fields}->{id}   ? $item->{fields}->{id}   : 0;
-						my $name = defined $item->{fields}->{name} ? $item->{fields}->{name} : '(No name)';
+						my $id   = defined $item->{fields}->{id}   ? $item->{fields}->{id} + 0 : 0;
+						my $name = defined $item->{fields}->{name} ? $item->{fields}->{name}   : '(No name)';
 						my $author = $Konstrukt::CGI->param('author');
+						{
+							no warnings;
+							$author += 0 if defined $author; #force numeric context
+						}
 						print "\t\t<option value=\"$id\"" . (defined $author and $id == $author ? " selected=\"selected\"" : "") . ">$name</option>\n";
 					}
 				<& / &>
@@ -1828,6 +1916,10 @@ function hideFilter () {
 				<& perl &>
 					my $year_now = (localtime(time))[5] + 1900;
 					my $year     = $Konstrukt::CGI->param('year');
+					{
+						no warnings; 
+						$year += 0 if defined $year; #force numeric context
+					}
 					for (0 .. 4) {
 						print "\t\t<option value=\"" . ($year_now - $_) . "\"" . (defined $year and $year == $year_now - $_ ? " selected=\"selected\"" : "") . ">" . ($year_now - $_) . "</option>\n";
 					}
@@ -1837,7 +1929,11 @@ function hideFilter () {
 				<option value="-1">Month:</option>
 				<& perl &>
 					my @month_name = qw/January February March April May June July August September October November December/;
-					my $month = $Konstrukt::CGI->param('month');
+					my $month = $Konstrukt::CGI->param('month') + 0;
+					{
+						no warnings; 
+						$month += 0 if defined $month; #force numeric context
+					}
 					for (1 .. 12) {
 						print "\t\t<option value=\"$_\"" . (defined $month and $month == $_ ? " selected=\"selected\"" : "") . ">$month_name[$_-1]</option>\n";
 					}
@@ -1858,7 +1954,9 @@ function hideFilter () {
 	</div>
 </div>
 
-<p style="text-align: right; margin-bottom: 5px;"><a href="#" id="filterlink" onclick="showFilter();">[ Find entry ]</a></p>
+<p id="filterlink">
+<a href="#" onclick="showFilter();">[ Find entry ]</a>
+</p>
 
 -- 8< -- textfile: layout/trackback_delete_form.form -- >8 --
 
@@ -1947,6 +2045,16 @@ $form_specification =
 	<h1>Comment deleted</h1>
 	<p>The comment has been deleted successfully!</p>
 </div>
+
+-- 8< -- textfile: messages/comment_email_notification.email -- >8 --
+
+$mail = {
+	subject => 'New comment on topic: $topic$',
+	body    =>
+'$author$ wrote a new comment on the topic "$topic$".
+
+You can read it at $url$.',
+}
 
 -- 8< -- textfile: messages/entry_add_failed.template -- >8 --
 
@@ -2063,7 +2171,7 @@ $form_specification =
 
 <& blog show="trackback" / &>
 
--- 8< -- binaryfile: /img/blog/rss2.gif -- >8 --
+-- 8< -- binaryfile: /images/blog/rss2.gif -- >8 --
 
 R0lGODlhMgAPALMAAGZmZv9mAP///4mOeQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAACwAAAAAMgAPAAAEexDISau9OFvBu/9gKI6dJARoqq4sKgxwLM/0IJhtnr91T9+Ak26Y4vmO
