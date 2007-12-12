@@ -18,10 +18,13 @@ requires:
   DateTime::Format::Mail: 0.28
   Devel::UseAnyFunc: 1
   Digest::SHA: 5.32
+  HTTP::BrowserDetect: 0.98
+  Image::Magick: 6.2.4
   MIME::Base64: 3
   POSIX: 1
   Session: 0.01
   Storable: 2.1
+  Text::Diff: 0.35
   Time::HiRes: 1.5
   Time::Local: 1
   Time::Zone: 2
@@ -37,11 +40,8 @@ recommends:
   Clone::Fast: 0.9
   Data::Dump: 1
   Digest::HMAC_MD5: 1
-  HTTP::BrowserDetect: 0.98
-  Image::Magick: 6.2.4
   Mail::Sender: 0.8.13
   Scalar::Util::Clone: 0.04
-  Text::Diff: 0.35
 provides:
   Konstrukt:
     file: lib/Konstrukt.pm
