@@ -7,6 +7,9 @@ my $build = Module::Build->new(
 	dist_author => 'Thomas Wittek <mail@gedankenkonstrukt.de>',
 	dist_abstract => 'Web application/design framework',
 	license => 'perl',
+	create_readme => 1,
+	create_makefile_pl => 'passthrough',
+	configure_requires => 'Module::Build',
 	build_requires => {
 		'Module::Build'       => '0.26',
 		'Test::More'          => 0,
@@ -33,6 +36,7 @@ my $build = Module::Build->new(
 		'Digest::SHA'            => '5.32',
 		'MIME::Base64'           => '3',
 		'POSIX'                  => '1',
+		'Session'                => '0.01',
 		'Storable'               => '2.1',
 		'Time::HiRes'            => '1.5',
 		'Time::Local'            => '1',
@@ -47,9 +51,7 @@ my $build = Module::Build->new(
 		'Mail::Sender'           => '0.8.13',
 		'Text::Diff'             => '0.35',
 		'Scalar::Util::Clone'    => '0.04',
-		'Session'                => '0.01'
 	},
-	create_readme => 1,
 );
 
 $build->create_build_script;

@@ -20,6 +20,7 @@ requires:
   Digest::SHA: 5.32
   MIME::Base64: 3
   POSIX: 1
+  Session: 0.01
   Storable: 2.1
   Time::HiRes: 1.5
   Time::Local: 1
@@ -40,7 +41,6 @@ recommends:
   Image::Magick: 6.2.4
   Mail::Sender: 0.8.13
   Scalar::Util::Clone: 0.04
-  Session: 0.01
   Text::Diff: 0.35
 provides:
   Konstrukt:
