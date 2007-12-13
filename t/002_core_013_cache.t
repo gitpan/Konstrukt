@@ -28,6 +28,11 @@ my $filename = "/t/data/Cache/testfile";
 my $abs_filename = $Konstrukt::File->absolute_path($filename);
 my $content;
 
+#create input files during test, as we will modify them later.
+#on some platforms we won't have write access to files that have been copied from the source archive
+$Konstrukt::File->write($filename, "testdata");
+$Konstrukt::File->write("${filename}2", "foobar");
+
 #write_cache, get_cache, delete_cache
 $content = $Konstrukt::File->read_and_track($filename); #read
 $Konstrukt::File->pop(); #we're done with this file now

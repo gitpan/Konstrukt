@@ -12,6 +12,7 @@ my $build = Module::Build->new(
 	configure_requires => 'Module::Build',
 	build_requires => {
 		'Module::Build'       => '0.26',
+		'File::Temp'          => 0,
 		'Test::More'          => 0,
 		'Test::Pod'           => 0,
 		'Test::Pod::Coverage' => 0,

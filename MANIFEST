@@ -188,8 +188,6 @@ t/003_plugin_001_template.t
 t/003_plugins.t
 t/004_pod_001_pod.t
 t/004_pod_002_pod_coverage.t
-t/data/Cache/testfile
-t/data/Cache/testfile2
 t/data/File/somedir/foo.txt
 t/data/File/test.txt
 t/data/Handler/Apache/konstrukt.settings
