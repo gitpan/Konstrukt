@@ -236,7 +236,7 @@ t/002_core_012_session.t:
 t/002_core_013_cache.t:
 
  TODO: more comprehensive tests of add_condition_date (line 3)
- TODO: test add_condition_sql and add_condition_sql_advanced (both to be implemented) (line 112)
+ TODO: test add_condition_sql and add_condition_sql_advanced (both to be implemented) (line 113)
 
 t/002_core_014_dbi.t:
 

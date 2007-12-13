@@ -30,6 +30,7 @@ my $content;
 
 #create input files during test, as we will modify them later.
 #on some platforms we won't have write access to files that have been copied from the source archive
+$Konstrukt::File->create_dirs($Konstrukt::File->extract_path($abs_filename));
 $Konstrukt::File->write($filename, "testdata");
 $Konstrukt::File->write("${filename}2", "foobar");
 
